@@ -1,0 +1,26 @@
+name: User Story
+description: Create a user story.
+title: "[User Story]: "
+labels: ["User Story"]
+body:
+  - type: textarea
+    attributes: 
+      label: User Story
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: Objects
+      multiple: true
+      description: All the Objects to consider for this user story
+      options:
+        - Authors
+        - Single Author
+        - Followers
+        - Friend/Follow Request
+        - Post
+        - Image Posts
+        - Comments
+        - Likes
+        - Liked
+        - Inbox
