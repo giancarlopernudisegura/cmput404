@@ -9,7 +9,8 @@ class BaseConfig:
     DEBUG = False
     TESTING = False
     HOST = '0.0.0.0'
-    SECRET_KEY = os.environ['SECRET_KEY']
+    #SECRET_KEY = os.environ['SECRET_KEY']
+    SECRET_KEY = os.getenv("SECRET_KEY")
 
 
 class DevelopmentConfig(BaseConfig):
