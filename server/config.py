@@ -1,4 +1,8 @@
 import os
+from dotenv import load_dotenv
+
+
+load_dotenv()
 
 
 class BaseConfig:
@@ -8,7 +12,8 @@ class BaseConfig:
     SECRET_KEY = os.environ['SECRET_KEY']
 
 
-class DevelopementConfig(BaseConfig):
+class DevelopmentConfig(BaseConfig):
+    ENV = 'development'
     DEBUG = True
     DEVELOPMENT = True
 
@@ -18,4 +23,4 @@ class TestingConfig(BaseConfig):
 
 
 class ProductionConfig(BaseConfig):
-    pass
+    ENV = 'production'

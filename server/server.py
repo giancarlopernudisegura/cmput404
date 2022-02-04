@@ -1,6 +1,10 @@
 from flask import Flask
 from routes import hello_world
 import os
+from dotenv import load_dotenv
+
+
+load_dotenv()
 
 
 dir = os.path.abspath(os.path.dirname(__file__))
