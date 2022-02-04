@@ -29,5 +29,19 @@
     "webpack": "^4.43.0",
     "webpack-cli": "^3.3.11",
     "webpack-dev-server": "^3.11.0"
-  }
+  },
+  "name": "tik-tak-toe",
+  "description": "Distributed social network for CMPUT 404.",
+  "version": "1.0.0",
+  "main": "jest.config.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/giancarlopernudisegura/cmput404.git"
+  },
+  "author": "Tik Tak Toe Team",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/giancarlopernudisegura/cmput404/issues"
+  },
+  "homepage": "https://github.com/giancarlopernudisegura/cmput404#readme"
 }
