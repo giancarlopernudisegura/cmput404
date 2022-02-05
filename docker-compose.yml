@@ -4,7 +4,7 @@ services:
     build:
       context: ./
     ports:
-      - "80:8000"
+      - "80:${PORT}"
     env_file: .env
     environment:
       - FLASK_ENV=production
