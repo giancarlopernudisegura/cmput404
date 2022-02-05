@@ -29,4 +29,4 @@ COPY . .
 
 EXPOSE 5000
 
-CMD [ "./docker-entrypoint.sh" ]
+CMD [ "sh", "docker-entrypoint.sh" ]
