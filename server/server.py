@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from flask import Flask
 from routes import hello_world
 import os
