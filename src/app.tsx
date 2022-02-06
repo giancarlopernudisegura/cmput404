@@ -6,6 +6,7 @@ import store from './store/store'
 
 import HelloWorld from './views/hello_world'
 
+import './css/main.css'
 
 class App extends Component {
 

@@ -5,7 +5,6 @@ var HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
   mode: 'production',
-  devtool: 'none',
   entry: ['./src/app.tsx'],
   output: {
     path: path.resolve(__dirname, 'public'),
@@ -13,7 +12,7 @@ module.exports = {
   },
   watch: false,
   resolve: {
-    extensions: ['.tsx', '.ts', '.js', '.scss']
+    extensions: ['.tsx', '.ts', '.js', '.scss', '.css']
   },
   module: {
     rules: [
@@ -25,6 +24,10 @@ module.exports = {
       {
         test: /\.scss$/,
         use: ['style-loader', 'css-loader', 'sass-loader']
+      },
+      {
+        test: /\.css$/i,
+        use: ['style-loader', 'css-loader', 'postcss-loader']
       }
     ]
   },
@@ -32,7 +35,7 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: 'public/index.html',
       inject: false,
-      minify: false
+      minify: 'auto'
     }),
   ]
 }

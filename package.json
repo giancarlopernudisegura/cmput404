@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "dev": "webpack-dev-server --inline --hot --config ./webpack.dev.js",
+    "dev": "webpack-dev-server --hot --config ./webpack.dev.js",
     "build": "webpack --config ./webpack.prod.js",
     "test": "jest"
   },
@@ -14,6 +14,7 @@
     "@testing-library/preact": "^1.0.2",
     "@types/chai": "^4.2.11",
     "@types/jest": "^25.2.3",
+    "autoprefixer": "^10.4.2",
     "awesome-typescript-loader": "^5.2.1",
     "chai": "^4.2.0",
     "css-loader": "^3.5.3",
@@ -22,13 +23,16 @@
     "html-webpack-plugin": "^4.3.0",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^26.0.1",
+    "postcss": "^8.4.6",
+    "postcss-loader": "^6.2.1",
     "sass": "^1.26.7",
     "sass-loader": "^8.0.2",
     "style-loader": "^1.2.1",
+    "tailwindcss": "^3.0.18",
     "ts-jest": "^26.0.0",
-    "webpack": "^4.43.0",
-    "webpack-cli": "^3.3.11",
-    "webpack-dev-server": "^3.11.0"
+    "webpack": "^5.68.0",
+    "webpack-cli": "^4.9.2",
+    "webpack-dev-server": "^4.7.4"
   },
   "name": "tik-tak-toe",
   "description": "Distributed social network for CMPUT 404.",
