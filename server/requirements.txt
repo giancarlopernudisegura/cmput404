@@ -2,3 +2,6 @@ flask
 gunicorn
 pytest
 python-dotenv
+
+#db
+flask_sqlalchemy
