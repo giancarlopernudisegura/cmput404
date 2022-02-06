@@ -36,7 +36,7 @@ jobs:
         with:
           node-version: '16'
 
-      - run: npm i
+      - run: npm ci
 
       - name: jest
         run: npm test
