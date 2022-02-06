@@ -1,0 +1,5 @@
+Backend:
+- any: ['server/', '*py', '*(d|D)ocker*']
+
+Frontend:
+- any: ['src/', '*.js', '*.tsx', 'package*.json', 'tsconfig.json']
