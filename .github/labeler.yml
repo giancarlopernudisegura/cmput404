@@ -3,3 +3,6 @@ Backend:
 
 Frontend:
 - any: ['src/', '*.js', 'package*.json', 'tsconfig.json']
+
+documentation:
+- any: ['.env.example', 'README.md']
