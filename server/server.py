@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
 from routes import hello_world
 import os
 from dotenv import load_dotenv
@@ -24,15 +25,18 @@ def create_app(config_filename=None):
 
     app.config.from_object(config_filename)
 
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    db = SQLAlchemy(app)
+
     app.register_blueprint(hello_world.bp)
 
     @app.route('/')
     def index():
         return app.send_static_file('index.html'), 200
 
-    @app.route('/hello')
+    @app.route('/hello')#for testing heroku, remove once heroku setup is completely finished
     def hello():
-        return 'Hello, World!'
+        return 'Hello, World! ... but with more!'
 
     return app
 
