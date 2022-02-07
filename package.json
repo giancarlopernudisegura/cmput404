@@ -5,6 +5,7 @@
     "test": "jest --coverage"
   },
   "dependencies": {
+    "cssnano": "^5.0.16",
     "preact": "^10.4.4",
     "preact-router": "^3.2.1",
     "typescript": "^3.9.3",
