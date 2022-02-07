@@ -12,7 +12,6 @@ module.exports = {
     host: '0.0.0.0',
     compress: false,
     historyApiFallback: true,
-    contentBase: path.join(__dirname, 'public'),
     proxy: {
       '/api': {
         target: 'http://localhost:5000',
@@ -26,7 +25,7 @@ module.exports = {
   },
   watch: true,
   resolve: {
-    extensions: ['.tsx', '.ts', '.js', '.scss']
+    extensions: ['.tsx', '.ts', '.js', '.scss', '.css']
   },
   module: {
     rules: [
@@ -38,6 +37,10 @@ module.exports = {
       {
         test: /\.scss$/,
         use: ['style-loader', 'css-loader', 'sass-loader']
+      },
+      {
+        test: /\.css$/i,
+        use: ['style-loader', 'css-loader', 'postcss-loader']
       }
     ]
   },
