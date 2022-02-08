@@ -9,7 +9,6 @@ class BaseConfig:
     DEBUG = False
     TESTING = False
     HOST = '0.0.0.0'
-    #SECRET_KEY = os.environ['SECRET_KEY']
     SECRET_KEY = os.getenv("SECRET_KEY")
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
 

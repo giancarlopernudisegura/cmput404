@@ -24,7 +24,6 @@ def create_app(config_filename=None):
                 static_url_path='/')
 
     if not config_filename:
-        #config_filename = os.environ['APP_SETTINGS']
         config_filename = os.getenv("APP_SETTINGS", "config.DevelopmentConfig")
 
     app.config.from_object(config_filename)
@@ -41,7 +40,7 @@ def create_app(config_filename=None):
 
     @app.route('/hello')#for local testing 
     def hello():
-        return f'Hello, World!\nDataBase URI:\n'
+        return f'Hello, World! ... but with more!\n'
 
     @app.route('/bundle.js')
     def bundle_js():
