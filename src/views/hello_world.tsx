@@ -33,7 +33,7 @@ export default class HelloWorld extends Component<Props, State> {
   public render = (): ComponentChild => {
     const { message } = this.state
     return (
-      <div>
+      <div class="text-3xl font-bold underline">
         {message}
       </div>
     )

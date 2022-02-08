@@ -1,6 +1,7 @@
 flask
 gunicorn
 pytest
+pytest-cov
 python-dotenv
 #db
 flask_sqlalchemy

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
-from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+import re
+from flask import Flask, redirect, current_app
 from routes import hello_world
 import os
 from dotenv import load_dotenv
@@ -14,7 +15,6 @@ dir = os.path.abspath(os.path.dirname(__file__))
 
 
 def create_app(config_filename=None):
-
     app = Flask(__name__,
                 static_folder=os.path.join(dir, '../public'),
                 static_url_path='/')
@@ -34,9 +34,16 @@ def create_app(config_filename=None):
     def index():
         return app.send_static_file('index.html'), 200
 
-    @app.route('/hello')#for testing heroku, remove once heroku setup is completely finished
+    @app.route('/hello')#for local testing 
     def hello():
         return 'Hello, World! ... but with more!'
+
+    @app.route('/bundle.js')
+    def bundle_js():
+        if current_app.debug:
+            return redirect('//localhost:3000/bundle.js')
+        else:
+            return app.send_static_file('bundle.js'), 200
 
     return app
 
