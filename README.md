@@ -23,6 +23,14 @@ Lastly, create a `.env` file. You can make a copy of the example file in the roo
 cp .env.example .env
 ```
 
+### Initialize local database
+First create an empty database in `/server` named `app.db`
+```bash
+touch server/app.db
+```
+Use the same `DATABASE_URL` environment variable found in `.env.example`
+
+
 ### Starting the server
 
 Recommended that you run the following commands on two different terminals so you can see that output for each command.
