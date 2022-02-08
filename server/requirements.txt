@@ -6,3 +6,4 @@ python-dotenv
 #db
 flask_sqlalchemy
 Flask-Migrate
+psycopg2-binary
