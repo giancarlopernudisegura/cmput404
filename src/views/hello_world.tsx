@@ -19,7 +19,7 @@ export default class HelloWorld extends Component<Props, State> {
   }
 
   private get = async (): Promise<void> => {
-    const response = await fetch('api/hello_world')
+    const response = await fetch('/service/hello_world')
     if (!response.ok) {
       this.setState({ message: 'Flask server is not running.' })
     }

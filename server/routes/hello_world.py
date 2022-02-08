@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, make_response
 
 
-bp = Blueprint('hello_world', __name__, url_prefix='/api')
+bp = Blueprint('hello_world', __name__, url_prefix='/service')
 
 
 @bp.route('/hello_world')
