@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 import re
 from flask import Flask, redirect, current_app
-from routes import hello_world
+from routes import api
 import os
 from dotenv import load_dotenv
 
@@ -32,7 +32,7 @@ def create_app(config_filename=None):
     db.init_app(app)
     migrate.init_app(app, db)
 
-    app.register_blueprint(hello_world.bp)
+    app.register_blueprint(api.bp)
 
     @app.route('/')
     def index():
