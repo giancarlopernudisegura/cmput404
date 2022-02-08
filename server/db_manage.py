@@ -8,7 +8,7 @@ import os
 
 
 
-app.config.from_obkect(os.getenv("DATABASE_URL"))
+app.config.from_object(os.getenv("DATABASE_URL"))
 
 migrate = Migrate(app, db)
 

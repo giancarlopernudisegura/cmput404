@@ -36,7 +36,7 @@ def create_app(config_filename=None):
 
     @app.route('/hello')#for local testing 
     def hello():
-        return 'Hello, World! ... but with more!'
+        return f'Hello, World!\nDataBase URI:\n'
 
     @app.route('/bundle.js')
     def bundle_js():
@@ -45,10 +45,10 @@ def create_app(config_filename=None):
         else:
             return app.send_static_file('bundle.js'), 200
 
-    return app
+    return app, db
 
 
-app = create_app()
+app, db = create_app()
 
 
 if __name__ == '__main__':
