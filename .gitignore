@@ -7,3 +7,5 @@ __pycache__/
 public/bundle.js
 .coverage
 *.db
+dev.docker-compose.yml
+*/Dockerfile
