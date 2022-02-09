@@ -37,10 +37,6 @@ def create_app(config_filename=None):
     def index():
         return app.send_static_file('index.html'), 200
 
-    @app.route('/hello')#for local testing 
-    def hello():
-        return f'Hello, World! ... but with more!\n'
-
     @app.route('/bundle.js')
     def bundle_js():
         if current_app.debug:
