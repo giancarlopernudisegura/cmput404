@@ -28,7 +28,6 @@ def create_app(config_filename=None):
 
     app.config.from_object(config_filename)
 
-    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     db.init_app(app)
     migrate.init_app(app, db)
 
