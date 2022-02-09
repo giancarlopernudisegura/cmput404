@@ -25,13 +25,15 @@ class Author(db.Model):
 class Post(db.Model):#relates post types together
     __tablename__ = 'post'
     id = db.Column(db.Integer, primary_key=True)
+    author = db.Column(db.ForeignKey('author.id'))
     textPost = db.Column(db.ForeignKey('textPost.id'))
     imagePost = db.Column(db.ForeignKey('imagePost.id'))
     timestamp = db.Column(db.DateTime())
     private = db.Column(db.Boolean())
 
 
-    def __init__(self, private, textPost = None, imagePost = None):
+    def __init__(self, author, private, textPost = None, imagePost = None):
+        self.author = author
         self.textPost = textPost
         self.imagePost = imagePost
         self.timestamp = datetime.datetime()
@@ -50,15 +52,15 @@ class Post(db.Model):#relates post types together
 class TextPost(db.Model):
     __tablename__ = 'textPost'
     id = db.Column(db.Integer, primary_key=True)
-    author = db.Column(db.ForeignKey('author.id'))
     title = db.Column(db.String())
     category = db.Column(db.String())
     content = db.Column(db.String())
     contentType = db.Column(db.Enum(ContentType))
 
 
-    def __init__(self, author, title, category, content, contentType):
-        self.author = author
+    def __init__(self, title, category, content, contentType):
+        if contentType not in (ContentType.plain, ContentType.markdown):
+            raise TypeError("Invalid content type")
         self.title = title
         self.category = category
         self.content = content
@@ -72,14 +74,14 @@ class TextPost(db.Model):
 class ImagePost(db.Model):
     __tablename__ = 'imagePost'
     id = db.Column(db.Integer, primary_key=True)
-    author = db.Column(db.ForeignKey('author.id'))
     title = db.Column(db.String())
     category = db.Column(db.String())
     content = db.Column(db.String())
     contentType = db.Column(db.Enum(ContentType))
     
-    def __init__(self, author, title, category, content, contentType):
-        self.author = author
+    def __init__(self, title, category, content, contentType):
+        if contentType not in (ContentType.png, ContentType.jpeg):
+            raise TypeError("Invalid content type")
         self.title = title
         self.category = category
         self.content = content
@@ -158,4 +160,4 @@ class Requests(db.Model):
 
 #TODO
 #   INBOX
-#   
+#   VIEWABLE POST RELATION
