@@ -9,3 +9,5 @@ public/bundle.js
 *.db
 dev.docker-compose.yml
 */Dockerfile
+src/utils/firebaseConfig.tsx
+tiktaktoe-private-key.json

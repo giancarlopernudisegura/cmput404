@@ -4,3 +4,4 @@ pytest
 python-dotenv
 #db
 flask_sqlalchemy
+firebase-admin
