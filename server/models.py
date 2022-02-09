@@ -5,12 +5,15 @@ from server import db
 class Author(db.Model):
     __tablename__ = 'author'
     id = db.Column(db.Integer, primary_key=True)
+    displayName = db.Column(db.String())
     githubId = db.Column(db.String())
     profileImageId = db.Column(db.String())
 
-    def __init__(self, githubId, profileImageId):
+
+    def __init__(self, githubId, profileImageId, displayName):
         self.githubId = githubId
         self.profileImageId = profileImageId
+        self.displayName = displayName
 
     def __repr__(self):
         return f"<id {self.id}>"
@@ -23,15 +26,17 @@ class Post(db.Model):
     category = db.Column(db.String())#investigate enum?
     private = db.Column(db.Boolean())
     content = db.Column(db.String())
+    contentType = db.Column(db.String())#enum?
     #timestamp = db.Column(db.Integer)# CHECK TYPE
     likes = db.Column(db.ForeignKey('author.id'))
 
-    def __init__(self, author, title, category, private, content):
+    def __init__(self, author, title, category, private, content, contentType):
         self.author = author
         self.title = title
         self.category = category
         self.private = private
         self.content = content
+        self.contentType = contentType
 
     def __repr__(self):
         return f"<id {self.id}>"
