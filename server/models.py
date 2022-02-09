@@ -1,5 +1,6 @@
 from server import db
 from enums import ContentType, RequestStatus
+import datetime
 
 
 #Models go here
@@ -16,32 +17,78 @@ class Author(db.Model):
         self.profileImageId = profileImageId
         self.displayName = displayName
 
+
     def __repr__(self):
         return f"<id {self.id}>"
 
-class Post(db.Model):
+
+class Post(db.Model):#relates post types together
     __tablename__ = 'post'
+    id = db.Column(db.Integer, primary_key=True)
+    textPost = db.Column(db.ForeignKey('textPost.id'))
+    imagePost = db.Column(db.ForeignKey('imagePost.id'))
+    timestamp = db.Column(db.DateTime())
+    private = db.Column(db.Boolean())
+
+
+    def __init__(self, private, textPost = None, imagePost = None):
+        self.textPost = textPost
+        self.imagePost = imagePost
+        self.timestamp = datetime.datetime()
+        self.private = private
+
+
+    @property
+    def likes(self):
+        return Like.query.filter_by(post=self.id).all()
+
+
+    def __repr__(self):
+        return f"<id {self.id}>"
+
+
+class TextPost(db.Model):
+    __tablename__ = 'textPost'
     id = db.Column(db.Integer, primary_key=True)
     author = db.Column(db.ForeignKey('author.id'))
     title = db.Column(db.String())
     category = db.Column(db.String())
-    private = db.Column(db.Boolean())
     content = db.Column(db.String())
     contentType = db.Column(db.Enum(ContentType))
-    timestamp = db.Column(db.DateTime())
-    likes = db.Column(db.ForeignKey('author.id'))#NEEDS TO CHANGE TO LIST
 
-    def __init__(self, author, title, category, private, content, contentType, timestamp):
+
+    def __init__(self, author, title, category, content, contentType):
         self.author = author
         self.title = title
         self.category = category
-        self.private = private
         self.content = content
         self.contentType = contentType
-        self.timestamp = timestamp
+
 
     def __repr__(self):
         return f"<id {self.id}>"
+
+
+class ImagePost(db.Model):
+    __tablename__ = 'imagePost'
+    id = db.Column(db.Integer, primary_key=True)
+    author = db.Column(db.ForeignKey('author.id'))
+    title = db.Column(db.String())
+    category = db.Column(db.String())
+    content = db.Column(db.String())
+    contentType = db.Column(db.Enum(ContentType))
+    
+    def __init__(self, author, title, category, content, contentType):
+        self.author = author
+        self.title = title
+        self.category = category
+        self.content = content
+        self.contentType = contentType
+
+
+    def __repr__(self):
+        return f"<id {self.id}>"
+
 
 class Commment(db.Model):
     __tablename__ = 'comment'
@@ -52,15 +99,44 @@ class Commment(db.Model):
     timestamp = db.Column(db.DateTime())
     likes = db.Column(db.ForeignKey('author.id'))#NEEDS TO CHANGE TO LIST
 
+
     def __init__(self, author, title, contentType, content, timestamp):
         self.author = author
         self.title = title
         self.contentType = contentType
         self.content = content
-        self.timestamp = timestamp
+        self.timestamp = datetime.datetime.now()
+
+
+    @property
+    def likes(self):
+        return Like.query.filter_by(comment=self.id).all()
+
 
     def __repr__(self):
         return f"<id {self.id}>"
+
+
+class Like(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    author = db.Column(db.ForeignKey('author.id'))
+    post = db.Column(db.ForeignKey('post.id'))
+    comment = db.Column(db.ForeignKey('comment.id'))
+    timestamp = db.Column(db.DateTime())
+
+
+    def __init__(self, author, post=None, comment=None):
+        self.author = author
+        if post and comment:
+            raise Exception("Cannot like both a post and a comment")
+        self.post = post
+        self.comment = comment
+        self.timestamp = datetime.datetime.now()
+
+
+    def __repr__(self):
+        return f"<id {self.id}>"
+
 
 class Requests(db.Model):
     __tablename__ = 'requests'
@@ -68,10 +144,18 @@ class Requests(db.Model):
     status = db.Column(db.Enum(RequestStatus))
     initiated = db.Column(db.ForeignKey('author.id'))
     to = db.Column(db.ForeignKey('author.id'))
-    timestamp = db.Column(db.DateTime())#DO WE NEED THIS?
+    timestamp = db.Column(db.DateTime())
+
 
     def __init__(self):
+        self.timestamp = datetime.datetime.now()
         pass #SETUP DEFAULTS
+
 
     def __repr__(self):
         return f"<id {self.id}>"
+
+
+#TODO
+#   INBOX
+#   
