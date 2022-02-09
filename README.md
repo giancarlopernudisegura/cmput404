@@ -42,3 +42,6 @@ cd server/
 source venv/bin/activate
 python3 server.py
 ```
+
+# References for authentication
+https://firebase.google.com/docs/reference/js/v8/firebase.auth.GithubAuthProvider#setCustomParameters
