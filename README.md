@@ -3,7 +3,7 @@
 
 [![CI](https://github.com/giancarlopernudisegura/cmput404/actions/workflows/heroku.yml/badge.svg)](https://github.com/giancarlopernudisegura/cmput404/actions/workflows/heroku.yml)
 ![min node version: 16](https://img.shields.io/badge/node--lts-%3E%3D16-brightgreen)
-![min python version: 3.8](https://img.shields.io/badge/python-%3E%3D8.3-blue)
+![min python version: 3.8](https://img.shields.io/badge/python-%3E%3D3.8-blue)
 
 ## Setting up development environment
 
