@@ -1,5 +1,5 @@
 from server import db
-from enums import ContentType, RequestStatus
+from enums import ContentType, RequestStatus, ImageContentType, TextContentType
 import datetime
 
 
@@ -55,11 +55,11 @@ class TextPost(db.Model):
     title = db.Column(db.String())
     category = db.Column(db.String())
     content = db.Column(db.String())
-    contentType = db.Column(db.Enum(ContentType))
+    contentType = db.Column(db.Enum(TextContentType))
 
 
     def __init__(self, title, category, content, contentType):
-        if contentType not in (ContentType.plain, ContentType.markdown):
+        if contentType not in (TextContentType.plain, TextContentType.markdown):
             raise TypeError("Invalid content type")
         self.title = title
         self.category = category
@@ -77,10 +77,10 @@ class ImagePost(db.Model):
     title = db.Column(db.String())
     category = db.Column(db.String())
     content = db.Column(db.String())
-    contentType = db.Column(db.Enum(ContentType))
+    contentType = db.Column(db.Enum(ImageContentType))
     
     def __init__(self, title, category, content, contentType):
-        if contentType not in (ContentType.png, ContentType.jpeg):
+        if contentType not in (ImageContentType, ImageContentType.jpeg):
             raise TypeError("Invalid content type")
         self.title = title
         self.category = category
