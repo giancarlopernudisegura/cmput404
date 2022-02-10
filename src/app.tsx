@@ -14,7 +14,7 @@ class App extends Component {
     return (
       <div class="app">
         <Router>
-          <HelloWorld path="/" />
+        <HelloWorld path="/" />
         </Router>
       </div>
     )
