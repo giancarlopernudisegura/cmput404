@@ -10,11 +10,16 @@ class Author(db.Model):
     displayName = db.Column(db.String())
     githubId = db.Column(db.String())
     profileImageId = db.Column(db.String())
+    isAdmin = db.Column(db.Boolean())
+    isVerified = db.Column(db.Boolean())
 
-    def __init__(self, githubId, profileImageId, displayName):
+    def __init__(self, githubId, profileImageId, displayName, isAdmin = False, isVerified = True):
         self.githubId = githubId
         self.profileImageId = profileImageId
         self.displayName = displayName
+        self.isAdmin = isAdmin
+        self.isVerified = isVerified
+
 
     def __repr__(self):
         return f"<id {self.id}>"
@@ -182,5 +187,3 @@ class Inbox(db.Model):
         return f"<id {self.id}>"
 
 
-#TODO
-#   INBOX
