@@ -157,6 +157,15 @@ class Requests(db.Model):
     def __repr__(self):
         return f"<id {self.id}>"
 
+class ViewablePostRelation(db.Model):
+    __tablename__ = 'viewablePostRelation'
+    id = db.Column(db.Integer, primary_key=True)
+    post = db.Column(db.ForeignKey('post.id'))
+    viewConsumer = db.Column(db.ForeignKey('author.id'))#the person who is allowed to view post
+def __init__(self, post, viewConsumer):
+    self.post = post
+    self.viewConsumer = viewConsumer
+
 
 #TODO
 #   INBOX
