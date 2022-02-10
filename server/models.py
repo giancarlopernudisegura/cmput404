@@ -18,7 +18,7 @@ class Author(db.Model):
         self.profileImageId = profileImageId
         self.displayName = displayName
         self.isAdmin = isAdmin
-        self.isVerified = isVerified
+        self.isVerified = isVerified#should set this from a JSON or db later
 
 
     def __repr__(self):
@@ -34,7 +34,9 @@ class Post(db.Model):#relates post types together
     timestamp = db.Column(db.DateTime())
     private = db.Column(db.Boolean())
 
-    def __init__(self, author, private, textPost = None, imagePost = None):
+    def __init__(self, author, textPost = None, imagePost = None, private = False):
+        if author == None:
+            raise Exception("Posts require an author")
         self.author = author
         self.textPost = textPost
         self.imagePost = imagePost
@@ -98,7 +100,7 @@ class Commment(db.Model):
     timestamp = db.Column(db.DateTime())
     likes = db.Column(db.ForeignKey('author.id'))#NEEDS TO CHANGE TO LIST
 
-    def __init__(self, author, title, contentType, content, timestamp):
+    def __init__(self, author, title, contentType, content):
         self.author = author
         self.title = title
         self.contentType = contentType
@@ -134,7 +136,7 @@ class Like(db.Model):
         return f"<id {self.id}>"
 
 
-class Requests(db.Model):
+class Requests(db.Model):#follow requests
     __tablename__ = 'requests'
     id = db.Column(db.Integer, primary_key=True)
     initiated = db.Column(db.ForeignKey('author.id'))
