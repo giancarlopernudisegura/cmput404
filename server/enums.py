@@ -6,7 +6,7 @@ import enum
 class ContentType(enum.Enum):
     markdown = "text/markdown"
     plain = "text/plain"
-    application = "application/base64"
+    #application = "application/base64"
     png = "image/png"
     jpeg = "image/jpeg"
 
@@ -17,8 +17,5 @@ class ImageContentType(enum.Enum):
 class TextContentType(enum.Enum):
     markdown = "text/markdown"
     plain = "text/plain"
-    application = "application/base64"
+    #application = "application/base64"
 
-class RequestStatus(enum.Enum):
-    friend = "friend"
-    follower = "follower"

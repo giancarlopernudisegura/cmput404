@@ -1,5 +1,5 @@
 from server import db
-from enums import ContentType, RequestStatus, ImageContentType, TextContentType
+from enums import ContentType, ImageContentType, TextContentType
 import datetime
 
 
@@ -105,11 +105,9 @@ class Commment(db.Model):
         self.content = content
         self.timestamp = datetime.datetime.now()
 
-
     @property
     def likes(self):
         return Like.query.filter_by(comment=self.id).all()
-
 
     def __repr__(self):
         return f"<id {self.id}>"
@@ -122,7 +120,6 @@ class Like(db.Model):
     comment = db.Column(db.ForeignKey('comment.id'))
     timestamp = db.Column(db.DateTime())
 
-
     def __init__(self, author, post=None, comment=None):
         self.author = author
         if post and comment:
@@ -133,7 +130,6 @@ class Like(db.Model):
         self.comment = comment
         self.timestamp = datetime.datetime.now()
 
-
     def __repr__(self):
         return f"<id {self.id}>"
 
@@ -141,15 +137,14 @@ class Like(db.Model):
 class Requests(db.Model):
     __tablename__ = 'requests'
     id = db.Column(db.Integer, primary_key=True)
-    status = db.Column(db.Enum(RequestStatus))
     initiated = db.Column(db.ForeignKey('author.id'))
     to = db.Column(db.ForeignKey('author.id'))
     timestamp = db.Column(db.DateTime())
 
-
-    def __init__(self):
+    def __init__(self, initiated, to):
         self.timestamp = datetime.datetime.now()
-        pass #SETUP DEFAULTS
+        self.initiated = initiated
+        self.to = to
 
     def __repr__(self):
         return f"<id {self.id}>"
@@ -179,6 +174,11 @@ class Inbox(db.Model):
 
     def __init__(self, owner, post = None, like = None, follow = None):
         self.owner = owner
+        argNoneCount = (like, post, follow).count(None)
+        if argNoneCount < 2:
+            raise Exception("Inbox can't relate multiple objects")
+        elif argNoneCount == 3:
+            raise Exception("Inbox must releate one object")
         self.post = post
         self.like = like
         self.follow = follow
