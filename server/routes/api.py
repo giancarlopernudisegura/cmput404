@@ -13,7 +13,7 @@ firebase_admin.initialize_app(cred)
 def hello_world():
     return make_response(jsonify(message='Hello World')), 200
 
-@bp.route('/test')
+@bp.route('/signup')
 def test():
     # get token from authorization header
     authorization_header = request.headers['Authorization']
@@ -25,7 +25,6 @@ def test():
         print("UID", uid)
     except Exception as e:
         print("Error", str(e))
-        return make_response(), 500
+        return make_response(jsonify(message='There was an error')), 500
 
-    print("AUTHORIZATION HEADER", authorization_header)
-    return make_response(), 200
+    return make_response(jsonify(message='Success')), 200
