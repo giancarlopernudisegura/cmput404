@@ -11,12 +11,10 @@ class Author(db.Model):
     githubId = db.Column(db.String())
     profileImageId = db.Column(db.String())
 
-
     def __init__(self, githubId, profileImageId, displayName):
         self.githubId = githubId
         self.profileImageId = profileImageId
         self.displayName = displayName
-
 
     def __repr__(self):
         return f"<id {self.id}>"
@@ -31,7 +29,6 @@ class Post(db.Model):#relates post types together
     timestamp = db.Column(db.DateTime())
     private = db.Column(db.Boolean())
 
-
     def __init__(self, author, private, textPost = None, imagePost = None):
         self.author = author
         self.textPost = textPost
@@ -39,11 +36,9 @@ class Post(db.Model):#relates post types together
         self.timestamp = datetime.datetime()
         self.private = private
 
-
     @property
     def likes(self):
         return Like.query.filter_by(post=self.id).all()
-
 
     def __repr__(self):
         return f"<id {self.id}>"
@@ -57,7 +52,6 @@ class TextPost(db.Model):
     content = db.Column(db.String())
     contentType = db.Column(db.Enum(TextContentType))
 
-
     def __init__(self, title, category, content, contentType):
         if contentType not in (TextContentType.plain, TextContentType.markdown):
             raise TypeError("Invalid content type")
@@ -65,7 +59,6 @@ class TextPost(db.Model):
         self.category = category
         self.content = content
         self.contentType = contentType
-
 
     def __repr__(self):
         return f"<id {self.id}>"
@@ -87,7 +80,6 @@ class ImagePost(db.Model):
         self.content = content
         self.contentType = contentType
 
-
     def __repr__(self):
         return f"<id {self.id}>"
 
@@ -100,7 +92,6 @@ class Commment(db.Model):
     contentType = db.Column(db.Enum(ContentType))
     timestamp = db.Column(db.DateTime())
     likes = db.Column(db.ForeignKey('author.id'))#NEEDS TO CHANGE TO LIST
-
 
     def __init__(self, author, title, contentType, content, timestamp):
         self.author = author
@@ -131,6 +122,8 @@ class Like(db.Model):
         self.author = author
         if post and comment:
             raise Exception("Cannot like both a post and a comment")
+        if not post and not comment:
+            raise Exception("Cannot like nothing!")
         self.post = post
         self.comment = comment
         self.timestamp = datetime.datetime.now()
@@ -153,20 +146,41 @@ class Requests(db.Model):
         self.timestamp = datetime.datetime.now()
         pass #SETUP DEFAULTS
 
-
     def __repr__(self):
         return f"<id {self.id}>"
+
 
 class ViewablePostRelation(db.Model):
     __tablename__ = 'viewablePostRelation'
     id = db.Column(db.Integer, primary_key=True)
     post = db.Column(db.ForeignKey('post.id'))
     viewConsumer = db.Column(db.ForeignKey('author.id'))#the person who is allowed to view post
+
 def __init__(self, post, viewConsumer):
     self.post = post
     self.viewConsumer = viewConsumer
 
+    def __repr__(self):
+        return f"<id {self.id}>"
+
+
+class Inbox(db.Model):
+    __tablename__ = 'inbox'
+    id = db.Column(db.Integer, primary_key=True)
+    owner = db.Column(db.ForeignKey('author.id'))
+    post = db.Column(db.ForeignKey('post.id'))
+    like = db.Column(db.ForeignKey('like.id'))
+    follow = db.Column(db.ForeignKey('requests.id'))
+
+    def __init__(self, owner, post = None, like = None, follow = None):
+        self.owner = owner
+        self.post = post
+        self.like = like
+        self.follow = follow
+
+    def __repr__(self):
+        return f"<id {self.id}>"
+
 
 #TODO
 #   INBOX
-#   VIEWABLE POST RELATION
