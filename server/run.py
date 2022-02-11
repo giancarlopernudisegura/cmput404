@@ -32,7 +32,7 @@ def create_app(config_filename=None):
 
     app.register_blueprint(api.bp)
 
-    @app.route('/')
+    @app.route('/', methods=['GET'])
     def index():
         return app.send_static_file('index.html'), 200
 
