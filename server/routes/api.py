@@ -13,8 +13,8 @@ firebase_admin.initialize_app(cred)
 def hello_world():
     return make_response(jsonify(message='Hello World')), 200
 
-@bp.route('/signup')
-def test():
+@bp.route('/signin')
+def signin():
     # get token from authorization header
     authorization_header = request.headers['Authorization']
     token = authorization_header.replace("Bearer ", "")
