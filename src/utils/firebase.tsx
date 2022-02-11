@@ -15,11 +15,10 @@ export const signInWithGithub = async () => {
     try {
         const result = await signInWithPopup(auth, provider);
         // you can access user's information with result.user
-        const credential = GithubAuthProvider.credentialFromResult(result);
-        const token = credential?.accessToken;
+        const token = await result.user.getIdToken();
 
         // send a request to Backend after signed up
-        fetch('http://localhost:5000/service/signup', {
+        fetch('http://localhost:5000/service/test', {
             headers: {
                 "Authorization": `Bearer ${token}`,
             }
