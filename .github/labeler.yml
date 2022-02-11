@@ -1,8 +1,8 @@
 Backend:
-- any: ['server/', '*.py', 'Dockerfile', '*docker*']
+- any: ['server/**/*', '*.py', 'Dockerfile', '*docker*']
 
 Frontend:
-- any: ['src/', '*.js', 'package*.json', 'tsconfig.json']
+- any: ['src/**/*', '*.js', 'package*.json', 'tsconfig.json']
 
 documentation:
 - any: ['.env.example', 'README.md']
