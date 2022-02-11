@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
-
-from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-import re
 from flask import Flask, redirect, current_app
-from routes import api
+from server.routes import api
+from server.exts import db
 import os
 from dotenv import load_dotenv
 
@@ -14,7 +12,7 @@ load_dotenv()
 
 dir = os.path.abspath(os.path.dirname(__file__))
 
-db = SQLAlchemy()
+
 migrate = Migrate()
 
 
@@ -24,7 +22,7 @@ def create_app(config_filename=None):
                 static_url_path='/')
 
     if not config_filename:
-        config_filename = os.getenv("APP_SETTINGS", "config.DevelopmentConfig")
+        config_filename = os.getenv("APP_SETTINGS", "server.config.DevelopmentConfig")
 
     app.config.from_object(config_filename)
 

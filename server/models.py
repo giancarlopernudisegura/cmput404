@@ -1,5 +1,5 @@
-from server import db
-from enums import ContentType, ImageContentType, TextContentType
+from server.exts import db
+from server.enums import ContentType, ImageContentType, TextContentType
 import datetime
 
 
@@ -12,6 +12,7 @@ class Author(db.Model):
     profileImageId = db.Column(db.String())
     isAdmin = db.Column(db.Boolean())
     isVerified = db.Column(db.Boolean())
+
 
     def __init__(self, githubId, profileImageId, displayName, isAdmin = False, isVerified = True):
         self.githubId = githubId
@@ -34,6 +35,7 @@ class Post(db.Model):#relates post types together
     timestamp = db.Column(db.DateTime())
     private = db.Column(db.Boolean())
 
+
     def __init__(self, author, textPost = None, imagePost = None, private = False):
         if author == None:
             raise Exception("Posts require an author")
@@ -43,9 +45,11 @@ class Post(db.Model):#relates post types together
         self.timestamp = datetime.datetime()
         self.private = private
 
+
     @property
     def likes(self):
         return Like.query.filter_by(post=self.id).all()
+
 
     def __repr__(self):
         return f"<id {self.id}>"
@@ -59,6 +63,7 @@ class TextPost(db.Model):
     content = db.Column(db.String())
     contentType = db.Column(db.Enum(TextContentType))
 
+
     def __init__(self, title, category, content, contentType):
         if contentType not in (TextContentType.plain, TextContentType.markdown):
             raise TypeError("Invalid content type")
@@ -66,6 +71,7 @@ class TextPost(db.Model):
         self.category = category
         self.content = content
         self.contentType = contentType
+
 
     def __repr__(self):
         return f"<id {self.id}>"
@@ -78,7 +84,8 @@ class ImagePost(db.Model):
     category = db.Column(db.String())
     content = db.Column(db.String())
     contentType = db.Column(db.Enum(ImageContentType))
-    
+
+
     def __init__(self, title, category, content, contentType):
         if contentType not in (ImageContentType, ImageContentType.jpeg):
             raise TypeError("Invalid content type")
@@ -86,6 +93,7 @@ class ImagePost(db.Model):
         self.category = category
         self.content = content
         self.contentType = contentType
+
 
     def __repr__(self):
         return f"<id {self.id}>"
@@ -100,6 +108,7 @@ class Commment(db.Model):
     timestamp = db.Column(db.DateTime())
     likes = db.Column(db.ForeignKey('author.id'))#NEEDS TO CHANGE TO LIST
 
+
     def __init__(self, author, title, contentType, content):
         self.author = author
         self.title = title
@@ -107,9 +116,11 @@ class Commment(db.Model):
         self.content = content
         self.timestamp = datetime.datetime.now()
 
+
     @property
     def likes(self):
         return Like.query.filter_by(comment=self.id).all()
+
 
     def __repr__(self):
         return f"<id {self.id}>"
@@ -122,6 +133,7 @@ class Like(db.Model):
     comment = db.Column(db.ForeignKey('comment.id'))
     timestamp = db.Column(db.DateTime())
 
+
     def __init__(self, author, post=None, comment=None):
         self.author = author
         if post and comment:
@@ -131,6 +143,7 @@ class Like(db.Model):
         self.post = post
         self.comment = comment
         self.timestamp = datetime.datetime.now()
+
 
     def __repr__(self):
         return f"<id {self.id}>"
@@ -143,10 +156,12 @@ class Requests(db.Model):#follow requests
     to = db.Column(db.ForeignKey('author.id'))
     timestamp = db.Column(db.DateTime())
 
+
     def __init__(self, initiated, to):
         self.timestamp = datetime.datetime.now()
         self.initiated = initiated
         self.to = to
+
 
     def __repr__(self):
         return f"<id {self.id}>"
@@ -158,9 +173,11 @@ class ViewablePostRelation(db.Model):
     post = db.Column(db.ForeignKey('post.id'))
     viewConsumer = db.Column(db.ForeignKey('author.id'))#the person who is allowed to view post
 
+
 def __init__(self, post, viewConsumer):
     self.post = post
     self.viewConsumer = viewConsumer
+
 
     def __repr__(self):
         return f"<id {self.id}>"
@@ -174,6 +191,7 @@ class Inbox(db.Model):
     like = db.Column(db.ForeignKey('like.id'))
     follow = db.Column(db.ForeignKey('requests.id'))
 
+
     def __init__(self, owner, post = None, like = None, follow = None):
         self.owner = owner
         argNoneCount = (like, post, follow).count(None)
@@ -185,7 +203,6 @@ class Inbox(db.Model):
         self.like = like
         self.follow = follow
 
+
     def __repr__(self):
         return f"<id {self.id}>"
-
-
