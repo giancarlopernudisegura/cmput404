@@ -5,6 +5,7 @@
     "test": "jest --coverage"
   },
   "dependencies": {
+    "@material-ui/core": "^4.12.3",
     "firebase": "^9.6.6",
     "preact": "^10.4.4",
     "preact-router": "^3.2.1",
