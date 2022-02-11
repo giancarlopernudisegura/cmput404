@@ -25,6 +25,7 @@ def create_app(config_filename=None):
         config_filename = os.getenv("APP_SETTINGS", "server.config.DevelopmentConfig")
 
     app.config.from_object(config_filename)
+    app.url_map.strict_slashes = False
 
     db.init_app(app)
     migrate.init_app(app, db)
