@@ -25,7 +25,11 @@ module.exports = {
   },
   watch: true,
   resolve: {
-    extensions: ['.tsx', '.ts', '.js', '.scss', '.css']
+    extensions: ['.tsx', '.ts', '.js', '.scss', '.css'],
+    alias: {
+      'react': 'preact/compat',
+      'react-dom': 'preact/compat'
+    }
   },
   module: {
     rules: [
@@ -48,6 +52,6 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: 'public/index.html',
       inject: false
-    }),
+    })
   ]
 }

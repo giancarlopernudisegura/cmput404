@@ -1,6 +1,6 @@
 import { h, Component, ComponentChild } from 'preact';
 import { signInWithGithub } from '../utils/firebase';
-import { Button } from '@material-ui/core'
+import { Button } from '@mui/material';
 
 interface Props {
 
@@ -38,7 +38,7 @@ export default class HelloWorld extends Component<Props, State> {
         {message}
         <p>Hello</p>
         <Button>jd</Button>
-        <button onClick={signInWithGithub }>Click me!</button>
+        {/* <button onClick={signInWithGithub }>Click me!</button> */}
       </div>
     );
   }
