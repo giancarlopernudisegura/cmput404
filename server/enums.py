@@ -1,4 +1,3 @@
-from email.mime import application
 import enum
 
 #starter for db models. feel reorganize or remove once/if internal classses for these are implemented

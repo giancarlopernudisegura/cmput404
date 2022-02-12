@@ -34,6 +34,7 @@ class Post(db.Model):#relates post types together
     imagePost = db.Column(db.ForeignKey('imagePost.id'))
     timestamp = db.Column(db.DateTime())
     private = db.Column(db.Boolean())
+    unlisted = db.Column(db.Boolean())
 
 
     def __init__(self, author, textPost = None, imagePost = None, private = False):
@@ -44,6 +45,7 @@ class Post(db.Model):#relates post types together
         self.imagePost = imagePost
         self.timestamp = datetime.datetime()
         self.private = private
+    
 
 
     @property
@@ -62,15 +64,16 @@ class TextPost(db.Model):
     category = db.Column(db.String())
     content = db.Column(db.String())
     contentType = db.Column(db.Enum(TextContentType))
+    unlisted = db.Column(db.Boolean())
 
-
-    def __init__(self, title, category, content, contentType):
+    def __init__(self, title, category, content, contentType, unlisted = False):
         if contentType not in (TextContentType.plain, TextContentType.markdown):
             raise TypeError("Invalid content type")
         self.title = title
         self.category = category
         self.content = content
         self.contentType = contentType
+        self.unlisted = unlisted
 
 
     def __repr__(self):
@@ -86,14 +89,14 @@ class ImagePost(db.Model):
     contentType = db.Column(db.Enum(ImageContentType))
 
 
-    def __init__(self, title, category, content, contentType):
+    def __init__(self, title, category, content, contentType, unlisted = False):
         if contentType not in (ImageContentType, ImageContentType.jpeg):
             raise TypeError("Invalid content type")
         self.title = title
         self.category = category
         self.content = content
         self.contentType = contentType
-
+        self.unlisted = unlisted
 
     def __repr__(self):
         return f"<id {self.id}>"
