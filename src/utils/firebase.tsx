@@ -5,7 +5,6 @@ import { firebaseConfig } from './firebaseConfig';
 
 // Initialize Firebase
 initializeApp(firebaseConfig);
-
 const provider = new GithubAuthProvider();
 
 const auth = getAuth();
@@ -16,6 +15,8 @@ export const signInWithGithub = async () => {
         const result = await signInWithPopup(auth, provider);
         // you can access user's information with result.user
         const token = await result.user.getIdToken();
+
+        console.log("TOKEN", token);
 
         // send a request to Backend after signed up
         fetch('http://localhost:5000/service/test', {

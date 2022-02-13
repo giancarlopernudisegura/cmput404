@@ -4,7 +4,7 @@ import { Provider } from 'unistore/preact';
 
 import store from './store/store';
 
-import HelloWorld from './views/hello_world';
+import Homepage from './views/Homepage';
 
 import './css/main.css';
 
@@ -14,7 +14,7 @@ class App extends Component {
     return (
       <div class="app">
         <Router>
-        <HelloWorld path="/" />
+          <Homepage path="/" />
         </Router>
       </div>
     )

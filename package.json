@@ -5,6 +5,7 @@
     "test": "jest --coverage"
   },
   "dependencies": {
+    "dotenv": "^16.0.0",
     "firebase": "^9.6.6",
     "preact": "^10.4.4",
     "preact-router": "^3.2.1",

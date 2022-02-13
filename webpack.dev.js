@@ -1,7 +1,10 @@
 var path = require('path');
 var webpack = require('webpack');
+var dotenv = require('dotenv');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 
+dotenv.config({ path: './.env' }); 
+console.log(process.env)
 
 module.exports = {
   mode: 'development',
@@ -49,5 +52,15 @@ module.exports = {
       template: 'public/index.html',
       inject: false
     }),
+    new webpack.EnvironmentPlugin([
+      'FIREBASE_API_KEY',
+      'FIREBASE_API_KEY',
+      'FIREBASE_AUTH_DOMAIN',
+      'FIREBASE_PROJECT_ID',
+      'FIREBASE_STG_BUCKET',
+      'FIREBASE_MESSAGING_SDR_ID',
+      'FIREBASE_APP_ID',
+      'FIREBASE_MEASUREMENT_ID'
+    ])
   ]
 }
