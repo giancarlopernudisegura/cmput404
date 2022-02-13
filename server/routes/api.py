@@ -1,4 +1,5 @@
 from ast import expr_context
+from re import L
 from unicodedata import category
 from flask import Blueprint, jsonify, make_response, request
 from server.exts import db
@@ -37,9 +38,14 @@ def create_post(author_id):
         category = request.form.get("category")
         content = request.form.get("content")
         unlisted = request.form.get("content")
-        contentTypeString = request.form.get("contentType")
+        try:
+            contentType= ContentType(request.form.get("contentType"))
+        except:
+            pass#return bad
 
         if not request.form.get("visibility") in post_visibility_map:
             pass#return bad
         private = post_visibility_map[request.form.get("visibility")]
-        
+        post = Post(author, title, category, content, contentType)
+        db.session.add(post)
+        db.session.commit()

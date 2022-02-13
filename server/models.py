@@ -39,14 +39,19 @@ class Post(db.Model):#relates post types together
     contentType = db.Column(db.Enum(ContentType))
 
 
-    def __init__(self, author, textPost = None, imagePost = None, private = False):
+    def __init__(self, author, title, category, content, contentType, private = False, unlisted = False):
         if author == None:
             raise Exception("Posts require an author")
         self.author = author
-        self.textPost = textPost
-        self.imagePost = imagePost
         self.timestamp = datetime.datetime()
         self.private = private
+        self.unlisted = unlisted
+        self.title = title
+        self.category = category
+        self.content = content
+        if contentType == None:
+            raise Exception("Posts require content type")
+        self.contentType = contentType
     
 
     @property
