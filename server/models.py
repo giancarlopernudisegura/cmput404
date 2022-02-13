@@ -1,5 +1,5 @@
 from server.exts import db
-from server.enums import ContentType, ImageContentType, TextContentType
+from server.enums import ContentType
 import datetime
 
 

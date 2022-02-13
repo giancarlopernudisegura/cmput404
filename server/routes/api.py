@@ -12,19 +12,6 @@ post_visibility_map  = {
     "FRIENDS": True
 }
 
-post_content_type_map = {#maps content type to class, assumes that both model classes take same args
-   ContentType.markdown.value: TextPost,
-   ContentType.plain.value: TextPost,
-   ContentType.png.value: ImagePost,
-   ContentType.jpeg.value: ImagePost
-}
-
-post_content_type_enum_map = {#maps content type to specific enum
-   ContentType.markdown.value: TextContentType,
-   ContentType.plain.value: TextContentType,
-   ContentType.png.value: ImageContentType,
-   ContentType.jpeg.value: ImageContentType
-}
 
 
 
@@ -51,13 +38,6 @@ def create_post(author_id):
         content = request.form.get("content")
         unlisted = request.form.get("content")
         contentTypeString = request.form.get("contentType")
-
-        #models classes MUST have same constructor args
-        if contentTypeString not in post_content_type_map:
-            pass#return bad contentType
-        contentType = post_content_type_enum_map[contentTypeString](contentTypeString)
-        post
-
 
         if not request.form.get("visibility") in post_visibility_map:
             pass#return bad
