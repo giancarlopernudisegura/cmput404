@@ -28,7 +28,7 @@ cp .env.example .env
 ```
 
 ### Initialize local database
-First create an empty database in `/server` named `app.db`
+First create an empty database in `/server` named `app.db` with:
 ```bash
 touch server/app.db
 ```
@@ -44,5 +44,5 @@ npm run dev
 ```bash
 cd server/
 source venv/bin/activate
-python3 server.py
+flask run
 ```
