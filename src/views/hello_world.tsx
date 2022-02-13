@@ -1,41 +1,16 @@
 import { h, Component, ComponentChild } from 'preact'
 
-interface Props {
-
+type Props = {
+  path: string;
 }
 
-interface State {
-  message: string
+function HelloWorld({ path }: Props ) {
+  return (
+    <div>Hello World!
+      This is a path: {path}
+    </div>
+  )
 }
 
-export default class HelloWorld extends Component<Props, State> {
+export default HelloWorld;
 
-  readonly state = {
-    message: ''
-  }
-
-  public componentDidMount = (): void => {
-    this.get()
-  }
-
-  private get = async (): Promise<void> => {
-    const response = await fetch('/service/hello_world')
-    if (!response.ok) {
-      this.setState({ message: 'Flask server is not running.' })
-    }
-    else {
-      const data = await response.json()
-      this.setState({ message: data.message })
-    }
-
-  }
-
-  public render = (): ComponentChild => {
-    const { message } = this.state
-    return (
-      <div class="text-3xl font-bold underline">
-        {message}
-      </div>
-    )
-  }
-}
