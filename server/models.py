@@ -43,7 +43,7 @@ class Post(db.Model):#relates post types together
         if author == None:
             raise Exception("Posts require an author")
         self.author = author
-        self.timestamp = datetime.datetime()
+        self.timestamp = datetime.datetime.now()
         self.private = private
         self.unlisted = unlisted
         self.title = title

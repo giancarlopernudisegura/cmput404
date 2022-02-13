@@ -1,7 +1,7 @@
 from ast import expr_context
 from re import L
 from unicodedata import category
-from flask import Blueprint, jsonify, make_response, request
+from flask import Blueprint, jsonify, make_response, request, Response
 from server.exts import db
 from server.models import *
 from server.enums import *
@@ -37,18 +37,20 @@ def post(author_id):
         title = request.form.get("title")
         category = request.form.get("category")
         content = request.form.get("content")
-        unlisted = request.form.get("content")
+        unlisted = request.form.get("unlisted")
         try:
             contentType= ContentType(request.form.get("contentType"))
         except:
             pass#return bad
-            return "bad content type", 400
+            return Response(400)
 
         if not request.form.get("visibility") in post_visibility_map:
             pass#return bad
-            return "bad visibility", 400
+            return Response(400)
         private = post_visibility_map[request.form.get("visibility")]
         post = Post(author, title, category, content, contentType)
         db.session.add(post)
         db.session.commit()
-        return "post created", 201
+        return Response(201)
+
+
