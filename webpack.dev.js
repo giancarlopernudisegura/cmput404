@@ -57,7 +57,6 @@ module.exports = {
     }),
     new webpack.EnvironmentPlugin([
       'FIREBASE_API_KEY',
-      'FIREBASE_API_KEY',
       'FIREBASE_AUTH_DOMAIN',
       'FIREBASE_PROJECT_ID',
       'FIREBASE_STG_BUCKET',

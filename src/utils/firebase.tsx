@@ -19,10 +19,12 @@ export const signInWithGithub = async () => {
         console.log("TOKEN", token);
 
         // send a request to Backend after signed up
-        fetch('http://localhost:5000/service/test', {
+        fetch('http://localhost:5000/service/verify_login', {
             headers: {
                 "Authorization": `Bearer ${token}`,
-            }
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include'
         }).then(response => response.json());
 
     } catch (err) {
