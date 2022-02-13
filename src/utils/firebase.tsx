@@ -11,25 +11,44 @@ const auth = getAuth();
 
 // Referenced https://firebase.google.com/docs/auth/web/github-auth
 export const signInWithGithub = async () => {
+    let token = null;
     try {
         const result = await signInWithPopup(auth, provider);
         // you can access user's information with result.user
-        const token = await result.user.getIdToken();
-
-        console.log("TOKEN", token);
+        token = await result.user.getIdToken();
 
         // send a request to Backend after signed up
         fetch('http://localhost:5000/service/verify_login', {
             headers: {
                 "Authorization": `Bearer ${token}`,
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Set-Cookie': 'SameSite=None; Secure;Domain=http://localhost:3000'
             },
             credentials: 'include'
-        }).then(response => response.json());
+        })
+        .then(response => response.json())
+        .catch();
 
     } catch (err) {
         // Handle errors
-        console.log(err.errorMessage);
+        console.log(err);
         console.log("ERROR", err);
+        return { isSuccess: false};
+    }
+
+    try {
+        let res = await fetch('http://localhost:5000/service/verify_login', {
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'Set-Cookie': 'SameSite=None; Secure;Domain=http://localhost:3000'
+            },
+            credentials: 'include'
+        });
+
+        let json = res.json();
+        return { ...json, isSucess: true }
+    } catch (err) {
+        return { isSuccess: false};
     }
 };

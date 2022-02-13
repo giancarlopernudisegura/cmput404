@@ -1,4 +1,3 @@
-
 export const firebaseConfig : Object = {
     "apiKey": process.env.FIREBASE_API_KEY,
     "authDomain": process.env.FIREBASE_AUTH_DOMAIN,
@@ -7,4 +6,4 @@ export const firebaseConfig : Object = {
     "messagingSenderId": process.env.FIREBASE_MESSAGING_SDR_ID,
     "appId": process.env.FIREBASE_APP_ID,
     "measurementId": process.env.FIREBASE_MEASUREMENT_ID
-}
+};
