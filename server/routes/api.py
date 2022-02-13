@@ -5,6 +5,7 @@ from flask import Blueprint, jsonify, make_response, request, Response
 from server.exts import db
 from server.models import *
 from server.enums import *
+import server.httpStatus as httpStatus
 
 bp = Blueprint('api', __name__, url_prefix='/service')
 
@@ -41,16 +42,14 @@ def post(author_id):
         try:
             contentType= ContentType(request.form.get("contentType"))
         except:
-            pass#return bad
-            return Response(400)
+            return Response(status=httpStatus.BAD_REQUEST)#bad content type
 
         if not request.form.get("visibility") in post_visibility_map:
-            pass#return bad
-            return Response(400)
+            return Response(status=httpStatus.BAD_REQUEST)#bad visibility type
         private = post_visibility_map[request.form.get("visibility")]
         post = Post(author, title, category, content, contentType)
         db.session.add(post)
         db.session.commit()
-        return Response(201)
+        return Response(status=httpStatus.OK)
 
 

@@ -26,7 +26,7 @@ class Author(db.Model):
         return f"<id {self.id}>"
 
 
-class Post(db.Model):#relates post types together
+class Post(db.Model):
     __tablename__ = 'post'
     id = db.Column(db.Integer, primary_key=True)
     author = db.Column(db.ForeignKey('author.id'))
