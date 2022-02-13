@@ -4,7 +4,7 @@ import json
 
 load_dotenv()
 
-def create_credential_json():
+def create_fbs_prv_key():
     svc_account_credentials = {
         "type": os.environ.get('FBS_SVC_ACCOUNT'),
         "project_id": os.environ.get('FBS_SVC_PROJECT_ID'),
