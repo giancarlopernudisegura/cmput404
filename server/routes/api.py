@@ -2,9 +2,12 @@ from flask import Blueprint, jsonify, make_response
 from firebase_admin import auth, credentials
 import firebase_admin
 from flask import request
-
+from .create_credential_json import create_fbs_prv_key
 
 bp = Blueprint('api', __name__, url_prefix='/service')
+
+# creates the json
+create_fbs_prv_key()
 
 cred = credentials.Certificate("./tiktaktoe-private-key.json")
 firebase_admin.initialize_app(cred)
