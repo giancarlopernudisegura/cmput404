@@ -1,5 +1,4 @@
 import { h, Component, ComponentChild } from 'preact';
-import { signInWithGithub } from '../utils/firebase';
 
 interface Props {
 
@@ -36,7 +35,6 @@ export default class HelloWorld extends Component<Props, State> {
       <div class="text-3xl font-bold underline">
         {message}
         <p>Hello</p>
-        <button onClick={signInWithGithub }>Click me!</button>
       </div>
     );
   }
