@@ -31,15 +31,15 @@ class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     author = db.Column(db.ForeignKey('author.id'))
     timestamp = db.Column(db.DateTime())
-    private = db.Column(db.Boolean())
-    unlisted = db.Column(db.Boolean())
+    private = db.Column(db.Boolean())#only friends can see
+    unlisted = db.Column(db.Boolean())#doesn't show up on timelines
     title = db.Column(db.String())
     category = db.Column(db.String())
     content = db.Column(db.String())
     contentType = db.Column(db.Enum(ContentType))
 
 
-    def __init__(self, author, title, category, content, contentType, private = False, unlisted = False):
+    def __init__(self, author, title, category, content, contentType, private, unlisted = False):
         if author == None:
             raise Exception("Posts require an author")
         self.author = author

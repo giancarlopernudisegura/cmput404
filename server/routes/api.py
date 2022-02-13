@@ -39,15 +39,19 @@ def post(author_id):
         category = request.form.get("category")
         content = request.form.get("content")
         unlisted = request.form.get("unlisted")
+        if unlisted == None:#default to not unlisted
+            unlisted = False
+
         try:
             contentType= ContentType(request.form.get("contentType"))
         except:
             return Response(status=httpStatus.BAD_REQUEST)#bad content type
 
         if not request.form.get("visibility") in post_visibility_map:
-            return Response(status=httpStatus.BAD_REQUEST)#bad visibility type
+            return Response(status=httpStatus.BAD_REQUEST)#bad visibility type or no visibility given
         private = post_visibility_map[request.form.get("visibility")]
-        post = Post(author, title, category, content, contentType)
+
+        post = Post(author, title, category, content, contentType, private)
         db.session.add(post)
         db.session.commit()
         return Response(status=httpStatus.OK)
