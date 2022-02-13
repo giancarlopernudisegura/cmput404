@@ -4,7 +4,6 @@ var dotenv = require('dotenv');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 
 dotenv.config({ path: './.env' }); 
-console.log(process.env)
 
 module.exports = {
   mode: 'development',

@@ -1,6 +1,7 @@
 import { h, Component, ComponentChild } from 'preact';
 import { signInWithGithub } from '../utils/firebase';
 
+
 interface Props {
 
 }
@@ -16,18 +17,7 @@ export default class Homepage extends Component<Props, State> {
   };
 
   public componentDidMount = (): void => {
-    this.get();
-  }
-
-  private get = async (): Promise<void> => {
-    const response = await fetch('/service/hello_world');
-    if (!response.ok) {
-      this.setState({ message: 'Flask server is not running.' });
-    }
-    else {
-      const data = await response.json();
-      this.setState({ message: data.message });
-    }
+    // this.get();
   }
 
   public render = (): ComponentChild => {
@@ -36,8 +26,13 @@ export default class Homepage extends Component<Props, State> {
     return (
       <div class="text-3xl font-bold underline">
         {message}
-        <p>Hello</p>
-        <button onClick={signInWithGithub }>Click me!</button>
+        <h1>Welcome to TikTakToe</h1>
+        <p>Connect with your friends in a private manner.</p>
+        <p>Currently we only support login with Github</p>
+        <div>
+          <h2>Log in to your account</h2>
+          <button onClick={signInWithGithub}>Sign in with Github!</button>
+        </div>
       </div>
     );
   }
