@@ -4,7 +4,7 @@ import json
 
 load_dotenv()
 
-def create_fbs_prv_key():
+def get_fbs_prv_key():
     svc_account_credentials = {
         "type": os.environ.get('FBS_SVC_ACCOUNT'),
         "project_id": os.environ.get('FBS_SVC_PROJECT_ID'),
@@ -17,6 +17,4 @@ def create_fbs_prv_key():
         "auth_provider_x509_cert_url": os.environ.get('FBS_SVC_AUTH_PROV'),
         "client_x509_cert_url": os.environ.get('FBS_SVC_CLIENT_CERT_URL')
     }
-
-    with open('tiktaktoe-private-key.json', 'w') as file_obj:
-        json.dump(svc_account_credentials, file_obj, ensure_ascii=True, indent=2)
+    return svc_account_credentials
