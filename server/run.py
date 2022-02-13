@@ -42,7 +42,13 @@ def create_app(config_filename=None):
         else:
             return app.send_static_file('bundle.js'), 200
 
+    @app.before_first_request
+    def create_tables():
+        db.create_all()#must be run before interacting with database
+
     return app
+
+
 
 
 app = create_app()
