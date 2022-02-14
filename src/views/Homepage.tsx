@@ -24,7 +24,7 @@ export default class Homepage extends Component<Props, State> {
     const { message } = this.state;
 
     return (
-      <div class="text-3xl font-bold underline">
+      <div class="text-3xl">
         {message}
         <h1>Welcome to TikTakToe</h1>
         <p>Connect with your friends in a private manner.</p>
