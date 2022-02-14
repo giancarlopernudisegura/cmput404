@@ -9,6 +9,7 @@ import HelloWorld from './views/hello_world'
 import './css/main.css'
 import ExplorePage from './views/ExplorePage'
 import Header from './components/Header'
+import Authentication from './views/authentication/authentication'
 
 class App extends Component {
 
@@ -20,7 +21,8 @@ class App extends Component {
         <Header />
 
         <Router>
-          <ExplorePage path="/" />
+          {/* <ExplorePage path="/" /> */}
+          <Authentication path='/'/>
           {/* TODO: add Friends and Personal pages */}
         </Router>
         
