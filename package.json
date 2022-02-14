@@ -18,6 +18,7 @@
     "awesome-typescript-loader": "^5.2.1",
     "chai": "^4.2.0",
     "css-loader": "^3.5.3",
+    "cssnano": "^5.0.17",
     "enzyme": "^3.11.0",
     "enzyme-to-json": "^3.5.0",
     "html-webpack-plugin": "^4.3.0",
