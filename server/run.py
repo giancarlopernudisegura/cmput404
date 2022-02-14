@@ -25,13 +25,14 @@ def create_app(config_filename=None):
         config_filename = os.getenv("APP_SETTINGS", "server.config.DevelopmentConfig")
 
     app.config.from_object(config_filename)
+    app.url_map.strict_slashes = False
 
     db.init_app(app)
     migrate.init_app(app, db)
 
     app.register_blueprint(api.bp)
 
-    @app.route('/')
+    @app.route('/', methods=['GET'])
     def index():
         return app.send_static_file('index.html'), 200
 
@@ -42,7 +43,13 @@ def create_app(config_filename=None):
         else:
             return app.send_static_file('bundle.js'), 200
 
+    @app.before_first_request
+    def create_tables():
+        db.create_all()#must be run before interacting with database
+
     return app
+
+
 
 
 app = create_app()
