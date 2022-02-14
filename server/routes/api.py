@@ -11,6 +11,7 @@ from server.exts import db
 from server.models import *
 from server.enums import *
 import server.httpStatus as httpStatus
+import server.utils.api_support as utils
 
 bp = Blueprint('api', __name__, url_prefix='/service')
 
@@ -64,18 +65,26 @@ def post(author_id):
 def hello_world():
     return make_response(jsonify(message='Hello World')), 200
 
-@bp.route('/verify_login')
-def verify_login():
+@bp.route('/login', methods=['POST'])
+def login():
     # get token from authorization header
     authorization_header = request.headers['Authorization']
     token = authorization_header.replace("Bearer ", "")
 
     try:
         decoded_token = auth.verify_id_token(token)
-        uid = decoded_token['uid']
-        print("UID", uid)
     except Exception as e:
+        print(e)
         print("Error", str(e))
         return make_response(jsonify(message='There was an error' + str(e))), 500
 
-    return make_response(jsonify(message='Success')), 200
+    # check if user exists in the database
+    github_id = utils.get_github_user_id(decoded_token)
+    author = Author.query.filter_by(githubId=github_id).first()
+
+    if not author:
+        # create an author
+        utils.create_author(decoded_token)
+        return make_response(jsonify(message='User created')), 200
+    else: 
+        return make_response(jsonify(message='Successful log in')), 200

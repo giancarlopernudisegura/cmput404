@@ -16,19 +16,6 @@ export const signInWithGithub = async () => {
         const result = await signInWithPopup(auth, provider);
         // you can access user's information with result.user
         token = await result.user.getIdToken();
-
-        // send a request to Backend after signed up
-        fetch('http://localhost:5000/service/verify_login', {
-            headers: {
-                "Authorization": `Bearer ${token}`,
-                'Content-Type': 'application/json',
-                'Set-Cookie': 'SameSite=None; Secure;Domain=http://localhost:3000'
-            },
-            credentials: 'include'
-        })
-        .then(response => response.json())
-        .catch();
-
     } catch (err) {
         // Handle errors
         console.log(err);
@@ -37,13 +24,15 @@ export const signInWithGithub = async () => {
     }
 
     try {
-        let res = await fetch('http://localhost:5000/service/verify_login', {
+        // send a request to Backend after signed up
+        let res = await fetch('http://localhost:5000/service/login', {
             headers: {
                 "Authorization": `Bearer ${token}`,
                 'Content-Type': 'application/json',
                 'Set-Cookie': 'SameSite=None; Secure;Domain=http://localhost:3000'
             },
-            credentials: 'include'
+            credentials: 'include',
+            method: 'POST'
         });
 
         let json = res.json();
