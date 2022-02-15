@@ -10,6 +10,7 @@ import './css/main.css'
 import ExplorePage from './views/ExplorePage'
 import Header from './components/Header'
 import Authentication from './views/authentication/authentication'
+import SignUp from './views/authentication/authentication-signup'
 
 class App extends Component {
 
@@ -23,6 +24,7 @@ class App extends Component {
         <Router>
           {/* <ExplorePage path="/" /> */}
           <Authentication path='/'/>
+          <SignUp path='/signup'/>
           {/* TODO: add Friends and Personal pages */}
         </Router>
         

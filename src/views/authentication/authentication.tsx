@@ -1,6 +1,7 @@
 import React from 'react'
 import { h, Component, ComponentChild } from 'preact'
 import Divider from '../../components/or-divider'
+import Footer from '../../components/Footer'
 
 type AuthProps = {
   path: string
@@ -58,7 +59,7 @@ function Authentication({path}: AuthProps) {
         </div>
         <div class="pt-8 items-center justify-center">
         <div class="text-sm font-medium text-gray-900 text-center"> 
-          Don't have an account? <a href="#" class="text-blue-500 hover:text-blue-700 font-bold">Sign Up</a>
+          Don't have an account? <a href="/signup" class="text-blue-500 hover:text-blue-700 font-bold">Sign Up</a>
         </div>
         </div>
       </form>
