@@ -36,7 +36,7 @@ export default class HelloWorld extends Component<Props, State> {
     return (
       <div class="text-3xl font-bold underline">
         {message}
-        <Button>dsdf</Button>
+        <Button>Click me</Button>
       </div>
     )
   }
