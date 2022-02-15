@@ -8,5 +8,5 @@ from dotenv import load_dotenv
 load_dotenv()
 
 bind = f'0.0.0.0:{os.environ["PORT"]}'
-workers = multiprocessing.cpu_count() * 2 + 1
+workers = multiprocessing.cpu_count()
 threads = multiprocessing.cpu_count()
