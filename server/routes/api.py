@@ -84,7 +84,7 @@ def login():
 
     if not author:
         # create an author
-        utils.create_author(decoded_token)
+        utils.create_author(decoded_token, auth)
         return make_response(jsonify(message='User created')), 200
     else: 
         return make_response(jsonify(message='Successful log in')), 200
