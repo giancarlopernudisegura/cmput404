@@ -42,13 +42,21 @@ def create_app(config_filename=None):
             return redirect('//localhost:3000/bundle.js')
         else:
             return app.send_static_file('bundle.js'), 200
-
+    
     @app.before_first_request
     def create_tables():
         db.create_all()#must be run before interacting with database
 
-    return app
+    # add CORS 
+    @app.after_request
+    def after_request(response):
+        response.headers.add('Access-Control-Allow-Origin', 'http://localhost:3000')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,Set-Cookie')
+        response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
+        response.headers.add('Access-Control-Allow-Credentials', 'true')
+        return response
 
+    return app
 
 
 

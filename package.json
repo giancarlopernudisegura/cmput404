@@ -5,9 +5,11 @@
     "test": "jest --coverage"
   },
   "dependencies": {
+    "dotenv": "^16.0.0",
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
     "@mui/material": "^5.4.1",
+    "firebase": "^9.6.6",
     "preact": "^10.4.4",
     "preact-router": "^3.2.1",
     "typescript": "^3.9.3",

@@ -1,12 +1,12 @@
-import { h, render, Component, ComponentChild } from 'preact'
-import Router from 'preact-router'
-import { Provider } from 'unistore/preact'
+import { h, render, Component, ComponentChild } from 'preact';
+import Router from 'preact-router';
+import { Provider } from 'unistore/preact';
 
-import store from './store/store'
+import store from './store/store';
 
-import HelloWorld from './views/hello_world'
+import Homepage from './views/Homepage';
 
-import './css/main.css'
+import './css/main.css';
 
 class App extends Component {
 
@@ -14,7 +14,7 @@ class App extends Component {
     return (
       <div class="app">
         <Router>
-          <HelloWorld path="/" />
+          <Homepage path="/" />
         </Router>
       </div>
     )
@@ -26,4 +26,4 @@ render (
     <App />
   </Provider>,
   document.body
-)
+);
