@@ -9,3 +9,4 @@ services:
     environment:
       - FLASK_ENV=production
       - APP_SETTINGS=config.ProductionConfig
+      - NODE_OPTIONS=--max-old-space-size=16384
