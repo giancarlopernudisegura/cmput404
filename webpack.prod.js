@@ -12,7 +12,11 @@ module.exports = {
   },
   watch: false,
   resolve: {
-    extensions: ['.tsx', '.ts', '.js', '.scss', '.css']
+    extensions: ['.tsx', '.ts', '.js', '.scss', '.css'],
+    alias: {
+      'react': 'preact/compat',
+      'react-dom': 'preact/compat'
+    }
   },
   module: {
     rules: [

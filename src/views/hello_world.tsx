@@ -1,4 +1,5 @@
-import { h, Component, ComponentChild } from 'preact';
+import { h, Component, ComponentChild } from 'preact'
+import { Button } from '@mui/material';
 
 interface Props {
 
@@ -34,7 +35,7 @@ export default class HelloWorld extends Component<Props, State> {
     return (
       <div class="text-3xl font-bold underline">
         {message}
-        <p>Hello</p>
+        <Button>Click me</Button>
       </div>
     );
   }
