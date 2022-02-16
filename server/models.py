@@ -5,6 +5,7 @@ import os
 from dotenv import load_dotenv
 from urllib.request import urlopen
 import json
+from typing import Any, Dict
 
 
 load_dotenv()
@@ -32,8 +33,7 @@ class Author(db.Model):
     def __repr__(self):
         return f"<id {self.id}>"
 
-
-    def json(self):
+    def json(self) -> Dict[str, str]:
         # get username from github id
         resp = urlopen(f'https://api.github.com/user/{self.githubId}')
         data = json.loads(resp.read().decode('utf-8'))
@@ -74,11 +74,12 @@ class Post(db.Model):
         if contentType == None:
             raise Exception("Posts require content type")
         self.contentType = contentType
-    
+
 
     @property
     def likes(self):
         return Like.query.filter_by(post=self.id).all()
+
 
     @property
     def comments(self):
@@ -88,21 +89,21 @@ class Post(db.Model):
     def __repr__(self):
         return f"<id {self.id}>"
 
-
-    def json(self):
+    def json(self) -> Dict[str, Any]:
+        author = Author.query.filter_by(id=self.author).first()
         return {
             'type': 'post',
             'title': self.title,
             'id': self.id,
             # TODO: going to hardcode source and origin to be only our node for now, must be changed later
-            'source': f'{os.getenv("FLASK_HOST")}/authors/{self.author.id}/posts/{self.id}',
-            'origin': f'{os.getenv("FLASK_HOST")}/authors/{self.author.id}/posts/{self.id}',
+            'source': f'{os.getenv("FLASK_HOST")}/authors/{self.author}/posts/{self.id}',
+            'origin': f'{os.getenv("FLASK_HOST")}/authors/{self.author}/posts/{self.id}',
             'description': self.content,
-            'contentType': self.contentType,
-            'author': self.author.json(),
+            'contentType': str(self.contentType),
+            'author': author.json(),
             'categories': self.category.split(','),
             'count': len(self.comments),
-            'comments': f'{os.getenv("FLASK_HOST")}/authors/{self.author.id}/posts/{self.id}/comments',
+            'comments': f'{os.getenv("FLASK_HOST")}/authors/{self.author}/posts/{self.id}/comments',
             'commentsSrc': None,
             'published': self.timestamp.isoformat(),
             'visibility': 'PUBLIC' if not self.private else 'FRIENDS',

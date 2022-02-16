@@ -31,7 +31,7 @@ def single_author(author_id):
         author = Author.query.filter_by(id=author_id).first()
         if author:
             return make_response(jsonify(author.json())), httpStatus.OK
-        return make_response(jsonify({"error": "Author not found"}), httpStatus.NOT_FOUND)
+        return make_response(jsonify({"error": "Author not found"})), httpStatus.NOT_FOUND
     elif request.method == "POST":
         pass
         #request.form.get('displayName')
@@ -41,7 +41,7 @@ def get_post(author_id, post_id):
     post = Post.query.filter_by(id=post_id).first()
     if post:
         return make_response(jsonify(post.json())), httpStatus.OK
-    return make_response(jsonify({"error": "Post not found"}), httpStatus.NOT_FOUND)
+    return make_response(jsonify({"error": "Post not found"})), httpStatus.NOT_FOUND
 
 
 @bp.route("authors/<author_id>/posts/", methods=['GET', 'POST'])
@@ -73,7 +73,7 @@ def post(author_id):
     
 @bp.route('/hello_world')
 def hello_world():
-    return make_response(jsonify(message='Hello World')), 200
+    return make_response(jsonify(message='Hello World')), httpStatus.OK
 
 @bp.route('/login', methods=['POST'])
 def login():
@@ -95,6 +95,6 @@ def login():
     if not author:
         # create an author
         utils.create_author(decoded_token, auth)
-        return make_response(jsonify(message='User created')), 200
+        return make_response(jsonify(message='User created')), httpStatus.OK
     else: 
-        return make_response(jsonify(message='Successful log in')), 200
+        return make_response(jsonify(message='Successful log in')), httpStatus.OK
