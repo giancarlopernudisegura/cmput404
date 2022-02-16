@@ -10,6 +10,8 @@ from typing import Any, Dict
 
 load_dotenv()
 
+HOST = os.getenv("FLASK_HOST")
+
 
 #Models go here
 class Author(db.Model):
@@ -40,9 +42,9 @@ class Author(db.Model):
         return {
             'type': 'author',
             'id': self.id,
-            'host': f'{os.getenv("FLASK_HOST")}/',
+            'host': f'{HOST}/',
             'displayName': self.displayName,
-            'url': f'{os.getenv("FLASK_HOST")}/authors/{self.id}',
+            'url': f'{HOST}/authors/{self.id}',
             'github': data['html_url'],
             'profileImage': self.profileImageId
         }
@@ -96,14 +98,14 @@ class Post(db.Model):
             'title': self.title,
             'id': self.id,
             # TODO: going to hardcode source and origin to be only our node for now, must be changed later
-            'source': f'{os.getenv("FLASK_HOST")}/authors/{self.author}/posts/{self.id}',
-            'origin': f'{os.getenv("FLASK_HOST")}/authors/{self.author}/posts/{self.id}',
+            'source': f'{HOST}/authors/{self.author}/posts/{self.id}',
+            'origin': f'{HOST}/authors/{self.author}/posts/{self.id}',
             'description': self.content,
             'contentType': str(self.contentType),
             'author': author.json(),
             'categories': self.category.split(','),
             'count': len(self.comments),
-            'comments': f'{os.getenv("FLASK_HOST")}/authors/{self.author}/posts/{self.id}/comments',
+            'comments': f'{HOST}/authors/{self.author}/posts/{self.id}/comments',
             'commentsSrc': None,
             'published': self.timestamp.isoformat(),
             'visibility': 'PUBLIC' if not self.private else 'FRIENDS',
@@ -160,6 +162,23 @@ class Like(db.Model):
 
     def __repr__(self):
         return f"<id {self.id}>"
+
+
+    def json(self) -> Dict[str, Any]:
+        author = Author.query.filter_by(id=self.author).first()
+        liked_object_type = 'post' if self.post else 'comment'
+        if self.post:
+            liked_object = f'http://{HOST}/authors/{author.id}/posts/{self.post}'
+        else:
+            comment = Commment.query.filter_by(id=self.comment).first()
+            liked_object = f'http://{HOST}/authors/{author.id}/posts/{comment.post}/comments/{comment.id}'
+        return {
+            '@context': 'https://www.w3.org/ns/activitystreams',
+            'summary': f'{author.displayName} Liked your {liked_object_type}',
+            'type': 'Like',
+            'author': author.json(),
+            'id': liked_object,
+        }
 
 
 class Requests(db.Model):#follow requests
