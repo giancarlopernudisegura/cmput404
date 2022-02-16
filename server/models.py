@@ -1,6 +1,13 @@
 from server.exts import db
 from server.enums import ContentType
 import datetime
+import os
+from dotenv import load_dotenv
+from urllib.request import urlopen
+import json
+
+
+load_dotenv()
 
 
 #Models go here
@@ -24,6 +31,21 @@ class Author(db.Model):
 
     def __repr__(self):
         return f"<id {self.id}>"
+
+
+    def json(self):
+        # get username from github id
+        resp = urlopen(f'https://api.github.com/user/{self.githubId}')
+        data = json.loads(resp.read().decode('utf-8'))
+        return {
+            'type': 'author',
+            'id': self.id,
+            'host': f'{os.getenv("FLASK_HOST")}/',
+            'displayName': self.displayName,
+            'url': f'{os.getenv("FLASK_HOST")}/authors/{self.id}',
+            'github': data['html_url'],
+            'profileImage': self.profileImageId
+        }
 
 
 class Post(db.Model):
@@ -58,15 +80,41 @@ class Post(db.Model):
     def likes(self):
         return Like.query.filter_by(post=self.id).all()
 
+    @property
+    def comments(self):
+        return Commment.query.filter_by(post=self.id).all()
+
 
     def __repr__(self):
         return f"<id {self.id}>"
+
+
+    def json(self):
+        return {
+            'type': 'post',
+            'title': self.title,
+            'id': self.id,
+            # TODO: going to hardcode source and origin to be only our node for now, must be changed later
+            'source': f'{os.getenv("FLASK_HOST")}/authors/{self.author.id}/posts/{self.id}',
+            'origin': f'{os.getenv("FLASK_HOST")}/authors/{self.author.id}/posts/{self.id}',
+            'description': self.content,
+            'contentType': self.contentType,
+            'author': self.author.json(),
+            'categories': self.category.split(','),
+            'count': len(self.comments),
+            'comments': f'{os.getenv("FLASK_HOST")}/authors/{self.author.id}/posts/{self.id}/comments',
+            'commentsSrc': None,
+            'published': self.timestamp.isoformat(),
+            'visibility': 'PUBLIC' if not self.private else 'FRIENDS',
+            'unlisted': self.unlisted
+        }
 
 
 class Commment(db.Model):
     __tablename__ = 'comment'
     id = db.Column(db.Integer, primary_key=True)
     author = db.Column(db.ForeignKey('author.id'))
+    post = db.Column(db.ForeignKey('post.id'))
     content = db.Column(db.String())
     contentType = db.Column(db.Enum(ContentType))
     timestamp = db.Column(db.DateTime())

@@ -1,7 +1,6 @@
 from flask import Blueprint, jsonify, make_response
 from firebase_admin import auth, credentials
 import firebase_admin
-from flask import request
 from .create_credential_json import get_fbs_prv_key
 from ast import expr_context
 from re import L
@@ -29,10 +28,21 @@ post_visibility_map  = {
 @bp.route("authors/<author_id>", methods=['GET', 'POST'])
 def single_author(author_id):
     if request.method == "GET":
-        pass
+        author = Author.query.filter_by(id=author_id).first()
+        if author:
+            return make_response(jsonify(author.json())), httpStatus.OK
+        return make_response(jsonify({"error": "Author not found"}), httpStatus.NOT_FOUND)
     elif request.method == "POST":
         pass
         #request.form.get('displayName')
+
+@bp.route("authors/<author_id>/posts/<post_id>", methods=['GET'])
+def get_post(author_id, post_id):
+    post = Post.query.filter_by(id=post_id).first()
+    if post:
+        return make_response(jsonify(post.json())), httpStatus.OK
+    return make_response(jsonify({"error": "Post not found"}), httpStatus.NOT_FOUND)
+
 
 @bp.route("authors/<author_id>/posts/", methods=['GET', 'POST'])
 def post(author_id):
