@@ -34,9 +34,9 @@ def pagination(arguments: Dict[str, str], default_page_size: int = 10,
 
     Returns:
         A tuple of (page, size) to use for pagination."""
-    size = int(arguments.get('size', default_page_size), base=10)
+    size = int(arguments.get('size', str(default_page_size)), base=10)
     page_number = int(arguments.get(
-        'page_number', default_page_number), base=10)
+        'page_number', str(default_page_number)), base=10)
     return page_number, size
 
 
@@ -54,7 +54,9 @@ def multiple_authors() -> Response:
     authors = Author.query.paginate(page=page, per_page=size).items
     return make_response(jsonify(
         type='authors',
-        items=[a.json() for a in authors]), httpStatus.OK)
+        items=[a.json() for a in authors],
+        page=page,
+        size=len(authors))), httpStatus.OK
 
 
 @bp.route("/authors/<int:author_id>", methods=['GET', 'POST'])
@@ -84,14 +86,13 @@ def get_post(author_id: int, post_id: int) -> Response:
 @bp.route("/authors/<int:author_id>/posts/", methods=['GET', 'POST'])
 def post(author_id: int) -> Response:
     if request.method == "GET":
-        page, size, start, end = pagination(request.args)
+        page, size = pagination(request.args)
         posts = Post.query.filter_by(
             author=author_id, private=False).paginate(
                 page=page, per_page=size).items
-        posts = [post.json() for post in posts[start:end]]
         return make_response(jsonify(
             type='posts',
-            items=posts,
+            items=[post.json() for post in posts],
             size=len(posts),
             page=page)), httpStatus.OK
     elif request.method == "POST":
