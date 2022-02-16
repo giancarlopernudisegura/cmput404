@@ -5,18 +5,20 @@ var HtmlWebpackPlugin = require('html-webpack-plugin');
 
 dotenv.config({ path: './.env' }); 
 
+const frontendUrl = new URL(process.env.PREACT_HOST);
+
 module.exports = {
   mode: 'development',
   devtool: 'source-map',
   entry: ['./src/app.tsx'],
   devServer: {
-    port: 3000,
-    host: '0.0.0.0',
+    port: parseInt(frontendUrl.port),
+    host: frontendUrl.hostname,
     compress: false,
     historyApiFallback: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: process.env.FLASK_HOST,
         secure: false
       }
     }
@@ -62,7 +64,8 @@ module.exports = {
       'FIREBASE_STG_BUCKET',
       'FIREBASE_MESSAGING_SDR_ID',
       'FIREBASE_APP_ID',
-      'FIREBASE_MEASUREMENT_ID'
+      'FIREBASE_MEASUREMENT_ID',
+      'FLASK_HOST'
     ])
   ]
 }
