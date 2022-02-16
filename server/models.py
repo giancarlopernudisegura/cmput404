@@ -141,6 +141,18 @@ class Commment(db.Model):
         return f"<id {self.id}>"
 
 
+    def json(self) -> Dict[str, Any]:
+        author = Author.query.filter_by(id=self.author).first()
+        return {
+            'type': 'comment',
+            'author': author.json(),
+            'comment': self.content,
+            'contentType': str(self.contentType),
+            'published': self.timestamp.isoformat(),
+            'id': f'{HOST}/authors/{author.id}/posts/{self.post}/comments/{self.id}',
+        }
+
+
 class Like(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     author = db.Column(db.ForeignKey('author.id'))
@@ -168,10 +180,10 @@ class Like(db.Model):
         author = Author.query.filter_by(id=self.author).first()
         liked_object_type = 'post' if self.post else 'comment'
         if self.post:
-            liked_object = f'http://{HOST}/authors/{author.id}/posts/{self.post}'
+            liked_object = f'{HOST}/authors/{author.id}/posts/{self.post}'
         else:
             comment = Commment.query.filter_by(id=self.comment).first()
-            liked_object = f'http://{HOST}/authors/{author.id}/posts/{comment.post}/comments/{comment.id}'
+            liked_object = f'{HOST}/authors/{author.id}/posts/{comment.post}/comments/{comment.id}'
         return {
             '@context': 'https://www.w3.org/ns/activitystreams',
             'summary': f'{author.displayName} Liked your {liked_object_type}',
