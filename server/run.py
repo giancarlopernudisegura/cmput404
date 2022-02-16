@@ -11,7 +11,7 @@ load_dotenv()
 
 
 dir = os.path.abspath(os.path.dirname(__file__))
-
+FRONT_END_HOST = os.getenv("PREACT_HOST")
 
 migrate = Migrate()
 
@@ -50,7 +50,7 @@ def create_app(config_filename=None):
     # add CORS 
     @app.after_request
     def after_request(response):
-        response.headers.add('Access-Control-Allow-Origin', 'http://localhost:3000')
+        response.headers.add('Access-Control-Allow-Origin', f'{FRONT_END_HOST}')
         response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,Set-Cookie')
         response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
         response.headers.add('Access-Control-Allow-Credentials', 'true')

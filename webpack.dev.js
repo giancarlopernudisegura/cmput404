@@ -62,7 +62,8 @@ module.exports = {
       'FIREBASE_STG_BUCKET',
       'FIREBASE_MESSAGING_SDR_ID',
       'FIREBASE_APP_ID',
-      'FIREBASE_MEASUREMENT_ID'
+      'FIREBASE_MEASUREMENT_ID',
+      'FLASK_HOST'
     ])
   ]
 }
