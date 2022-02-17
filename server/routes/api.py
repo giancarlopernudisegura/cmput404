@@ -5,7 +5,8 @@ from .create_credential_json import get_fbs_prv_key
 from server.exts import db
 from server.models import Author, Post
 from server.enums import ContentType
-import server.httpStatus as httpStatus
+from http import HTTPStatus as httpStatus
+
 import server.utils.api_support as utils
 from typing import Dict, Tuple
 
