@@ -21,12 +21,12 @@ export const signInWithGithub = async () => {
         // Handle errors
         console.log(err);
         console.log("ERROR", err);
-        return { isSuccess: false};
+        return { isSuccess: false };
     }
 
     try {
         // send a request to Backend after signed up
-        let res = await fetch(`${BACKEND_HOST}/service/login`, {
+        let res = await fetch(`${BACKEND_HOST}/login`, {
             headers: {
                 "Authorization": `Bearer ${token}`,
                 'Content-Type': 'application/json',
@@ -39,6 +39,6 @@ export const signInWithGithub = async () => {
         let json = res.json();
         return { ...json, isSucess: true }
     } catch (err) {
-        return { isSuccess: false};
+        return { isSuccess: false };
     }
 };
