@@ -8,3 +8,6 @@ class ContentType(enum.Enum):
     #application = "application/base64"
     png = "image/png;base64"
     jpeg = "image/jpeg;base64"
+
+    def __str__(self) -> str:
+        return self.value
