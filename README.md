@@ -51,4 +51,3 @@ flask run
 ### Firebase Authentication
 - https://firebase.google.com/docs/reference/js/v8/firebase.auth.GithubAuthProvider
 - https://firebase.google.com/docs/auth/web/github-auth
-- [Session Cookies login](https://firebase.google.com/docs/auth/admin/manage-cookie)
