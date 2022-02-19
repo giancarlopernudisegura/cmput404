@@ -28,12 +28,14 @@ export const signInWithGithub = async () => {
         // send a request to Backend after signed up
         let res = await fetch(`${BACKEND_HOST}/login`, {
             headers: {
-                "Authorization": `Bearer ${token}`,
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/x-www-form-urlencoded',
                 'Set-Cookie': `SameSite=None; Secure;Domain=${BACKEND_HOST}`
             },
             credentials: 'include',
-            method: 'POST'
+            method: 'POST',
+            body: new URLSearchParams({
+                'token': `${token}`
+            })
         });
 
         let json = res.json();
