@@ -124,28 +124,28 @@ def post(author_id: int) -> Response:
         return Response(status=httpStatus.OK)
 
 
-@bp.route("/authors/<int:author_id>/posts/<int:post_id>", methods=['GET', 'POST', 'PUT', 'DELETE'])
+@bp.route("/authors/<int:author_id>/posts/<int:post_id>", methods=['POST', 'PUT', 'DELETE'])
 def specific_post(author_id: int, post_id: int) -> Response:
-    """Get/post/put/delete a specific post."""
+    """Modify create or delete a specific post."""
     if request.method in ("PUT", "POST", "DELETE"):
         # TODO: replace with check if logged in user is the author of the post
         if False:
             return Response(status=httpStatus.UNAUTHORIZED)
-    if request.method in ("GET", "POST", "DELETE"):
-        post = Post.query.filter_by(id=post_id).first_or_404()
-    if request.method in ("PUT", "POST"):
-        author = author_id
-        title = request.form.get("title")
-        category = request.form.get("category")
-        content = request.form.get("content")
-        unlisted = request.form.get("unlisted") or False
-        try:
-            contentType = ContentType(request.form.get("contentType"))
-        except ValueError:
-            return Response(status=httpStatus.BAD_REQUEST)
-        if not request.form.get("visibility") in post_visibility_map:
-            return Response(status=httpStatus.BAD_REQUEST)
-        private = post_visibility_map[request.form.get("visibility")]
+        if request.method != "PUT":
+            post = Post.query.filter_by(id=post_id).first_or_404()
+        if request.method != "DELETE":
+            author = author_id
+            title = request.form.get("title")
+            category = request.form.get("category")
+            content = request.form.get("content")
+            unlisted = request.form.get("unlisted") or False
+            try:
+                contentType = ContentType(request.form.get("contentType"))
+            except ValueError:
+                return Response(status=httpStatus.BAD_REQUEST)
+            if not request.form.get("visibility") in post_visibility_map:
+                return Response(status=httpStatus.BAD_REQUEST)
+            private = post_visibility_map[request.form.get("visibility")]
     if request.method == "GET":
         return make_response(jsonify(post.json())), httpStatus.OK
     elif request.method == "POST":
