@@ -60,9 +60,11 @@ class Post(db.Model):
     content = db.Column(db.String())
     contentType = db.Column(db.Enum(ContentType))
 
-    def __init__(self, author, title, category, content, contentType, private, unlisted=False):
-        if author == None:
+    def __init__(self, author, title, category, content, contentType, private, unlisted=False, id=None):
+        if author is None:
             raise Exception("Posts require an author")
+        if id is not None:
+            self.id = id
         self.author = author
         self.timestamp = datetime.datetime.now()
         self.private = private
