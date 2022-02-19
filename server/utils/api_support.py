@@ -1,25 +1,29 @@
 from server.models import Author
 from server.exts import db
+from flask import Response
+from server.utils import create_credential_json
+import server.utils.api_support as utils
 from firebase_admin import auth, credentials
 import firebase_admin
-from server.utils.create_credential_json import get_fbs_prv_key
+import json
 
 # creates the json
-fbs_private_key = get_fbs_prv_key()
+fbs_private_key = create_credential_json.get_fbs_prv_key()
 
+#initialize firebase
 cred = credentials.Certificate(fbs_private_key)
 firebase_admin.initialize_app(cred)
 
 def get_github_user_id(decoded_token):
     return decoded_token['firebase']['identities']['github.com'][0]
 
-def get_displayName(auth, decoded_token):
+def get_displayName(decoded_token):
     user = auth.get_user(decoded_token["user_id"])
     return user.display_name
 
-def create_author(decoded_token, auth):
+def create_author(decoded_token):
     # if author doesn't exists, create an entry
-    displayName = get_displayName(auth, decoded_token)
+    displayName = get_displayName(decoded_token)
     githubId = get_github_user_id(decoded_token)
     profileImageId = decoded_token["picture"]
     isAdmin = False
