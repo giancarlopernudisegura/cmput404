@@ -1,3 +1,4 @@
+from flask_login import UserMixin
 from server.exts import db
 from server.enums import ContentType
 import datetime
@@ -14,7 +15,7 @@ HOST = os.getenv("FLASK_HOST")
 
 
 # Models go here
-class Author(db.Model):
+class Author(db.Model, UserMixin):
     __tablename__ = 'author'
     id = db.Column(db.Integer, primary_key=True)
     displayName = db.Column(db.String())
