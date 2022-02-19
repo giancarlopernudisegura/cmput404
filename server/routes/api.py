@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, make_response, request, Response
+from flask_login import login_user, login_required
 from firebase_admin import auth, credentials
 import firebase_admin
 from .create_credential_json import get_fbs_prv_key
@@ -143,9 +144,16 @@ def login() -> Response:
     author = Author.query.filter_by(githubId=github_id).first()
 
     if not author:
-        # create an author
         utils.create_author(decoded_token, auth)
+        login_user(author)
         return make_response(jsonify(message='User created')), httpStatus.OK
     else:
+        login_user(author)
         return make_response(jsonify(
             message='Successful log in')), httpStatus.OK
+
+
+@bp.route('/login_test', methods=['GET'])
+@login_required
+def login_test() -> Response:
+    return make_response(jsonify(message='Successful log in')), httpStatus.OK
