@@ -2,12 +2,18 @@ from flask import Blueprint, jsonify, make_response, request, Response
 from server.constants import res_msg
 from flask_login import login_user, login_required, current_user
 from server.exts import db
-from server.models import Author, Post
+from server.models import Author, Post, Comment
 from server.enums import ContentType
 from http import HTTPStatus as httpStatus
+import os
+from dotenv import load_dotenv
 
 import server.utils.api_support as utils
 from typing import Dict, Tuple
+
+load_dotenv()
+
+HOST = os.getenv("FLASK_HOST")
 
 bp = Blueprint("api", __name__)
 
@@ -107,18 +113,15 @@ def post(author_id: int) -> Response:
                 httpStatus.UNAUTHORIZED,
             )
         author = author_id
-        title = request.form.get("title")
-        category = request.form.get("category")
-        content = request.form.get("content")
-        unlisted = request.form.get("unlisted")
-        # default to not unlisted
-        if unlisted is None:
-            unlisted = False
-
         try:
-            contentType = ContentType(request.form.get("contentType"))
+            title = request.form["title"]
+            category = request.form["category"]
+            content = request.form["content"]
+            unlisted = request.form.get("unlisted") or False
+            contentType = ContentType(request.form["contentType"])
+        except KeyError:
+            return Response(status=httpStatus.BAD_REQUEST)
         except ValueError:
-            # bad content type
             return Response(status=httpStatus.BAD_REQUEST)
 
         if (
@@ -149,13 +152,15 @@ def specific_post(author_id: int, post_id: int) -> Response:
     if request.method != "PUT":
         post = Post.query.filter_by(id=post_id).first_or_404()
     if request.method != "DELETE":
-        author = author_id
-        title = request.form.get("title")
-        category = request.form.get("category")
-        content = request.form.get("content")
-        unlisted = request.form.get("unlisted") or False
         try:
-            contentType = ContentType(request.form.get("contentType"))
+            author = author_id
+            title = request.form["title"]
+            category = request.form["category"]
+            content = request.form["content"]
+            unlisted = request.form.get("unlisted") or False
+            contentType = ContentType(request.form["contentType"])
+        except KeyError:
+            return Response(status=httpStatus.BAD_REQUEST)
         except ValueError:
             return Response(status=httpStatus.BAD_REQUEST)
         if (
@@ -190,6 +195,53 @@ def specific_post(author_id: int, post_id: int) -> Response:
         db.session.delete(post)
         db.session.commit()
         return Response(status=httpStatus.NO_CONTENT)
+
+
+@bp.route("/authors/<int:author_id>/posts/<int:post_id>/comments", methods=["GET"])
+def get_comments(author_id: int, post_id: int) -> Response:
+    page, size = pagination(request.args)
+    comments = (
+        Comment.query.filter_by(post=post_id).paginate(page=page, per_page=size).items
+    )
+    return (
+        make_response(
+            jsonify(
+                type="comments",
+                page=page,
+                size=len(comments),
+                post=f"{HOST}/authors/{author_id}/posts/{post_id}",
+                id=f"{HOST}/authors/{author_id}/posts/{post_id}/comments",
+                comments=[comment.json() for comment in comments],
+            )
+        ),
+        httpStatus.OK,
+    )
+
+
+@bp.route(
+    "/authors/<int:author_id>/posts/<int:post_id>/comments/<int:comment_id>",
+    methods=["GET"],
+)
+def get_comment(author_id: int, post_id: int, comment_id: int) -> Response:
+    comment = Comment.query.filter_by(id=comment_id).first_or_404()
+    return make_response(jsonify(comment.json())), httpStatus.OK
+
+
+@bp.route("/authors/<int:author_id>/posts/<int:post_id>/comments", methods=["POST"])
+@login_required
+def post_comment(author_id: int, post_id: int) -> Response:
+    try:
+        title = request.form["title"]
+        content = request.form["content"]
+        contentType = ContentType(request.form.get("contentType"))
+    except KeyError:
+        return Response(status=httpStatus.BAD_REQUEST)
+    except ValueError:
+        return Response(status=httpStatus.BAD_REQUEST)
+    comment = Comment(current_user.id, post_id, title, contentType, content)
+    db.session.add(comment)
+    db.session.commit()
+    return Response(status=httpStatus.OK)
 
 
 @bp.route("/login", methods=["POST"])
