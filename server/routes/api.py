@@ -1,8 +1,6 @@
 from flask import Blueprint, jsonify, make_response, request, Response
+from server.constants import res_msg
 from flask_login import login_user, login_required
-from firebase_admin import auth, credentials
-import firebase_admin
-from .create_credential_json import get_fbs_prv_key
 from server.exts import db
 from server.models import Author, Post
 from server.enums import ContentType
@@ -12,12 +10,6 @@ import server.utils.api_support as utils
 from typing import Dict, Tuple
 
 bp = Blueprint('api', __name__)
-
-# creates the json
-fbs_private_key = get_fbs_prv_key()
-
-cred = credentials.Certificate(fbs_private_key)
-firebase_admin.initialize_app(cred)
 
 post_visibility_map = {
     "PUBLIC": False,
@@ -127,31 +119,33 @@ def post(author_id: int) -> Response:
 @bp.route('/login', methods=['POST'])
 def login() -> Response:
     # get token from authorization header
-    authorization_header = request.headers['Authorization']
-    token = authorization_header.replace("Bearer ", "")
+    token = request.form.get('token')
+
+    if not token:
+        return utils.json_response(httpStatus.UNAUTHORIZED, {"message": res_msg.TOKEN_MISSING})
 
     try:
-        decoded_token = auth.verify_id_token(token)
+        author, decoded_token = utils.get_author(token)
+
+        if not author:
+            # create an author
+            utils.create_author(decoded_token)
+            # login_user(author)
+            return utils.json_response(
+                httpStatus.OK, 
+                { "message": res_msg.SUCCESS_USER_CREATED}
+            )
+        else:
+            login_user(author)
+            return utils.json_response(
+                httpStatus.OK, 
+                {"message": res_msg.SUCCESS_VERIFY_USER}
+            )
     except Exception as e:
-        print(e)
-        print("Error", str(e))
-        return make_response(jsonify(
-            message=f'There was an error {str(e)}')), \
-            httpStatus.INTERNAL_SERVER_ERROR
-
-    # check if user exists in the database
-    github_id = utils.get_github_user_id(decoded_token)
-    author = Author.query.filter_by(githubId=github_id).first()
-
-    if not author:
-        utils.create_author(decoded_token, auth)
-        login_user(author)
-        return make_response(jsonify(message='User created')), httpStatus.OK
-    else:
-        login_user(author)
-        return make_response(jsonify(
-            message='Successful log in')), httpStatus.OK
-
+        return utils.json_response(
+            httpStatus.INTERNAL_SERVER_ERROR, 
+            {"message": res_msg.GENERAL_ERROR + str(e)}
+        )
 
 @bp.route('/login_test', methods=['GET'])
 @login_required

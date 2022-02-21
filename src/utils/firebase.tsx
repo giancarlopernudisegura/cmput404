@@ -11,11 +11,13 @@ const BACKEND_HOST = process.env.FLASK_HOST;
 
 // Referenced https://firebase.google.com/docs/auth/web/github-auth
 export const signInWithGithub = async () => {
+
     const auth = getAuth();
     let token = null;
     try {
         const result = await signInWithPopup(auth, provider);
         // you can access user's information with result.user
+
         token = await result.user.getIdToken();
     } catch (err) {
         // Handle errors
@@ -28,12 +30,15 @@ export const signInWithGithub = async () => {
         // send a request to Backend after signed up
         let res = await fetch(`${BACKEND_HOST}/login`, {
             headers: {
-                "Authorization": `Bearer ${token}`,
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/x-www-form-urlencoded',
                 'Set-Cookie': `SameSite=None; Secure;Domain=${BACKEND_HOST}`
             },
+            mode: 'cors',
             credentials: 'include',
-            method: 'POST'
+            method: 'POST',
+            body: new URLSearchParams({
+                'token': `${token}`
+            })
         });
 
         let json = res.json();
