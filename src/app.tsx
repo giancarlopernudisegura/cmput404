@@ -4,21 +4,20 @@ import { Provider } from 'unistore/preact';
 
 import store from './store/store';
 
-import Homepage from './views/Homepage';
+import Login from './pages/Login';
+import Homepage from './pages/Homepage';
 
 import './css/main.css';
 
-class App extends Component {
-
-  public render = (): ComponentChild => {
-    return (
-      <div class="app">
-        <Router>
-          <Homepage path="/" />
-        </Router>
-      </div>
-    )
-  }
+const App = () => {
+  return (
+    <div class="app">
+      <Router>
+        <Homepage path="/" />
+        <Login path="/login" />
+      </Router>
+    </div>
+  )
 }
 
 render (

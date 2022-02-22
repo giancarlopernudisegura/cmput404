@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, make_response, request, Response
 from server.constants import res_msg
-from flask_login import login_user, login_required
+from flask_login import login_user, login_required, logout_user, current_user
 from server.exts import db
 from server.models import Author, Post
 from server.enums import ContentType
@@ -129,18 +129,75 @@ def login() -> Response:
 
         if not author:
             # create an author
-            utils.create_author(decoded_token)
-            # login_user(author)
+            new_author = utils.create_author(decoded_token)
+            login_user(author)
             return utils.json_response(
                 httpStatus.OK, 
-                { "message": res_msg.SUCCESS_USER_CREATED}
+                { 
+                    "message": res_msg.SUCCESS_USER_CREATED,
+                    "data": new_author.json()
+                }
             )
         else:
             login_user(author)
             return utils.json_response(
                 httpStatus.OK, 
-                {"message": res_msg.SUCCESS_VERIFY_USER}
+                {
+                    "message": res_msg.SUCCESS_VERIFY_USER,
+                    "data": author.json()
+                }
             )
+    except Exception as e:
+        return utils.json_response(
+            httpStatus.INTERNAL_SERVER_ERROR, 
+            {"message": res_msg.GENERAL_ERROR + str(e)}
+        )
+
+@bp.route('/logout')
+@login_required
+def logout() -> Response:
+    try:
+        logout_user()
+        return utils.json_response(
+            httpStatus.OK,
+            {"message": res_msg.SUCCESS_LOGOUT}
+        )
+    except Exception as e:
+        return utils.json_response(
+            httpStatus.INTERNAL_SERVER_ERROR,
+            {"message": res_msg.LOGOUT_ERROR}
+        )
+
+@bp.route('/user_me')
+@login_required
+def get_user_me() -> Response:
+    try:
+        return utils.json_response(
+            httpStatus.OK,
+            {
+                "message": res_msg.SUCCESS_VERIFY_USER,
+                "data": current_user.json()
+            }
+        )
+    except Exception as e:
+        return utils.json_response(
+            httpStatus.INTERNAL_SERVER_ERROR, 
+            {"message": res_msg.GENERAL_ERROR + str(e)}
+        )
+
+@bp.route('/update_me', methods=['POST'])
+@login_required
+def update_myself() -> Response:
+    try:
+        updated_user = utils.update_user_me(request, current_user)
+        print("CURRENT", updated_user.is_authenticated)
+        return utils.json_response(
+            httpStatus.OK,
+            {
+                "message": res_msg.SUCCESS_USER_UPDATE,
+                "data": updated_user.json()
+            }
+        )
     except Exception as e:
         return utils.json_response(
             httpStatus.INTERNAL_SERVER_ERROR, 
