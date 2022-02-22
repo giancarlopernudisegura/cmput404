@@ -219,13 +219,15 @@ class Requests(db.Model):  # follow requests
     initiated = db.Column(db.ForeignKey("author.id"))
     to = db.Column(db.ForeignKey("author.id"))
     timestamp = db.Column(db.DateTime())
-    summary = db.Column(db.String())
 
-    def __init__(self, initiated: int, to: int, summary: str):
+    def __init__(
+        self,
+        initiated: int,
+        to: int,
+    ):
         self.timestamp = datetime.datetime.now()
         self.initiated = initiated
         self.to = to
-        self.summary = summary
 
     def __repr__(self):
         return f"<id {self.id}>"

@@ -288,9 +288,7 @@ def add_follower(author_id: int, follower_id: int) -> Response:
             make_response(jsonify(error=res_msg.CREATE_CONFLICT)),
             httpStatus.BAD_REQUEST,
         )
-    followee = Author.query.filter_by(id=author_id).first_or_404()
-    summary = f"{current_user.displayName} wants to follow {followee.displayName}"
-    follower = Requests(follower_id, author_id, summary)
+    follower = Requests(follower_id, author_id)
     db.session.add(follower)
     db.session.commit()
     return Response(status=httpStatus.OK)
