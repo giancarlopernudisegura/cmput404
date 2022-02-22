@@ -172,6 +172,7 @@ def logout() -> Response:
 @login_required
 def get_user_me() -> Response:
     try:
+        print("TEST", current_user)
         return utils.json_response(
             httpStatus.OK,
             {
