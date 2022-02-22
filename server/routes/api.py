@@ -265,8 +265,14 @@ def is_follower(author_id: int, follower_id: int) -> Response:
 
 
 @bp.route("/authors/<int:author_id>/followers/<int:follower_id>", methods=["DELETE"])
-def remove_follower(author_id: int) -> Response:
-    follower = Requests.query.filter_by(to=author_id, initiated=current_user.id).first()
+@login_required
+def remove_follower(author_id: int, follower_id: int) -> Response:
+    if current_user.id != follower_id:
+        return (
+            make_response(jsonify(error=res_msg.NO_PERMISSION)),
+            httpStatus.UNAUTHORIZED,
+        )
+    follower = Requests.query.filter_by(to=author_id, initiated=follower_id).first()
     if not follower:
         return Response(status=httpStatus.NOT_FOUND)
     db.session.delete(follower)
