@@ -7,6 +7,8 @@ import store from './store/store';
 import Login from './pages/Login';
 import Homepage from './pages/Homepage';
 import { get_author_me } from './utils/apiCalls';
+import { CircularProgress } from '@mui/material';
+
 
 import { useEffect, useState } from 'preact/hooks';
 
@@ -14,25 +16,32 @@ import './css/main.css';
 
 const App = () => {
   const [ author, setAuthor ] = useState(null);
-
-  const test = () => {
-    
-  }
+  const [ isLoading, setIsLoading ] = useState(true);
 
   useEffect(() => {
-    const d = async () => {
-      await get_author_me();
+    const get_author_helper = async () => {
+      try {
+        let response = await get_author_me();
+        setAuthor(response.data);
+        setIsLoading(false);
+      } catch(err) {
+        // TODO: handle error, show a message
+        setIsLoading(false);
+      }
     }
-    d();
+    get_author_helper();
   }, []);
 
 
   return (
     <div class="app">
-      <Router>
-        <Homepage path="/" />
-        <Login path="/login" />
-      </Router>
+      {isLoading === true ? <CircularProgress /> : (
+        <Router>
+          <Homepage path="/" />
+          <Login path="/login" />
+        </Router>
+      )
+      }
     </div>
   )
 }
