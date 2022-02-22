@@ -1,7 +1,9 @@
 var path = require('path');
 var webpack = require('webpack');
+var dotenv = require('dotenv');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 
+dotenv.config({ path: './.env' }); 
 
 module.exports = {
   mode: 'production',
@@ -12,7 +14,11 @@ module.exports = {
   },
   watch: false,
   resolve: {
-    extensions: ['.tsx', '.ts', '.js', '.scss', '.css']
+    extensions: ['.tsx', '.ts', '.js', '.scss', '.css'],
+    alias: {
+      'react': 'preact/compat',
+      'react-dom': 'preact/compat'
+    }
   },
   module: {
     rules: [
@@ -37,5 +43,15 @@ module.exports = {
       inject: false,
       minify: 'auto'
     }),
+    new webpack.EnvironmentPlugin([
+      'FIREBASE_API_KEY',
+      'FIREBASE_AUTH_DOMAIN',
+      'FIREBASE_PROJECT_ID',
+      'FIREBASE_STG_BUCKET',
+      'FIREBASE_MESSAGING_SDR_ID',
+      'FIREBASE_APP_ID',
+      'FIREBASE_MEASUREMENT_ID',
+      'FLASK_HOST'
+    ])
   ]
 }

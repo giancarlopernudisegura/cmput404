@@ -1,13 +1,13 @@
-import { h, render, Component, ComponentChild } from 'preact'
-import Router from 'preact-router'
-import { Provider } from 'unistore/preact'
+import { h, render, Component, ComponentChild } from 'preact';
+import Router from 'preact-router';
+import { Provider } from 'unistore/preact';
 
-import store from './store/store'
-
-import './css/main.css'
+import store from './store/store';
 
 import ExplorePage from './views/ExplorePage'
 import Header from './components/Header'
+
+import './css/main.css';
 
 class App extends Component {
 
@@ -33,4 +33,4 @@ render (
     <App />
   </Provider>,
   document.body
-)
+);

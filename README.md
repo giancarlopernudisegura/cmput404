@@ -46,3 +46,8 @@ cd server/
 source venv/bin/activate
 flask run
 ```
+
+## References
+### Firebase Authentication
+- https://firebase.google.com/docs/reference/js/v8/firebase.auth.GithubAuthProvider
+- https://firebase.google.com/docs/auth/web/github-auth
