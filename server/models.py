@@ -25,7 +25,12 @@ class Author(db.Model, UserMixin):
     isVerified = db.Column(db.Boolean())
 
     def __init__(
-        self, githubId, profileImageId, displayName, isAdmin=False, isVerified=True
+        self,
+        githubId: str,
+        profileImageId: str,
+        displayName: str,
+        isAdmin: bool = False,
+        isVerified: bool = True,
     ):
         self.githubId = githubId
         self.profileImageId = profileImageId
@@ -65,14 +70,14 @@ class Post(db.Model):
 
     def __init__(
         self,
-        author,
-        title,
-        category,
-        content,
+        author: int,
+        title: str,
+        category: str,
+        content: str,
         contentType,
-        private,
-        unlisted=False,
-        id=None,
+        private: bool,
+        unlisted: bool = False,
+        id: int | None = None,
     ):
         if author is None:
             raise Exception("Posts require an author")
@@ -142,7 +147,7 @@ class Comment(db.Model):
     timestamp = db.Column(db.DateTime())
     likes = db.Column(db.ForeignKey("author.id"))  # NEEDS TO CHANGE TO LIST
 
-    def __init__(self, author, post, title, contentType, content):
+    def __init__(self, author: int, post: int, title: str, contentType, content: str):
         self.author = author
         self.post = post
         self.title = title
@@ -214,14 +219,22 @@ class Requests(db.Model):  # follow requests
     initiated = db.Column(db.ForeignKey("author.id"))
     to = db.Column(db.ForeignKey("author.id"))
     timestamp = db.Column(db.DateTime())
+    summary = db.Column(db.String())
 
-    def __init__(self, initiated, to):
+    def __init__(self, initiated: int, to: int, summary: str):
         self.timestamp = datetime.datetime.now()
         self.initiated = initiated
         self.to = to
+        self.summary = summary
 
     def __repr__(self):
         return f"<id {self.id}>"
+
+    @staticmethod
+    def are_friends(author_id1: int, author_id2: int) -> bool:
+        r1 = Requests.query.filter_by(initiated=author_id1, to=author_id2).first()
+        r2 = Requests.query.filter_by(initiated=author_id2, to=author_id1).first()
+        return r1 and r2
 
 
 class ViewablePostRelation(db.Model):
@@ -248,7 +261,13 @@ class Inbox(db.Model):
     like = db.Column(db.ForeignKey("like.id"))
     follow = db.Column(db.ForeignKey("requests.id"))
 
-    def __init__(self, owner, post=None, like=None, follow=None):
+    def __init__(
+        self,
+        owner: int,
+        post: int | None = None,
+        like: int | None = None,
+        follow: int | None = None,
+    ):
         self.owner = owner
         argNoneCount = (like, post, follow).count(None)
         if argNoneCount < 2:
