@@ -82,7 +82,7 @@ def single_author(author_id: int) -> Response:
 
 @bp.route("/authors/<int:author_id>/posts/<int:post_id>", methods=["GET"])
 def get_post(author_id: int, post_id: int) -> Response:
-    post = Post.query.filter_by(id=post_id).first_or_404()
+    post = Post.query.filter_by(id=post_id, private=False).first_or_404()
     return make_response(jsonify(post.json())), httpStatus.OK
 
 
