@@ -163,19 +163,24 @@ def specific_post(author_id: int, post_id: int) -> Response:
             return Response(status=httpStatus.BAD_REQUEST)
         except ValueError:
             return Response(status=httpStatus.BAD_REQUEST)
-        if (
-            not (visibility := request.form.get("visibility").upper())
-            in post_visibility_map
+        if request.method == "PUT" and (
+            (visibility := request.form.get("visibility")) is None
+            or not visibility.upper() in post_visibility_map
         ):
             return Response(status=httpStatus.BAD_REQUEST)
-        private = post_visibility_map[visibility]
+        elif request.method == "PUT":
+            private = post_visibility_map[visibility]
     if request.method == "POST":
+        if post.private:
+            return (
+                make_response(jsonify(error=res_msg.NO_PERMISSION)),
+                httpStatus.BAD_REQUEST,
+            )
         post.author = author
         post.title = title
         post.category = category
         post.content = content
         post.contentType = contentType
-        post.private = private
         post.unlisted = unlisted
         db.session.commit()
         return make_response(jsonify(post.json())), httpStatus.OK
