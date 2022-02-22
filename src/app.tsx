@@ -1,4 +1,4 @@
-import { h, render, Component, ComponentChild } from 'preact';
+import { h, render, ComponentChild } from 'preact';
 import Router from 'preact-router';
 import { Provider } from 'unistore/preact';
 
@@ -6,26 +6,48 @@ import store from './store/store';
 
 import ExplorePage from './views/ExplorePage'
 import Header from './components/Header'
+import Login from './pages/Login';
+import Homepage from './pages/Homepage';
+import { get_author_me } from './utils/apiCalls';
+import { CircularProgress } from '@mui/material';
+
+
+import { useEffect, useState } from 'preact/hooks';
 
 import './css/main.css';
 
-class App extends Component {
+const App = () => {
+  const [ author, setAuthor ] = useState(null);
+  const [ isLoading, setIsLoading ] = useState(true);
 
-  public render = (): ComponentChild => {
-    return (
-      <div class="app"
-        className="min-h-screen static bg-stone-50">
+  useEffect(() => {
+    const get_author_helper = async () => {
+      try {
+        let response = await get_author_me();
+        setAuthor(response.data);
+        setIsLoading(false);
+      } catch(err) {
+        // TODO: handle error, show a message
+        setIsLoading(false);
+      }
+    }
+    get_author_helper();
+  }, []);
 
+
+  return (
+    <div class="app"
+      className="min-h-screen static bg-stone-50">
         <Header />
-
-        <Router>
-          <ExplorePage path="/" />
-          {/* TODO: add Friends and Personal pages */}
-        </Router>
-        
-      </div>
-    )
-  }
+        {isLoading === true ? <CircularProgress /> : (
+          <Router>
+            <ExplorePage path="/" />
+            <Login path="/login" />
+          </Router>
+        )
+        }
+    </div>
+  )
 }
 
 render (
