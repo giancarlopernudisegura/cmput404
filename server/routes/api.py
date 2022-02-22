@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, make_response, request, Response
 from server.constants import res_msg
 from flask_login import login_user, login_required, current_user
 from server.exts import db
-from server.models import Author, Post, Comment
+from server.models import Author, Post, Comment, Requests
 from server.enums import ContentType
 from http import HTTPStatus as httpStatus
 import os
@@ -240,6 +240,58 @@ def post_comment(author_id: int, post_id: int) -> Response:
         return Response(status=httpStatus.BAD_REQUEST)
     comment = Comment(current_user.id, post_id, title, contentType, content)
     db.session.add(comment)
+    db.session.commit()
+    return Response(status=httpStatus.OK)
+
+
+@bp.route("/authors/<int:author_id>/followers", methods=["GET"])
+def get_followers(author_id: int) -> Response:
+    followers = Requests.query.filter_by(to=author_id).all()
+    return (
+        make_response(jsonify(type="followers", items=[f.json() for f in followers])),
+        httpStatus.OK,
+    )
+
+
+@bp.route("/authors/<int:author_id>/followers/<int:follower_id>", methods=["GET"])
+def is_follower(author_id: int, follower_id: int) -> Response:
+    follower = Requests.query.filter_by(to=author_id, initiated=follower_id).first()
+    if not follower:
+        return Response(status=httpStatus.NOT_FOUND)
+    return (
+        make_response(jsonify(type="followers", items=[follower.json()])),
+        httpStatus.OK,
+    )
+
+
+@bp.route("/authors/<int:author_id>/followers/<int:follower_id>", methods=["DELETE"])
+def remove_follower(author_id: int) -> Response:
+    follower = Requests.query.filter_by(to=author_id, initiated=current_user.id).first()
+    if not follower:
+        return Response(status=httpStatus.NOT_FOUND)
+    db.session.delete(follower)
+    db.session.commit()
+    return Response(status=httpStatus.NO_CONTENT)
+
+
+@bp.route("/authors/<int:author_id>/followers/<int:follower_id>", methods=["PUT"])
+@login_required
+def add_follower(author_id: int, follower_id: int) -> Response:
+    if current_user.id != follower_id:
+        return (
+            make_response(jsonify(error=res_msg.NO_PERMISSION)),
+            httpStatus.FORBIDDEN,
+        )
+    follower = Requests.query.filter_by(to=author_id, initiated=current_user.id).first()
+    if follower:
+        return (
+            make_response(jsonify(error=res_msg.CREATE_CONFLICT)),
+            httpStatus.BAD_REQUEST,
+        )
+    followee = Author.query.filter_by(id=author_id).first_or_404()
+    summary = f"{current_user.displayName} wants to follow {followee.displayName}"
+    follower = Requests(follower_id, author_id, summary)
+    db.session.add(follower)
     db.session.commit()
     return Response(status=httpStatus.OK)
 
