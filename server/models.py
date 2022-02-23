@@ -6,7 +6,7 @@ import os
 from dotenv import load_dotenv
 from urllib.request import urlopen
 import json
-from typing import Any, Dict
+from typing import Any, Dict, Union
 
 
 load_dotenv()
@@ -77,7 +77,7 @@ class Post(db.Model):
         contentType,
         private: bool,
         unlisted: bool = False,
-        id: int | None = None,
+        id: Union[int, None] = None,
     ):
         if author is None:
             raise Exception("Posts require an author")
@@ -266,9 +266,9 @@ class Inbox(db.Model):
     def __init__(
         self,
         owner: int,
-        post: int | None = None,
-        like: int | None = None,
-        follow: int | None = None,
+        post: Union[int, None] = None,
+        like: Union[int, None] = None,
+        follow: Union[int, None] = None,
     ):
         self.owner = owner
         argNoneCount = (like, post, follow).count(None)
