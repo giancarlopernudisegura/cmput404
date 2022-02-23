@@ -5,7 +5,7 @@ import { Button } from '@mui/material';
 
 
 type FeedProps = {
-  path: string
+  path?: string
 };
 
 

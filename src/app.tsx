@@ -1,11 +1,12 @@
 import { h, render, ComponentChild } from 'preact';
-import Router from 'preact-router';
+import { Router, route } from 'preact-router';
 import { Provider } from 'unistore/preact';
 
 import store from './store/store';
 
 import Login from './pages/Login';
 import Homepage from './pages/Homepage';
+import RestrictedRoute from './views/RestrictedRoute';
 import { get_author_me } from './utils/apiCalls';
 import { CircularProgress } from '@mui/material';
 
@@ -17,6 +18,20 @@ import './css/main.css';
 const App = () => {
   const [ author, setAuthor ] = useState(null);
   const [ isLoading, setIsLoading ] = useState(true);
+
+  // const handleRoute = async (event : any) => {
+  //   switch (event.url) {
+  //     case '/':
+  //       const response = await get_author_me();
+  //       setAuthor(response.data);
+  //       setIsLoading(false);
+
+  //       if (response.data === null) {
+  //         route('/login', true);
+  //       }
+  //       break;
+  //   }
+  // }
 
   useEffect(() => {
     const get_author_helper = async () => {
@@ -37,11 +52,10 @@ const App = () => {
     <div class="app">
       {isLoading === true ? <CircularProgress /> : (
         <Router>
-          <Homepage path="/" />
-          <Login path="/login" />
+          <RestrictedRoute path="/" component={<Homepage />} author={author}/>
+          <Login path="/login" author={author} setAuthor={setAuthor} />
         </Router>
-      )
-      }
+      )}
     </div>
   )
 }

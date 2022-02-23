@@ -21,9 +21,8 @@ export const signInWithGithub = async () => {
         token = await result.user.getIdToken();
     } catch (err) {
         // Handle errors
-        console.log(err);
         console.log("ERROR", err);
-        return { isSuccess: false };
+        throw err;
     }
 
     try {
@@ -41,9 +40,9 @@ export const signInWithGithub = async () => {
             })
         });
 
-        let json = res.json();
-        return { ...json, isSucess: true }
+        let res_json = await res.json();
+        return res_json;
     } catch (err) {
-        return { isSuccess: false };
+        throw err;
     }
 };
