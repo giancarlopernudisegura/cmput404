@@ -10,7 +10,7 @@ interface State {
   message: string
 }
 
-export default class Homepage extends Component<Props, State> {
+export default class Login extends Component<Props, State> {
 
   readonly state = {
     message: ''
