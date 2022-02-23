@@ -19,20 +19,6 @@ const App = () => {
   const [ author, setAuthor ] = useState(null);
   const [ isLoading, setIsLoading ] = useState(true);
 
-  // const handleRoute = async (event : any) => {
-  //   switch (event.url) {
-  //     case '/':
-  //       const response = await get_author_me();
-  //       setAuthor(response.data);
-  //       setIsLoading(false);
-
-  //       if (response.data === null) {
-  //         route('/login', true);
-  //       }
-  //       break;
-  //   }
-  // }
-
   useEffect(() => {
     const get_author_helper = async () => {
       try {
