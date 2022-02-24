@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
+from datetime import datetime
 from http import HTTPStatus
 from flask_migrate import Migrate
 from flask import Flask, redirect, current_app
 from server.routes import api
 from server.exts import db, login_manager
-from server.models import Author
+from server.models import Author, Post
+from server.enums import ContentType
 import os
 from dotenv import load_dotenv
 
@@ -37,6 +39,9 @@ def create_app(config_filename=None):
 
     @app.route("/", methods=["GET"])
     def index():
+        '''
+            Return the Explore page with public posts 
+        '''
         return app.send_static_file("index.html"), HTTPStatus.OK
 
     @app.route("/bundle.js")
@@ -53,7 +58,7 @@ def create_app(config_filename=None):
     @app.before_first_request
     def create_tables():
         db.create_all()  # must be run before interacting with database
-
+        
     @login_manager.user_loader
     def load_user(user_id):
         return Author.query.get(user_id)
