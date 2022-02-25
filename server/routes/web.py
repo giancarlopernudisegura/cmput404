@@ -12,7 +12,7 @@ bp = Blueprint("webapp", __name__, url_prefix="/app")
 
 
 def frontend_page() -> Response:
-    current_app.send_static_file("index.html"), httpStatus.OK
+    return current_app.send_static_file("index.html"), httpStatus.OK
 
 
 @bp.route("/", methods=["GET"])
