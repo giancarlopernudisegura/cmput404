@@ -12,7 +12,7 @@ from typing import Any, Dict
 load_dotenv()
 
 HOST = os.getenv("FLASK_HOST")
-
+debug = True  
 
 # Models go here
 class Author(db.Model, UserMixin):
@@ -37,9 +37,22 @@ class Author(db.Model, UserMixin):
         return f"<id {self.id}>"
 
     def json(self) -> Dict[str, str]:
+
+        if debug:
+            return {
+            "type": "author",
+            "id": self.id,
+            "host": f"{HOST}/",
+            "displayName": self.displayName,
+            "url": f"{HOST}/authors/{self.id}",
+            "github": "https://github.com/dellahumanita",
+            "profileImage": self.profileImageId,
+            }
+
         # get username from github id
         resp = urlopen(f"https://api.github.com/user/{self.githubId}")
         data = json.loads(resp.read().decode("utf-8"))
+
         return {
             "type": "author",
             "id": self.id,
@@ -49,6 +62,7 @@ class Author(db.Model, UserMixin):
             "github": data["html_url"],
             "profileImage": self.profileImageId,
         }
+    
 
 
 class Post(db.Model):

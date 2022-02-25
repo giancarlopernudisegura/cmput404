@@ -11,15 +11,14 @@ export const get_author_me = async () => {
   return data;
 };
 
-export function getPosts(author_id: number) {
-  // DEBUG: only get posts from author_id 1
-  fetch(`${BACKEND_HOST}/authors/${author_id}/posts/`, {
+export function getPosts(author_id: number): Promise<any>{
+
+  let listOfPosts = fetch(`${BACKEND_HOST}/authors/${author_id}/posts/`, {
     mode: 'cors',
     method: 'GET',
   }).then(res => res.json())
     .then(data => { 
-      console.log(data.items);
-      var posts = [];
+      var posts = Array();
       for (let i=0; i<data.items.length; i++) {
         const post : any = {
           'author': data.items[i].author.displayName,
@@ -29,7 +28,9 @@ export function getPosts(author_id: number) {
         posts.push(post);
       }
       return posts;
-    // TODO: send promise data back to the caller
-    });
+    })
+    .catch(err => {alert(err);});
+  
+    return listOfPosts;
 
 };
