@@ -26,20 +26,21 @@ function ExplorePage({ path }: ExplorePageProps) {
     
     }, []);
 
-    console.log("POSTS 2:", posts);
     return (
         <div>
             <h1>Explore</h1>
     
             <div>
                 <ul>
-                    <li>
-                        {/* TODO: display post here */}
-                        <Post
-                            title="Hello World" 
-                            body="This is a body" 
-                            author="John Doe" />
-                    </li>
+                    {posts.map(post => (
+                        <li>
+                            <Post
+                                title={post.title}
+                                body={post.description}
+                                author={post.author} />
+                        </li>
+                    ))}
+                    
                 </ul>
             </div>
         </div>
