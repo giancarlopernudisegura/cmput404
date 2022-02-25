@@ -7,4 +7,3 @@ __pycache__/
 public/bundle.js
 .coverage
 *.db
-*/tiktaktoe-private-key.json

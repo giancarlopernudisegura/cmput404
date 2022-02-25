@@ -1,5 +1,6 @@
 import { h, Component, ComponentChild } from 'preact'
 import Post from '../components/Post'
+import { Button } from '@mui/material';
 
 type HelloWorldProps = {
   path: string;

@@ -1,20 +1,24 @@
 var path = require('path');
 var webpack = require('webpack');
+var dotenv = require('dotenv');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 
+dotenv.config({ path: './.env' }); 
+
+const frontendUrl = new URL(process.env.PREACT_HOST);
 
 module.exports = {
   mode: 'development',
   devtool: 'source-map',
   entry: ['./src/app.tsx'],
   devServer: {
-    port: 3000,
-    host: '0.0.0.0',
+    port: parseInt(frontendUrl.port),
+    host: frontendUrl.hostname,
     compress: false,
     historyApiFallback: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: process.env.FLASK_HOST,
         secure: false
       }
     }
@@ -25,7 +29,11 @@ module.exports = {
   },
   watch: true,
   resolve: {
-    extensions: ['.tsx', '.ts', '.js', '.scss', '.css']
+    extensions: ['.tsx', '.ts', '.js', '.scss', '.css'],
+    alias: {
+      'react': 'preact/compat',
+      'react-dom': 'preact/compat'
+    }
   },
   module: {
     rules: [
@@ -49,5 +57,15 @@ module.exports = {
       template: 'public/index.html',
       inject: false
     }),
+    new webpack.EnvironmentPlugin([
+      'FIREBASE_API_KEY',
+      'FIREBASE_AUTH_DOMAIN',
+      'FIREBASE_PROJECT_ID',
+      'FIREBASE_STG_BUCKET',
+      'FIREBASE_MESSAGING_SDR_ID',
+      'FIREBASE_APP_ID',
+      'FIREBASE_MEASUREMENT_ID',
+      'FLASK_HOST'
+    ])
   ]
 }
