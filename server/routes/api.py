@@ -33,7 +33,8 @@ def pagination(
     Returns:
         A tuple of (page, size) to use for pagination."""
     size = int(arguments.get("size", str(default_page_size)), base=10)
-    page_number = int(arguments.get("page_number", str(default_page_number)), base=10)
+    page_number = int(arguments.get(
+        "page_number", str(default_page_number)), base=10)
     return page_number, size
 
 
@@ -132,7 +133,8 @@ def post(author_id: int) -> Response:
             return Response(status=httpStatus.BAD_REQUEST)
         private = post_visibility_map[visibility.upper()]
 
-        post = Post(author, title, category, content, contentType, private, unlisted)
+        post = Post(author, title, category, content,
+                    contentType, private, unlisted)
         db.session.add(post)
         db.session.commit()
         return Response(status=httpStatus.OK)
@@ -171,11 +173,6 @@ def specific_post(author_id: int, post_id: int) -> Response:
         elif request.method == "PUT":
             private = post_visibility_map[visibility]
     if request.method == "POST":
-        if post.private:
-            return (
-                make_response(jsonify(error=res_msg.NO_PERMISSION)),
-                httpStatus.BAD_REQUEST,
-            )
         post.author = author
         post.title = title
         post.category = category
@@ -206,7 +203,8 @@ def specific_post(author_id: int, post_id: int) -> Response:
 def get_comments(author_id: int, post_id: int) -> Response:
     page, size = pagination(request.args)
     comments = (
-        Comment.query.filter_by(post=post_id).paginate(page=page, per_page=size).items
+        Comment.query.filter_by(post=post_id).paginate(
+            page=page, per_page=size).items
     )
     return (
         make_response(
