@@ -126,7 +126,7 @@ def post(author_id: int) -> Response:
             return Response(status=httpStatus.BAD_REQUEST)
 
         if (
-            not (visibility:= request.form.get("visibility").upper())
+            not (visibility := request.form.get("visibility").upper())
             in post_visibility_map
         ):
             # bad visibility type or no visibility given
@@ -166,7 +166,7 @@ def specific_post(author_id: int, post_id: int) -> Response:
         except ValueError:
             return Response(status=httpStatus.BAD_REQUEST)
         if (
-            not (visibility:= request.form.get("visibility").upper())
+            not (visibility := request.form.get("visibility").upper())
             in post_visibility_map
         ):
             return Response(status=httpStatus.BAD_REQUEST)
@@ -306,8 +306,8 @@ def add_follower(author_id: int, follower_id: int) -> Response:
     return Response(status=httpStatus.OK)
 
 
-@bp.route("/login", methods=["POST"])
-def login() -> Response:
+@bp.route("/signup", methods=["POST"])
+def signup() -> Response:
     # get token from authorization header
     token = request.form.get("token")
 
@@ -322,12 +322,46 @@ def login() -> Response:
         if not author:
             # create an author
             new_author = utils.create_author(decoded_token)
-            login_user(author)
             return utils.json_response(
                 httpStatus.OK,
                 {
                     "message": res_msg.SUCCESS_USER_CREATED,
                     "data": new_author.json()
+                }
+            )
+        else:
+            return utils.json_response(
+                httpStatus.BAD_REQUEST,
+                {
+                    "message": res_msg.USER_ALREADY_EXISTS,
+                    "data": author.json()
+                }
+            )
+    except Exception as e:
+        return utils.json_response(
+            httpStatus.INTERNAL_SERVER_ERROR,
+            {"message": res_msg.GENERAL_ERROR + str(e)},
+        )
+
+
+@ bp.route("/login", methods=["POST"])
+def login() -> Response:
+    # get token from authorization header
+    token = request.form.get("token")
+
+    if not token:
+        return utils.json_response(
+            httpStatus.UNAUTHORIZED, {"message": res_msg.TOKEN_MISSING}
+        )
+
+    try:
+        author, decoded_token = utils.get_author(token)
+
+        if not author:
+            return utils.json_response(
+                httpStatus.BAD_REQUEST,
+                {
+                    "message": res_msg.USER_DOES_NOT_EXIST
                 }
             )
         else:
@@ -346,8 +380,8 @@ def login() -> Response:
         )
 
 
-@bp.route('/logout')
-@login_required
+@ bp.route('/logout')
+@ login_required
 def logout() -> Response:
     try:
         logout_user()
@@ -362,46 +396,7 @@ def logout() -> Response:
         )
 
 
-@bp.route('/user_me')
-@login_required
-def get_user_me() -> Response:
-    try:
-        print("TEST", current_user)
-        return utils.json_response(
-            httpStatus.OK,
-            {
-                "message": res_msg.SUCCESS_VERIFY_USER,
-                "data": current_user.json()
-            }
-        )
-    except Exception as e:
-        return utils.json_response(
-            httpStatus.INTERNAL_SERVER_ERROR,
-            {"message": res_msg.GENERAL_ERROR + str(e)}
-        )
-
-
-@bp.route('/update_me', methods=['POST'])
-@login_required
-def update_myself() -> Response:
-    try:
-        updated_user = utils.update_user_me(request, current_user)
-        print("CURRENT", updated_user.is_authenticated)
-        return utils.json_response(
-            httpStatus.OK,
-            {
-                "message": res_msg.SUCCESS_USER_UPDATE,
-                "data": updated_user.json()
-            }
-        )
-    except Exception as e:
-        return utils.json_response(
-            httpStatus.INTERNAL_SERVER_ERROR,
-            {"message": res_msg.GENERAL_ERROR + str(e)}
-        )
-
-
-@bp.route('/login_test', methods=['GET'])
-@login_required
+@ bp.route('/login_test', methods=['GET'])
+@ login_required
 def login_test() -> Response:
     return make_response(jsonify(message="Successful log in")), httpStatus.OK

@@ -2,7 +2,7 @@
 from http import HTTPStatus
 from flask_migrate import Migrate
 from flask import Flask, redirect, current_app
-from server.routes import api
+from server.routes import api, web
 from server.exts import db, login_manager
 from server.models import Author
 import os
@@ -24,7 +24,8 @@ def create_app(config_filename=None):
     )
 
     if not config_filename:
-        config_filename = os.getenv("APP_SETTINGS", "server.config.DevelopmentConfig")
+        config_filename = os.getenv(
+            "APP_SETTINGS", "server.config.DevelopmentConfig")
 
     app.config.from_object(config_filename)
     app.url_map.strict_slashes = False
@@ -34,10 +35,11 @@ def create_app(config_filename=None):
     login_manager.init_app(app)
 
     app.register_blueprint(api.bp)
+    app.register_blueprint(web.bp)
 
     @app.route("/", methods=["GET"])
     def index():
-        return app.send_static_file("index.html"), HTTPStatus.OK
+        return redirect("/app")
 
     @app.route("/bundle.js")
     def bundle_js():
@@ -61,11 +63,13 @@ def create_app(config_filename=None):
     # add CORS
     @app.after_request
     def after_request(response):
-        response.headers.add("Access-Control-Allow-Origin", f"{FRONT_END_HOST}")
+        response.headers.add(
+            "Access-Control-Allow-Origin", f"{FRONT_END_HOST}")
         response.headers.add(
             "Access-Control-Allow-Headers", "Content-Type,Authorization,Set-Cookie"
         )
-        response.headers.add("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE")
+        response.headers.add(
+            "Access-Control-Allow-Methods", "GET,PUT,POST,DELETE")
         response.headers.add("Access-Control-Allow-Credentials", "true")
         return response
 
