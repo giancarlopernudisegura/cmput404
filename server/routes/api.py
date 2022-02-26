@@ -83,7 +83,7 @@ def single_author(author_id: int) -> Response:
 
 @bp.route("/authors/<int:author_id>/posts/<int:post_id>", methods=["GET"])
 def get_post(author_id: int, post_id: int) -> Response:
-    post = Post.query.filter_by(id=post_id).first_or_404()
+    post = Post.query.filter_by(id=post_id, private=False).first_or_404()
     return make_response(jsonify(post.json())), httpStatus.OK
 
 
@@ -165,19 +165,19 @@ def specific_post(author_id: int, post_id: int) -> Response:
             return Response(status=httpStatus.BAD_REQUEST)
         except ValueError:
             return Response(status=httpStatus.BAD_REQUEST)
-        if (
-            not (visibility := request.form.get("visibility").upper())
-            in post_visibility_map
+        if request.method == "PUT" and (
+            (visibility := request.form.get("visibility")) is None
+            or not visibility.upper() in post_visibility_map
         ):
             return Response(status=httpStatus.BAD_REQUEST)
-        private = post_visibility_map[visibility]
+        elif request.method == "PUT":
+            private = post_visibility_map[visibility]
     if request.method == "POST":
         post.author = author
         post.title = title
         post.category = category
         post.content = content
         post.contentType = contentType
-        post.private = private
         post.unlisted = unlisted
         db.session.commit()
         return make_response(jsonify(post.json())), httpStatus.OK
