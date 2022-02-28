@@ -1,7 +1,10 @@
 import { h } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
-import Post from '../components/Post';
+
 import { getPosts, getAllAuthors } from '../utils/apiCalls';
+
+import Post from '../components/Post';
+import CreatePost from '../components/CreatePost';
 
 type ExplorePageProps = { path: string };
 
@@ -27,7 +30,9 @@ function ExplorePage({ path }: ExplorePageProps) {
     }, []);
 
     return (
-            <div>
+            <div id="explore">
+                <CreatePost />
+
                 {posts.length > 0 &&
                     <ul>
                         {posts.map(post => (
