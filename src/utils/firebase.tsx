@@ -10,7 +10,7 @@ const provider = new GithubAuthProvider();
 const BACKEND_HOST = process.env.FLASK_HOST;
 
 // Referenced https://firebase.google.com/docs/auth/web/github-auth
-export const signInWithGithub = async () => {
+const authenticateWithGithub = async (signup: Boolean) => {
 
     const auth = getAuth();
     let token = null;
@@ -28,7 +28,7 @@ export const signInWithGithub = async () => {
 
     try {
         // send a request to Backend after signed up
-        let res = await fetch(`${BACKEND_HOST}/login`, {
+        let res = await fetch(`${BACKEND_HOST}/${signup ? 'signup' : 'login'}`, {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
                 'Set-Cookie': `SameSite=None; Secure;Domain=${BACKEND_HOST}`
@@ -46,4 +46,12 @@ export const signInWithGithub = async () => {
     } catch (err) {
         return { isSuccess: false };
     }
+};
+
+export const signInWithGithub = async () => {
+    return await authenticateWithGithub(false);
+};
+
+export const signUpWithGithub = async () => {
+    return await authenticateWithGithub(true);
 };

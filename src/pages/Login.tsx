@@ -1,5 +1,5 @@
 import { h, Component, ComponentChild } from 'preact';
-import { signInWithGithub } from '../utils/firebase';
+import { signInWithGithub, signUpWithGithub } from '../utils/firebase';
 import { Button } from '@mui/material';
 
 interface Props {
@@ -31,7 +31,8 @@ export default class Login extends Component<Props, State> {
         <p>Currently we only support login with Github</p>
         <div>
           <h2>Log in to your account</h2>
-          <Button onClick={signInWithGithub} variant="contained">Sign in with Github!</Button>
+          <Button onClick={signUpWithGithub} variant="contained">Sign up with Github</Button>
+          <Button onClick={signInWithGithub} variant="contained">Log in with Github</Button>
         </div>
       </div>
     );
