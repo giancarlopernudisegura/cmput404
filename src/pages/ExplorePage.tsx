@@ -34,7 +34,7 @@ function ExplorePage({ path }: ExplorePageProps) {
                 <CreatePost />
 
                 {posts.length > 0 &&
-                    <ul>
+                    <ul className="grid grid-cols-1 gap-y-7">
                         {posts.map(post => (
                             <li>
                                 <Post
