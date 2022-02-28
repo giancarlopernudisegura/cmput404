@@ -1,7 +1,7 @@
 import { h } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import Post from '../components/Post';
-import { getPosts } from '../utils/apiCalls';
+import { getPosts, getAllAuthors } from '../utils/apiCalls';
 
 type ExplorePageProps = { path: string };
 
