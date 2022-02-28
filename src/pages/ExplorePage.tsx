@@ -4,7 +4,7 @@ import { useEffect, useState } from 'preact/hooks';
 import { getPosts, getAllAuthors } from '../utils/apiCalls';
 
 import Post from '../components/Post';
-import CreatePost from '../components/CreatePost';
+import PostForm from '../components/PostForm';
 
 type ExplorePageProps = { path: string };
 
@@ -31,7 +31,7 @@ function ExplorePage({ path }: ExplorePageProps) {
 
     return (
             <div id="explore">
-                <CreatePost />
+                <PostForm />
 
                 {posts.length > 0 &&
                     <ul className="grid grid-cols-1 gap-y-7">
