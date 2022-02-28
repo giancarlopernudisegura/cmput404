@@ -27,22 +27,29 @@ function ExplorePage({ path }: ExplorePageProps) {
     }, []);
 
     return (
-        <div>    
             <div>
-                <ul>
-                    {posts.map(post => (
-                        <li>
-                            <Post
-                                title={post.title}
-                                body={post.description}
-                                author={post.author} />
-                        </li>
-                    ))}
-                    
-                </ul>
+                {posts.length > 0 &&
+                    <ul>
+                        {posts.map(post => (
+                            <li>
+                                <Post
+                                    title={post.title}
+                                    body={post.description}
+                                    author={post.author} />
+                            </li>
+                        ))}
+
+                    </ul>
+                }
+
+                {posts === undefined &&
+                    <div>
+                        <h1>No posts yet!</h1>
+                    </div>
+                }
             </div>
-        </div>
-    );
+
+);
 }
 
 export default ExplorePage;

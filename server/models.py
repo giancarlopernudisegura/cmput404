@@ -12,7 +12,7 @@ from typing import Any, Dict, Union
 load_dotenv()
 
 HOST = os.getenv("FLASK_HOST")
-debug = False 
+debug = False
 
 # Models go here
 class Author(db.Model, UserMixin):

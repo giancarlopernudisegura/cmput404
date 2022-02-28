@@ -4,7 +4,7 @@ import { Provider } from 'unistore/preact';
 
 import store from './store/store';
 
-import ExplorePage from './views/ExplorePage'
+import ExplorePage from './pages/ExplorePage'
 import Header from './components/Header'
 import Login from './pages/Login';
 import Homepage from './pages/Homepage';
@@ -16,7 +16,7 @@ const App = () => {
     <div class="app" className="min-h-screen static bg-stone-50">
       <Header />
       <Router>
-        <Homepage path="/app" />
+        <ExplorePage path="/app" />
         <Login path="/app/login" />
       </Router>
     </div>
