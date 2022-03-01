@@ -55,3 +55,15 @@ export function getAllAuthors() {
   
     return listOfAuthors;
 } 
+
+export function createNewPost(authorId: number, postId: number, postData: any) {
+  
+  // postData contains data from the forms 
+  fetch(`${BACKEND_HOST}/authors/${authorId}/posts/${postId}`, {
+    mode: 'cors',
+    method: 'POST',
+    credentials: 'include'
+  });
+
+  return;
+}
