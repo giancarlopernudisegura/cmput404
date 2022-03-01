@@ -16,6 +16,7 @@ import sidebar from './components/sidemenu-components/sidebar';
 import DrawerMenu from './components/sidemenu-components/Drawer';
 import Profile from './views/Profile';
 import Notifications from './views/Notifications'
+import HomePageV2 from './views/HomepageV2'
 
 class App extends Component {
 
@@ -31,7 +32,7 @@ class App extends Component {
           <Authentication path='/'/>
           <SignUp path='/signup'/>
           {/* TODO: add Friends and Personal pages */}
-          <Homepage path="/homepage" />
+          <HomePageV2 path="/homepage" />
           <ExplorePageV2 path="/explore" />
           <Notifications path="/notifications"/>
           <Profile path='/profile'/>
