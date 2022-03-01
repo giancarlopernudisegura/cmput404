@@ -1,4 +1,5 @@
 from flask_login import UserMixin
+from flask import current_app
 from server.exts import db
 from server.enums import ContentType
 import datetime
@@ -12,7 +13,6 @@ from typing import Any, Dict, Union
 load_dotenv()
 
 HOST = os.getenv("FLASK_HOST")
-
 
 # Models go here
 class Author(db.Model, UserMixin):
@@ -42,9 +42,23 @@ class Author(db.Model, UserMixin):
         return f"<id {self.id}>"
 
     def json(self) -> Dict[str, str]:
+        
+        # Hardcoded author data
+        if current_app.debug:
+            return {
+            "type": "author",
+            "id": self.id,
+            "host": f"{HOST}/",
+            "displayName": self.displayName,
+            "url": f"{HOST}/authors/{self.id}",
+            "github": "https://github.com/dellahumanita",
+            "profileImage": self.profileImageId,
+            }
+
         # get username from github id
         resp = urlopen(f"https://api.github.com/user/{self.githubId}")
         data = json.loads(resp.read().decode("utf-8"))
+
         return {
             "type": "author",
             "id": self.id,
@@ -54,6 +68,7 @@ class Author(db.Model, UserMixin):
             "github": data["html_url"],
             "profileImage": self.profileImageId,
         }
+    
 
 
 class Post(db.Model):
