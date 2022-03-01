@@ -36,7 +36,7 @@ export function getPosts(author_id: number): Promise<any>{
 };
 
 export function getAllAuthors() {
-  let listOfAuthors = fetch(`${BACKEND_HOST}/authors/`, {
+  const listOfAuthors = fetch(`${BACKEND_HOST}/authors/`, {
     mode: 'cors',
     method: 'GET',
   }).then(res => res.json())
@@ -56,14 +56,17 @@ export function getAllAuthors() {
     return listOfAuthors;
 } 
 
-export function createNewPost(authorId: number, postId: number, postData: any) {
-  
+export async function createNewPost(authorId: number, postId: number, postData: any) {
+
   // postData contains data from the forms 
-  fetch(`${BACKEND_HOST}/authors/${authorId}/posts/${postId}`, {
+  const response = await fetch(`${BACKEND_HOST}/authors/${authorId}/posts/${postId}`, {
     mode: 'cors',
     method: 'POST',
-    credentials: 'include'
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    }
   });
 
-  return;
+  return response.json();
 }

@@ -63,6 +63,7 @@ def create_app(config_filename=None):
         return Author.query.get(user_id)
 
     # add CORS
+    # TODO
     @app.after_request
     def after_request(response):
         response.headers.add(

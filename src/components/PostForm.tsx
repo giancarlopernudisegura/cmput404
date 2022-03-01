@@ -1,24 +1,60 @@
 import { h, Component } from 'preact';
 import { Button } from '@mui/material';
+import { createNewPost } from '../utils/apiCalls';
 
-class PostForm extends Component<{}, { value: string }> {
+type Props = {  };
+type State = { 
+    body: string
+    tags: Array<string>
+    title: string
+};
+
+class PostForm extends Component<Props, State> {
     constructor() {
         super();
-        this.state = { value: "What's on your mind?" };
+        this.state = { 
+            body: "What's on your mind?",
+            tags: [''],
+            title: ""
+        };
         
-        this.handleChange = this.handleChange.bind(this);
+        this.handleBody = this.handleBody.bind(this);
+        this.handleTitle = this.handleTitle.bind(this);
+        // this.handleTags = this.handleTags.bind(this);
+        
         this.handleSubmit = this.handleSubmit.bind(this);
     }
 
 
-    handleChange(event: Event) { 
+    handleBody(event: Event) { 
         if (event){
-            this.setState({ value: (event.target as HTMLTextAreaElement).value });
+            this.setState({ body: (event.target as HTMLTextAreaElement).value });
         }
     }
 
+    handleTitle(event: Event) { 
+        if (event){
+            this.setState({ title: (event.target as HTMLInputElement).value });
+        }
+    }
+
+    // handleTags(event: Event) { 
+    //     if (event){
+    //         this.setState({ tags: (event.target as HTMLInputElement).value });
+    //     }
+    // }
+
     handleSubmit = (event: Event): void => {
-        console.log("The message: " + this.state.value);
+        console.log("The message: " + this.state.title + "\n" + this.state.body);
+        // DEBUG: temp variables 
+        let authorId = 1;
+        let postId = 1;
+        let postData = {
+            'title': this.state.title,
+            'content': this.state.body,
+            'category': 'A temporary ',
+        }
+        createNewPost(authorId, postId, postData);
         alert('Shared a post');
         event.preventDefault();
     };
@@ -26,20 +62,24 @@ class PostForm extends Component<{}, { value: string }> {
 
 
     render() {
+
         return (
             <div class="create-post"
                 className="bg-zinc-100 border-solid border-1 border-slate-600 w-2/3 m-auto rounded-lg py-4 px-5  my-5">
                     {/* TODO: Create a markdown editor  */}
                     {/* TODO: add current user's username and displayImage */}
 
-                    <form onSubmit={this.handleSubmit} className="grid grid-cols-1 gap-y-5">
+                    <form onSubmit={this.handleSubmit} className="grid grid-cols-1 gap-y-3">
                         <label>Title</label>
-                        <input type="text"></input>
+                        <input type="text"
+                            onChange={this.handleTitle}></input>
                         <textarea type="text"
-                            value={this.state.value}
-                            onChange={this.handleChange}
+                            value={this.state.body}
+                            onChange={this.handleBody}
                             className="w-full" >    
                         </textarea>
+                        <label>Tags</label>
+                        <input type="text"></input>
 
                         <Button variant="contained"
                             type="submit"
