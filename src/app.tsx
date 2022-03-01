@@ -7,7 +7,6 @@ import store from './store/store';
 import ExplorePage from './pages/ExplorePage'
 import Header from './components/Header'
 import Login from './pages/Login';
-import Homepage from './pages/Homepage';
 
 import './css/main.css';
 

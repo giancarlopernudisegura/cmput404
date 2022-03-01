@@ -5,6 +5,7 @@ import { getPosts, getAllAuthors } from '../utils/apiCalls';
 import * as linkify from 'linkifyjs';
 import { Button } from '@mui/material';
 import { uploadPhotosToFbs } from '../utils/firebase';
+import ReactMarkdown from 'react-markdown';
 
 
 type ExplorePageProps = { path: string };
@@ -21,6 +22,7 @@ type PostBody = {
 function ExplorePage({ path }: ExplorePageProps) {
 
     const [ posts, setPosts ] = useState(Array());
+    const [ image, setImage ] = useState("");
 
     // useEffect(() => {
     //     function getPostsFromAPI() {
@@ -38,7 +40,7 @@ function ExplorePage({ path }: ExplorePageProps) {
     
     // }, []);
 
-    const body = {
+    const hardcodedBody = {
         "author": "1",
         "title": "hello",
         "category": "d",
@@ -53,33 +55,38 @@ function ExplorePage({ path }: ExplorePageProps) {
         console.log("test", test)
     }
 
+    const createImgMkd = (imagesUrl : Array<String>) => {
+        let mkd = "";
+
+        for (let img of imagesUrl) {
+            mkd += `![](${img})`;
+        }
+
+        return mkd;
+    }
+
     const handleUploadPhoto = (event: any) => {
         const files = event.target.files;
-        const valid_files = [];
-
-        console.log("DD", event);
-        console.log("target", event.target);
-        console.log("target", event.target.file);
-        console.log("FILES", files);
+        let imagesUrls : Array<String> = [];
 
         let values = Object.values(files);
         for (let val of values) {
             if (val instanceof File) {
-                valid_files.push(val);
+                let x : string = URL.createObjectURL(val);
+                imagesUrls.push(x);
             }
         }
 
-        console.log("V", valid_files);
-        const imagesURL : Array<String> = uploadPhotosToFbs(valid_files);
-        console.log("IMAGES", imagesURL);
-        // const content = `!()[${imageURL}]`
+        // call to uploadPhotos
+        // const imagesURL : Array<String> = uploadPhotosToFbs(valid_files);
+        const markdown = createImgMkd(imagesUrls);
+        setImage(markdown);
     }
 
     return (
             <div>
-<<<<<<< HEAD:src/views/ExplorePage.tsx
+                {/* {handleCreatePost(hardcodedBody)} */}
                 <ul>
-                    {handleCreatePost(body)}
                     {posts.map(post => (
                         <li>
                             <Post
@@ -102,29 +109,9 @@ function ExplorePage({ path }: ExplorePageProps) {
                         <Button variant="contained" component="span">
                             Upload
                         </Button>
+                        {image && <ReactMarkdown>{image}</ReactMarkdown>}
                     </label>
                 </ul>
-=======
-                {posts.length > 0 &&
-                    <ul>
-                        {posts.map(post => (
-                            <li>
-                                <Post
-                                    title={post.title}
-                                    body={post.description}
-                                    author={post.author} />
-                            </li>
-                        ))}
-
-                    </ul>
-                }
-
-                {posts === undefined &&
-                    <div>
-                        <h1>No posts yet!</h1>
-                    </div>
-                }
->>>>>>> master:src/pages/ExplorePage.tsx
             </div>
 
 );

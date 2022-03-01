@@ -52,19 +52,18 @@ const authenticateWithGithub = async (signup: Boolean) => {
     }
 };
 
-export const uploadPhotosToFbs = (files: Array<File>) => {
+export const uploadPhotosToFbs = async (files: Array<File>) => {
     let imagesUrls : Array<String> = [];
     let imageRef;
     for (let file of files) {
         imageRef = ref(storage, file.name);
-        uploadBytes(imageRef, file).then((snapshot) => {
-            console.log("Uploaded a blob or file!");
-            console.log("path", snapshot.ref.fullPath);
-            getDownloadURL(snapshot.ref).then((downloadURL) => {
+        const snapshot = await uploadBytes(imageRef, file).catch(error => console.log("ERROR", error));
+        if (snapshot !== undefined) {
+            let downloadURL = await getDownloadURL(snapshot.ref).catch(err => console.log(err));
+            if (downloadURL !== undefined) {
                 imagesUrls.push(downloadURL);
-                console.log("File Available at", downloadURL);
-            })
-        });
+            }
+        } 
     }
 
     return imagesUrls;
