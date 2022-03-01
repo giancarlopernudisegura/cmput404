@@ -1,10 +1,14 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { getAuth, signInWithPopup, GithubAuthProvider } from "firebase/auth";
 import { firebaseConfig } from './firebaseConfig';
 
 // Initialize Firebase
-initializeApp(firebaseConfig);
+const firebaseApp = initializeApp(firebaseConfig);
+const storage = getStorage(firebaseApp);
+// Create a storage reference from our storage service
+
 const provider = new GithubAuthProvider();
 
 const BACKEND_HOST = process.env.FLASK_HOST;
@@ -47,3 +51,21 @@ export const signInWithGithub = async () => {
         return { isSuccess: false };
     }
 };
+
+export const uploadPhotosToFbs = (files: Array<File>) => {
+    let imagesUrls : Array<String> = [];
+    let imageRef;
+    for (let file of files) {
+        imageRef = ref(storage, file.name);
+        uploadBytes(imageRef, file).then((snapshot) => {
+            console.log("Uploaded a blob or file!");
+            console.log("path", snapshot.ref.fullPath);
+            getDownloadURL(snapshot.ref).then((downloadURL) => {
+                imagesUrls.push(downloadURL);
+                console.log("File Available at", downloadURL);
+            })
+        });
+    }
+
+    return imagesUrls;
+}

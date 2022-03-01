@@ -321,7 +321,6 @@ def get_user_me() -> Response:
 def update_myself() -> Response:
     try:
         updated_user = utils.update_user_me(request, current_user)
-        print("CURRENT", updated_user.is_authenticated)
         return utils.json_response(
             httpStatus.OK,
             {
