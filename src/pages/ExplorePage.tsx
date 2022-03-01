@@ -1,7 +1,7 @@
 import { h } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import Post from '../components/Post';
-import { getPosts } from '../utils/apiCalls';
+import { getPosts, getAllAuthors } from '../utils/apiCalls';
 import * as linkify from 'linkifyjs';
 import { Button } from '@mui/material';
 import { uploadPhotosToFbs } from '../utils/firebase';
@@ -76,8 +76,8 @@ function ExplorePage({ path }: ExplorePageProps) {
     }
 
     return (
-        <div>    
             <div>
+<<<<<<< HEAD:src/views/ExplorePage.tsx
                 <ul>
                     {handleCreatePost(body)}
                     {posts.map(post => (
@@ -104,9 +104,30 @@ function ExplorePage({ path }: ExplorePageProps) {
                         </Button>
                     </label>
                 </ul>
+=======
+                {posts.length > 0 &&
+                    <ul>
+                        {posts.map(post => (
+                            <li>
+                                <Post
+                                    title={post.title}
+                                    body={post.description}
+                                    author={post.author} />
+                            </li>
+                        ))}
+
+                    </ul>
+                }
+
+                {posts === undefined &&
+                    <div>
+                        <h1>No posts yet!</h1>
+                    </div>
+                }
+>>>>>>> master:src/pages/ExplorePage.tsx
             </div>
-        </div>
-    );
+
+);
 }
 
 export default ExplorePage;

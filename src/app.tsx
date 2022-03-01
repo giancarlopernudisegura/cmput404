@@ -4,53 +4,26 @@ import { Provider } from 'unistore/preact';
 
 import store from './store/store';
 
-import ExplorePage from './views/ExplorePage'
+import ExplorePage from './pages/ExplorePage'
 import Header from './components/Header'
 import Login from './pages/Login';
 import Homepage from './pages/Homepage';
-import { get_author_me } from './utils/apiCalls';
-import { CircularProgress } from '@mui/material';
-
-
-import { useEffect, useState } from 'preact/hooks';
 
 import './css/main.css';
 
 const App = () => {
-  const [ author, setAuthor ] = useState(null);
-  const [ isLoading, setIsLoading ] = useState(true);
-
-  useEffect(() => {
-    const get_author_helper = async () => {
-      try {
-        let response = await get_author_me();
-        setAuthor(response.data);
-        setIsLoading(false);
-      } catch(err) {
-        // TODO: handle error, show a message
-        setIsLoading(false);
-      }
-    }
-    get_author_helper();
-  }, []);
-
-
   return (
-    <div class="app"
-      className="min-h-screen static bg-stone-50">
-        <Header />
-        {isLoading === true ? <CircularProgress /> : (
-          <Router>
-            <ExplorePage path="/" />
-            <Login path="/login" />
-          </Router>
-        )
-        }
+    <div class="app" className="min-h-screen static bg-stone-50">
+      <Header />
+      <Router>
+        <ExplorePage path="/app" />
+        <Login path="/app/login" />
+      </Router>
     </div>
   )
 }
 
-render (
+render(
   <Provider store={store}>
     <App />
   </Provider>,
