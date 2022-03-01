@@ -7,13 +7,11 @@
     "target": "es6",
     "jsx": "react",
     "jsxFactory": "h",
-    "module": "commonjs",
     "esModuleInterop": true,
     "outDir": "./public",
     "rootDir": "./src",
     "strict": true,
     "moduleResolution": "node",
-    "experimentalDecorators": true,
-    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true
   }
 }
