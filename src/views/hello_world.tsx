@@ -1,22 +1,42 @@
 import { h, Component, ComponentChild } from 'preact'
-import Post from '../components/Post'
 import { Button } from '@mui/material';
 
-type HelloWorldProps = {
-  path: string;
+interface Props {
+
 }
 
-function HelloWorld({ path }: HelloWorldProps ) {
-
-  return (
-    <div>
-      <h1>TikTakToe</h1>
-      <h2>Current path: {path}</h2>
-      
-      <Post title="Hello World" body="This is a body" author="John Doe"/>
-    </div>
-  )
+interface State {
+  message: string
 }
 
-export default HelloWorld;
+export default class HelloWorld extends Component<Props, State> {
 
+  readonly state = {
+    message: ''
+  };
+
+  public componentDidMount = (): void => {
+    this.get()
+  }
+
+  private get = async (): Promise<void> => {
+    const response = await fetch('/service/hello_world');
+    if (!response.ok) {
+      this.setState({ message: 'Flask server is not running.' });
+    }
+    else {
+      const data = await response.json();
+      this.setState({ message: data.message });
+    }
+  }
+
+  public render = (): ComponentChild => {
+    const { message } = this.state;
+    return (
+      <div class="text-3xl font-bold underline">
+        {message}
+        <Button>Click me</Button>
+      </div>
+    );
+  }
+}

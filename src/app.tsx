@@ -1,49 +1,31 @@
-import { h, render, Component, ComponentChild } from 'preact';
+import { h, render, ComponentChild } from 'preact';
 import Router from 'preact-router';
 import { Provider } from 'unistore/preact';
 
 import store from './store/store';
 
-import Homepage from './views/Homepage';
-
-import './css/main.css'
-import ExplorePage from './views/ExplorePage'
+import ExplorePage from './pages/ExplorePage'
 import Header from './components/Header'
-import Authentication from './views/authentication/authentication'
-import SignUp from './views/authentication/authentication-signup'
-import ExplorePageV2 from './views/ExplorePageV2';
-import sidebar from './components/sidemenu-components/sidebar';
-import DrawerMenu from './components/sidemenu-components/Drawer';
-import Profile from './views/Profile';
-import Notifications from './views/Notifications'
-import HomePageV2 from './views/HomepageV2'
+import Login from './pages/Login';
+import Homepage from './pages/Homepage';
 
-class App extends Component {
+import './css/main.css';
+import HomepageV2 from './views/HomepageV2';
 
-  public render = (): ComponentChild => {
-    return (
-      <div class="app"
-        className="min-h-screen static bg-stone-50">
-
-        {/* <Header /> */}
-
-        <Router>
-          {/* <ExplorePage path="/" /> */}
-          <Authentication path='/'/>
-          <SignUp path='/signup'/>
-          {/* TODO: add Friends and Personal pages */}
-          <HomePageV2 path="/homepage" />
-          <ExplorePageV2 path="/explore" />
-          <Notifications path="/notifications"/>
-          <Profile path='/profile'/>
-        </Router>
-        
-      </div>
-    )
-  }
+const App = () => {
+  return (
+    <div class="app" className="min-h-screen static bg-stone-50">
+      <Header />
+      <Router>
+        <ExplorePage path="/app" />
+        <Login path="/app/login" />
+        <HomepageV2 path="/app/homepage"/>
+      </Router>
+    </div>
+  )
 }
 
-render (
+render(
   <Provider store={store}>
     <App />
   </Provider>,
