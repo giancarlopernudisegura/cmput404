@@ -12,7 +12,7 @@ export const get_author_me = async () => {
 };
 
 export function getPosts(author_id: number): Promise<any>{
-
+ 
   let listOfPosts = fetch(`${BACKEND_HOST}/authors/${author_id}/posts/`, {
     mode: 'cors',
     method: 'GET',
@@ -56,17 +56,20 @@ export function getAllAuthors() {
     return listOfAuthors;
 } 
 
-export async function createNewPost(authorId: number, postId: number, postData: any) {
+export function newPublicPost(authorId: number, postData: any) {
 
   // postData contains data from the forms 
-  const response = await fetch(`${BACKEND_HOST}/authors/${authorId}/posts/${postId}`, {
+  fetch(`${BACKEND_HOST}/authors/${authorId}/posts/`, {
     mode: 'cors',
     method: 'POST',
     credentials: 'include',
     headers: {
-      'Content-Type': 'application/json',
-    }
-  });
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: postData
+  }).then(res => res.json())
+    .then(data => {console.log(data)})
+    .catch(err => {alert(err);});
 
-  return response.json();
+
 }

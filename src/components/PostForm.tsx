@@ -1,6 +1,8 @@
 import { h, Component } from 'preact';
 import { Button } from '@mui/material';
-import { createNewPost } from '../utils/apiCalls';
+import { newPublicPost } from '../utils/apiCalls';
+
+import { generateId } from '../utils/utilMethods';
 
 type Props = {  };
 type State = { 
@@ -46,15 +48,19 @@ class PostForm extends Component<Props, State> {
 
     handleSubmit = (event: Event): void => {
         console.log("The message: " + this.state.title + "\n" + this.state.body);
-        // DEBUG: temp variables 
-        let authorId = 1;
-        let postId = 1;
-        let postData = {
-            'title': this.state.title,
-            'content': this.state.body,
-            'category': 'A temporary ',
+        
+        const authorId = 2; // temp
+
+        var postData = {
+            "title": this.state.title,
+            "content": this.state.body,
+            "category": "temp",
+            "contentType": "plain", //temp writing plain text
         }
-        createNewPost(authorId, postId, postData);
+        var encodedPostData = encodeURIComponent(JSON.stringify(postData));
+
+        newPublicPost(authorId, encodedPostData);
+
         alert('Shared a post');
         event.preventDefault();
     };
@@ -67,7 +73,7 @@ class PostForm extends Component<Props, State> {
             <div class="create-post"
                 className="bg-zinc-100 border-solid border-1 border-slate-600 w-2/3 m-auto rounded-lg py-4 px-5  my-5">
                     {/* TODO: Create a markdown editor  */}
-                    {/* TODO: add current user's username and displayImage */}
+                    {/* TODO: add current user's username and displayImage from /user_me */}
 
                     <form onSubmit={this.handleSubmit} className="grid grid-cols-1 gap-y-3">
                         <label>Title</label>

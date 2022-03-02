@@ -15,8 +15,7 @@ function ExplorePage({ path }: ExplorePageProps) {
 
     useEffect(() => {
         function getPostsFromAPI() {
-            console.log("Getting posts from API...");
-            let author_id = 1; //TODO: temp, should display all authors with public posts 
+            let author_id = 2; //TODO: temp, should display all authors with public posts 
             const response = getPosts(author_id);                        
             response.then(data => {
                 setPosts(data);
@@ -28,6 +27,8 @@ function ExplorePage({ path }: ExplorePageProps) {
         getPostsFromAPI(); 
     
     }, []);
+
+    
 
     return (
             <div id="explore">
