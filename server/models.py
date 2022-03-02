@@ -48,19 +48,6 @@ class Author(db.Model, UserMixin, JSONSerializable):
         return f"<id {self.id}>"
 
     def json(self) -> Dict[str, str]:
-
-        # Hardcoded author data
-        if current_app.debug:
-            return {
-                "type": "author",
-                "id": self.id,
-                "host": f"{HOST}/",
-                "displayName": self.displayName,
-                "url": f"{HOST}/authors/{self.id}",
-                "github": "https://github.com/dellahumanita",
-                "profileImage": self.profileImageId,
-            }
-
         # get username from github id
         resp = urlopen(f"https://api.github.com/user/{self.githubId}")
         data = json.loads(resp.read().decode("utf-8"))
