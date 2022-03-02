@@ -135,6 +135,7 @@ def post(author_id: int) -> Response:
         post = Post(author, title, category, content, contentType, private, unlisted)
         db.session.add(post)
         db.session.commit()
+        post.push()
         return Response(status=httpStatus.OK)
 
 
@@ -190,6 +191,7 @@ def specific_post(author_id: int, post_id: int) -> Response:
         )
         db.session.add(post)
         db.session.commit()
+        post.push()
         return Response(status=httpStatus.CREATED)
     elif request.method == "DELETE":
         db.session.delete(post)
@@ -296,6 +298,8 @@ def add_follower(author_id: int, follower_id: int) -> Response:
         )
     follower = Requests(follower_id, author_id)
     db.session.add(follower)
+    inbox = Inbox(author_id, follow=follower.id)
+    db.session.add(inbox)
     db.session.commit()
     return Response(status=httpStatus.OK)
 

@@ -20,6 +20,21 @@ class JSONSerializable(object):
         raise NotImplementedError()
 
 
+class InboxItem(object):
+    """
+    Classes that inherit this class must implement the `push` method which pushes
+    the item to the inbox of all subscribers.
+    """
+
+    @staticmethod
+    def get_subscribers(author_id: int) -> list[int]:
+        subscribers = Requests.query.filter_by(to=author_id).all()
+        return [s.initiated for s in subscribers]
+
+    def push(self):
+        raise NotImplementedError()
+
+
 # Models go here
 class Author(db.Model, UserMixin, JSONSerializable):
     __tablename__ = "author"
@@ -63,7 +78,7 @@ class Author(db.Model, UserMixin, JSONSerializable):
         }
 
 
-class Post(db.Model, JSONSerializable):
+class Post(db.Model, JSONSerializable, InboxItem):
     __tablename__ = "post"
     id = db.Column(db.Integer, primary_key=True)
     author = db.Column(db.ForeignKey("author.id"))
@@ -143,6 +158,13 @@ class Post(db.Model, JSONSerializable):
             "unlisted": self.unlisted,
         }
 
+    def push(self):
+        subscribers = InboxItem.get_subscribers(self.author)
+        for subscriber in subscribers:
+            inbox = Inbox(subscriber, post=self.id)
+            db.session.add(inbox)
+        db.session.commit()
+
 
 class Comment(db.Model, JSONSerializable):
     __tablename__ = "comment"
@@ -181,7 +203,7 @@ class Comment(db.Model, JSONSerializable):
         }
 
 
-class Like(db.Model, JSONSerializable):
+class Like(db.Model, JSONSerializable, InboxItem):
     id = db.Column(db.Integer, primary_key=True)
     author = db.Column(db.ForeignKey("author.id"))
     post = db.Column(db.ForeignKey("post.id"))
@@ -218,6 +240,13 @@ class Like(db.Model, JSONSerializable):
             "author": author.json(),
             "id": liked_object,
         }
+
+    def push(self):
+        subscribers = InboxItem.get_subscribers(self.author)
+        for subscriber in subscribers:
+            inbox = Inbox(subscriber, like=self.id)
+            db.session.add(inbox)
+        db.session.commit()
 
 
 class Requests(db.Model):  # follow requests
