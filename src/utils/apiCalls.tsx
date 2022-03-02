@@ -56,3 +56,15 @@ export function getAllAuthors() {
 
   return listOfAuthors;
 }
+
+export async function getInbox(author_id: string) {
+  const res = await fetch(`${BACKEND_HOST}/authors/${author_id}/inbox/`)
+  return await res.json();
+}
+
+export async function clearInbox(author_id: string): Promise<boolean> {
+  const res = await fetch(`${BACKEND_HOST}/authors/${author_id}/inbox/`, {
+    method: 'DELETE'
+  })
+  return res.status === 200;
+}

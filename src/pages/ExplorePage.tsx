@@ -1,7 +1,7 @@
 import { h } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import Post from '../components/Post';
-import { getPosts, getAllAuthors, get_author_id } from '../utils/apiCalls';
+import { get_author_id, getInbox } from '../utils/apiCalls';
 
 type ExplorePageProps = { path: string };
 
@@ -13,13 +13,13 @@ function ExplorePage({ path }: ExplorePageProps) {
     useEffect(() => {
         function getPostsFromAPI() {
             console.log("Getting posts from API...");
-            //TODO: temp, should display all authors with public posts
             get_author_id()
                 .then(author_id => {
-                    const response = getPosts(author_id);
+                    const response = getInbox(author_id);
                     response
                         .then(data => {
-                            setPosts(data);
+                            // TODO: temp, only use posts from inbox for now
+                            setPosts(data.items.filter((item: any) => item.type == "post"));
                         })
                         .catch(err => {
                             alert(err);
