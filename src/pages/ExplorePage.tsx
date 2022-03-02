@@ -23,7 +23,7 @@ function ExplorePage({ path }: ExplorePageProps) {
             });
         }
         getPostsFromAPI(); 
-    
+    console.log(posts);
     }, []);
 
     return (
