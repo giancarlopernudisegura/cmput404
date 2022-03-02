@@ -42,17 +42,17 @@ class Author(db.Model, UserMixin):
         return f"<id {self.id}>"
 
     def json(self) -> Dict[str, str]:
-        
+
         # Hardcoded author data
         if current_app.debug:
             return {
-            "type": "author",
-            "id": self.id,
-            "host": f"{HOST}/",
-            "displayName": self.displayName,
-            "url": f"{HOST}/authors/{self.id}",
-            "github": "https://github.com/dellahumanita",
-            "profileImage": self.profileImageId,
+                "type": "author",
+                "id": self.id,
+                "host": f"{HOST}/",
+                "displayName": self.displayName,
+                "url": f"{HOST}/authors/{self.id}",
+                "github": "https://github.com/dellahumanita",
+                "profileImage": self.profileImageId,
             }
 
         # get username from github id
@@ -68,7 +68,6 @@ class Author(db.Model, UserMixin):
             "github": data["html_url"],
             "profileImage": self.profileImageId,
         }
-    
 
 
 class Post(db.Model):
@@ -297,3 +296,14 @@ class Inbox(db.Model):
 
     def __repr__(self):
         return f"<id {self.id}>"
+
+    def json(self) -> Dict[str, Any]:
+        if self.post:
+            post = Post.query.filter_by(id=self.post).first()
+            return post.json()
+        elif self.like:
+            like = Like.query.filter_by(id=self.like).first()
+            return like.json()
+        elif self.follow:
+            follow = Requests.query.filter_by(id=self.follow).first()
+            return follow.json()
