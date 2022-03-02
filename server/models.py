@@ -14,8 +14,14 @@ load_dotenv()
 
 HOST = os.getenv("FLASK_HOST")
 
+
+class JSONSerializable(object):
+    def json(self) -> Dict[str, str]:
+        raise NotImplementedError()
+
+
 # Models go here
-class Author(db.Model, UserMixin):
+class Author(db.Model, UserMixin, JSONSerializable):
     __tablename__ = "author"
     id = db.Column(db.Integer, primary_key=True)
     displayName = db.Column(db.String())
@@ -70,7 +76,7 @@ class Author(db.Model, UserMixin):
         }
 
 
-class Post(db.Model):
+class Post(db.Model, JSONSerializable):
     __tablename__ = "post"
     id = db.Column(db.Integer, primary_key=True)
     author = db.Column(db.ForeignKey("author.id"))
@@ -151,7 +157,7 @@ class Post(db.Model):
         }
 
 
-class Comment(db.Model):
+class Comment(db.Model, JSONSerializable):
     __tablename__ = "comment"
     id = db.Column(db.Integer, primary_key=True)
     author = db.Column(db.ForeignKey("author.id"))
@@ -188,7 +194,7 @@ class Comment(db.Model):
         }
 
 
-class Like(db.Model):
+class Like(db.Model, JSONSerializable):
     id = db.Column(db.Integer, primary_key=True)
     author = db.Column(db.ForeignKey("author.id"))
     post = db.Column(db.ForeignKey("post.id"))
@@ -269,7 +275,7 @@ def __init__(self, post, viewConsumer):
         return f"<id {self.id}>"
 
 
-class Inbox(db.Model):
+class Inbox(db.Model, JSONSerializable):
     __tablename__ = "inbox"
     id = db.Column(db.Integer, primary_key=True)
     owner = db.Column(db.ForeignKey("author.id"))
@@ -289,7 +295,7 @@ class Inbox(db.Model):
         if argNoneCount < 2:
             raise Exception("Inbox can't relate multiple objects")
         elif argNoneCount == 3:
-            raise Exception("Inbox must releate one object")
+            raise Exception("Inbox must relate one object")
         self.post = post
         self.like = like
         self.follow = follow
