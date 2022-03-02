@@ -55,7 +55,9 @@ class PostForm extends Component<Props, State> {
             "title": this.state.title,
             "content": this.state.body,
             "category": "temp",
-            "contentType": "plain", //temp writing plain text
+            "contentType": "text/plain", //temp writing plain text
+            "visibility": "PUBLIC",
+            "unlisted": false,
         }
         var encodedPostData = encodeURIComponent(JSON.stringify(postData));
 

@@ -11,8 +11,12 @@ export const get_author_me = async () => {
   return data;
 };
 
+/**
+ * Gets the posts of the given author_id
+ * @param author_id 
+ * @returns Array<Post>
+ */
 export function getPosts(author_id: number): Promise<any>{
- 
   let listOfPosts = fetch(`${BACKEND_HOST}/authors/${author_id}/posts/`, {
     mode: 'cors',
     method: 'GET',
@@ -34,7 +38,11 @@ export function getPosts(author_id: number): Promise<any>{
     return listOfPosts;
 
 };
-
+/**
+ * Gets a list of all authenticated authors
+ * with their id and displayName
+ * @returns Array<Author>
+ */
 export function getAllAuthors() {
   const listOfAuthors = fetch(`${BACKEND_HOST}/authors/`, {
     mode: 'cors',
@@ -55,9 +63,12 @@ export function getAllAuthors() {
   
     return listOfAuthors;
 } 
-
+/**
+ * Sends a post to the backend
+ * @param authorId  the id of the author
+ * @param postData  form data of the post 
+ */
 export function newPublicPost(authorId: number, postData: any) {
-
   // postData contains data from the forms 
   fetch(`${BACKEND_HOST}/authors/${authorId}/posts/`, {
     mode: 'cors',
