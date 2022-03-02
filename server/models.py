@@ -1,4 +1,5 @@
 from flask_login import UserMixin
+from flask import current_app
 from server.exts import db
 from server.enums import ContentType
 import datetime
@@ -12,7 +13,6 @@ from typing import Any, Dict, Union
 load_dotenv()
 
 HOST = os.getenv("FLASK_HOST")
-debug = True
 
 # Models go here
 class Author(db.Model, UserMixin):
@@ -42,8 +42,9 @@ class Author(db.Model, UserMixin):
         return f"<id {self.id}>"
 
     def json(self) -> Dict[str, str]:
-
-        if debug:
+        
+        # Hardcoded author data
+        if current_app.debug:
             return {
             "type": "author",
             "id": self.id,

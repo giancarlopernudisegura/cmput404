@@ -1,0 +1,40 @@
+{ 
+    "members": [
+            {       
+                "githubId": "20142047",
+                "profileImageId": "https://avatars.githubusercontent.com/u/20142047?v=4",
+                "displayName": "jasonexus",
+                "isAdmin": true,
+                "isVerified": true
+            },
+            {
+                "githubId": "50651099",
+                "profileImageId": "https://avatars.githubusercontent.com/u/50651099?v=4",
+                "displayName": "della",
+                "isAdmin": true,
+                "isVerified": true
+            },
+            {
+                "githubId": "42719299",
+                "profileImageId": "https://avatars.githubusercontent.com/u/42719299?v=4",
+                "displayName": "dalidia",
+                "isAdmin": true,
+                "isVerified": true
+            },
+            {
+                "githubId": "31188380",
+                "profileImageId": "https://avatars.githubusercontent.com/u/31188380?v=4",
+                "displayName": "giancarlopernudisegura",
+                "isAdmin": true,
+                "isVerified": true
+            },
+            {
+                "githubId": "738053",
+                "profileImageId": "https://avatars.githubusercontent.com/u/738053?v=4",
+                "displayName": "Pegmode",
+                "isAdmin": true,
+                "isVerified": true
+            }
+         
+    ]
+}
