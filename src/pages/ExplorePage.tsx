@@ -1,55 +1,59 @@
 import { h } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import Post from '../components/Post';
-import { getPosts, getAllAuthors } from '../utils/apiCalls';
+import { getPosts, getAllAuthors, get_author_id } from '../utils/apiCalls';
 
 type ExplorePageProps = { path: string };
 
 
 function ExplorePage({ path }: ExplorePageProps) {
 
-    const [ posts, setPosts ] = useState(Array());
+    const [posts, setPosts] = useState(Array());
 
     useEffect(() => {
         function getPostsFromAPI() {
             console.log("Getting posts from API...");
-            let author_id = 1; //TODO: temp, should display all authors with public posts 
-            const response = getPosts(author_id);                        
-            response.then(data => {
-                setPosts(data);
-            })
-            .catch(err => {
-                alert(err);
-            });
+            //TODO: temp, should display all authors with public posts
+            get_author_id()
+                .then(author_id => {
+                    const response = getPosts(author_id);
+                    response
+                        .then(data => {
+                            setPosts(data);
+                        })
+                        .catch(err => {
+                            alert(err);
+                        });
+                })
+                .catch(console.error);
         }
-        getPostsFromAPI(); 
-    
+        getPostsFromAPI();
     }, []);
 
     return (
-            <div>
-                {posts.length > 0 &&
-                    <ul>
-                        {posts.map(post => (
-                            <li>
-                                <Post
-                                    title={post.title}
-                                    body={post.description}
-                                    author={post.author} />
-                            </li>
-                        ))}
+        <div>
+            {posts.length > 0 &&
+                <ul>
+                    {posts.map(post => (
+                        <li>
+                            <Post
+                                title={post.title}
+                                body={post.description}
+                                author={post.author} />
+                        </li>
+                    ))}
 
-                    </ul>
-                }
+                </ul>
+            }
 
-                {posts === undefined &&
-                    <div>
-                        <h1>No posts yet!</h1>
-                    </div>
-                }
-            </div>
+            {posts === undefined &&
+                <div>
+                    <h1>No posts yet!</h1>
+                </div>
+            }
+        </div>
 
-);
+    );
 }
 
 export default ExplorePage;

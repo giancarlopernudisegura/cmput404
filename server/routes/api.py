@@ -33,8 +33,7 @@ def pagination(
     Returns:
         A tuple of (page, size) to use for pagination."""
     size = int(arguments.get("size", str(default_page_size)), base=10)
-    page_number = int(arguments.get(
-        "page_number", str(default_page_number)), base=10)
+    page_number = int(arguments.get("page_number", str(default_page_number)), base=10)
     return page_number, size
 
 
@@ -133,8 +132,7 @@ def post(author_id: int) -> Response:
             return Response(status=httpStatus.BAD_REQUEST)
         private = post_visibility_map[visibility.upper()]
 
-        post = Post(author, title, category, content,
-                    contentType, private, unlisted)
+        post = Post(author, title, category, content, contentType, private, unlisted)
         db.session.add(post)
         db.session.commit()
         return Response(status=httpStatus.OK)
@@ -203,8 +201,7 @@ def specific_post(author_id: int, post_id: int) -> Response:
 def get_comments(author_id: int, post_id: int) -> Response:
     page, size = pagination(request.args)
     comments = (
-        Comment.query.filter_by(post=post_id).paginate(
-            page=page, per_page=size).items
+        Comment.query.filter_by(post=post_id).paginate(page=page, per_page=size).items
     )
     return (
         make_response(
@@ -251,19 +248,18 @@ def post_comment(author_id: int, post_id: int) -> Response:
 def get_followers(author_id: int) -> Response:
     followers = Requests.query.filter_by(to=author_id).all()
     return (
-        make_response(jsonify(type="followers", items=[
-                      f.json() for f in followers])),
+        make_response(jsonify(type="followers", items=[f.json() for f in followers])),
         httpStatus.OK,
     )
 
 
 @bp.route("/authors/<int:author_id>/followers/<int:follower_id>", methods=["GET"])
 def is_follower(author_id: int, follower_id: int) -> Response:
-    follower = Requests.query.filter_by(
-        to=author_id, initiated=follower_id).first()
+    follower = Requests.query.filter_by(to=author_id, initiated=follower_id).first()
     return (
-        make_response(jsonify(type="followers", items=(
-            [follower.json()] if follower else []))),
+        make_response(
+            jsonify(type="followers", items=([follower.json()] if follower else []))
+        ),
         httpStatus.OK,
     )
 
@@ -276,8 +272,7 @@ def remove_follower(author_id: int, follower_id: int) -> Response:
             make_response(jsonify(error=res_msg.NO_PERMISSION)),
             httpStatus.UNAUTHORIZED,
         )
-    follower = Requests.query.filter_by(
-        to=author_id, initiated=follower_id).first()
+    follower = Requests.query.filter_by(to=author_id, initiated=follower_id).first()
     if not follower:
         return Response(status=httpStatus.NOT_FOUND)
     db.session.delete(follower)
@@ -293,8 +288,7 @@ def add_follower(author_id: int, follower_id: int) -> Response:
             make_response(jsonify(error=res_msg.NO_PERMISSION)),
             httpStatus.FORBIDDEN,
         )
-    follower = Requests.query.filter_by(
-        to=author_id, initiated=current_user.id).first()
+    follower = Requests.query.filter_by(to=author_id, initiated=current_user.id).first()
     if follower:
         return (
             make_response(jsonify(error=res_msg.CREATE_CONFLICT)),
@@ -324,18 +318,12 @@ def signup() -> Response:
             new_author = utils.create_author(decoded_token)
             return utils.json_response(
                 httpStatus.OK,
-                {
-                    "message": res_msg.SUCCESS_USER_CREATED,
-                    "data": new_author.json()
-                }
+                {"message": res_msg.SUCCESS_USER_CREATED, "data": new_author.json()},
             )
         else:
             return utils.json_response(
                 httpStatus.BAD_REQUEST,
-                {
-                    "message": res_msg.USER_ALREADY_EXISTS,
-                    "data": author.json()
-                }
+                {"message": res_msg.USER_ALREADY_EXISTS, "data": author.json()},
             )
     except Exception as e:
         return utils.json_response(
@@ -344,7 +332,7 @@ def signup() -> Response:
         )
 
 
-@ bp.route("/login", methods=["POST"])
+@bp.route("/login", methods=["POST"])
 def login() -> Response:
     # get token from authorization header
     token = request.form.get("token")
@@ -359,19 +347,13 @@ def login() -> Response:
 
         if not author:
             return utils.json_response(
-                httpStatus.BAD_REQUEST,
-                {
-                    "message": res_msg.USER_DOES_NOT_EXIST
-                }
+                httpStatus.BAD_REQUEST, {"message": res_msg.USER_DOES_NOT_EXIST}
             )
         else:
             login_user(author)
             return utils.json_response(
                 httpStatus.OK,
-                {
-                    "message": res_msg.SUCCESS_VERIFY_USER,
-                    "data": author.json()
-                }
+                {"message": res_msg.SUCCESS_VERIFY_USER, "data": author.json()},
             )
     except Exception as e:
         return utils.json_response(
@@ -380,23 +362,19 @@ def login() -> Response:
         )
 
 
-@ bp.route('/logout')
-@ login_required
+@bp.route("/logout")
+@login_required
 def logout() -> Response:
     try:
         logout_user()
-        return utils.json_response(
-            httpStatus.OK,
-            {"message": res_msg.SUCCESS_LOGOUT}
-        )
+        return utils.json_response(httpStatus.OK, {"message": res_msg.SUCCESS_LOGOUT})
     except Exception as e:
         return utils.json_response(
-            httpStatus.INTERNAL_SERVER_ERROR,
-            {"message": res_msg.LOGOUT_ERROR}
+            httpStatus.INTERNAL_SERVER_ERROR, {"message": res_msg.LOGOUT_ERROR}
         )
 
 
-@ bp.route('/login_test', methods=['GET'])
-@ login_required
+@bp.route("/login_test", methods=["GET"])
+@login_required
 def login_test() -> Response:
     return make_response(jsonify(message="Successful log in")), httpStatus.OK
