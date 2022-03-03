@@ -8,7 +8,7 @@ type State = {
     category: string
     title: string
     authorDisplayName: string
-    authorId: any
+    authorId: number | null
 };
 
 class PostForm extends Component<Props, State> {
@@ -19,7 +19,7 @@ class PostForm extends Component<Props, State> {
             category: "",
             title: "",
             authorDisplayName: "",
-            authorId: null
+            authorId: null 
         };
         
         this.handleBody = this.handleBody.bind(this);

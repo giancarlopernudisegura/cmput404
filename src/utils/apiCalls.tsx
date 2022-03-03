@@ -107,3 +107,14 @@ export function newPublicPost(authorId: any, postData: any) {
   }).catch(err => {console.log(err)});
 
 }
+
+export const logOutCall = async () => {
+  const res = await fetch(`${BACKEND_HOST}/logout`, {
+    mode: 'cors',
+    credentials: 'include',
+    method: 'POST',
+  });
+
+  let json = await res.json();
+  return json;
+}

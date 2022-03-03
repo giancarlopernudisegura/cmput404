@@ -364,7 +364,7 @@ def login() -> Response:
         )
 
 
-@bp.route("/logout")
+@bp.route("/logout", methods=["POST"])
 @login_required
 def logout() -> Response:
     try:

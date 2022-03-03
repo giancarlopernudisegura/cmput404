@@ -4,6 +4,7 @@ import { getPosts, get_author_id } from '../utils/apiCalls';
 
 import Post from '../components/Post';
 import PostForm from '../components/PostForm';
+import DrawerMenu from '../components/sidemenu-components/Drawer';
 
 type ExplorePageProps = { path: string };
 
@@ -33,31 +34,32 @@ function ExplorePage({ path }: ExplorePageProps) {
     
 
     return (
-            <div id="explore">
-                <PostForm />
+        <DrawerMenu pageName="Explore">
+            <PostForm />
+            
+            <div id="post-grid">
+            {posts.length > 0 &&
+                <ul>
+                    {posts.map(post => (
+                        <li>
+                            <Post
+                                title={post.title}
+                                body={post.description}
+                                author={post.author} />
+                        </li>
+                    ))}
 
-                {posts.length > 0 &&
-                    <ul className="grid grid-cols-1 gap-y-7">
-                        {posts.map(post => (
-                            <li>
-                                <Post
-                                    title={post.title}
-                                    body={post.description}
-                                    author={post.author} />
-                            </li>
-                        ))}
+                </ul>
+            }
 
-                    </ul>
-                }
-
-                {posts === undefined &&
-                    <div>
-                        <h1>No posts yet!</h1>
-                    </div>
-                }
-            </div>
-
-);
+            {posts === undefined &&
+                <div>
+                    <h1>No posts yet!</h1>
+                </div>
+            }
+        </div>
+        </DrawerMenu>
+    );
 }
 
 export default ExplorePage;
