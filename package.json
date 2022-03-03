@@ -11,8 +11,10 @@
     "@mui/material": "^5.4.1",
     "dotenv": "^16.0.0",
     "firebase": "^9.6.6",
+    "material-icons": "^1.10.7",
     "preact": "^10.4.4",
     "preact-router": "^3.2.1",
+    "react-pro-sidebar": "^0.7.1",
     "typescript": "^3.9.3",
     "unistore": "^3.5.1"
   },
@@ -27,6 +29,7 @@
     "cssnano": "^5.0.17",
     "enzyme": "^3.11.0",
     "enzyme-to-json": "^3.5.0",
+    "file-loader": "^6.2.0",
     "html-webpack-plugin": "^4.3.0",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^26.0.1",

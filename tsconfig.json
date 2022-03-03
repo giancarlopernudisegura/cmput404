@@ -14,5 +14,9 @@
     "strict": true,
     "moduleResolution": "node",
     "experimentalDecorators": true
-  }
+  },
+  "files": [
+    "src/index.d.ts"],
+  "include": ["./src/**/*.tsx"],
+  "exclude": ["dist", "build", "node_modules"]
 }
