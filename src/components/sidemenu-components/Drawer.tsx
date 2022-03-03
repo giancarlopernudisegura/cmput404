@@ -21,20 +21,16 @@ import { route } from 'preact-router';
 import { useState } from "preact/hooks";
 import { logOutCall } from '../../utils/apiCalls';
 
+// Drawer Implementation retrieved from MUI Official Documentation. (n.d.). React drawer component. MUI. Retrieved March 3, 2022, from https://mui.com/components/drawers/#responsive-drawer
+
 const drawerWidth = 240;
 
 type drawerProps = { path: string };
 
 interface Props {
-  /**
-   * Injected by the documentation to work in an iframe.
-   * You won't need it on your project.
-   */
   window?: () => Window;
   pageName: string;
   navLink: string;
-//   children: any;
-//   path: string;
 }
 
 
@@ -120,14 +116,13 @@ function DrawerMenu(props: any) {
         sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
         aria-label="explore page"
       >
-        {/* The implementation can be swapped with js to avoid SEO duplication of links. */}
         <Drawer
           container={container}
           variant="temporary"
           open={mobileOpen}
           onClose={handleDrawerToggle}
           ModalProps={{
-            keepMounted: true, // Better open performance on mobile.
+            keepMounted: true,
           }}
           sx={{
             display: { xs: "block", sm: "none" },

@@ -51,3 +51,9 @@ flask run
 ### Firebase Authentication
 - https://firebase.google.com/docs/reference/js/v8/firebase.auth.GithubAuthProvider
 - https://firebase.google.com/docs/auth/web/github-auth
+
+### Material UI Drawer Implementation
+- MUI Official Documentation. (n.d.). React drawer component. MUI. Retrieved March 3, 2022, from https://mui.com/components/drawers/#responsive-drawer
+
+### Tailwind NavBar Implementation
+- Flowbite Documentation. (n.d.). Tailwind CSS Navbar. Flowbite. Retrieved March 3, 2022, from https://flowbite.com/docs/components/navbar/  
