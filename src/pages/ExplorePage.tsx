@@ -1,7 +1,6 @@
 import { h } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
-
-import { getPosts, getAllAuthors } from '../utils/apiCalls';
+import { getPosts, getAllAuthors, get_author_id } from '../utils/apiCalls';
 
 import Post from '../components/Post';
 import PostForm from '../components/PostForm';
@@ -11,21 +10,26 @@ type ExplorePageProps = { path: string };
 
 function ExplorePage({ path }: ExplorePageProps) {
 
-    const [ posts, setPosts ] = useState(Array());
+    const [posts, setPosts] = useState(Array());
 
     useEffect(() => {
         function getPostsFromAPI() {
-            let author_id = 2; //TODO: temp, should display all authors with public posts 
-            const response = getPosts(author_id);                        
-            response.then(data => {
-                setPosts(data);
-            })
-            .catch(err => {
-                alert(err);
-            });
+            console.log("Getting posts from API...");
+            //TODO: temp, should display all authors with public posts
+            get_author_id()
+                .then(author_id => {
+                    const response = getPosts(author_id);
+                    response
+                        .then(data => {
+                            setPosts(data);
+                        })
+                        .catch(err => {
+                            alert(err);
+                        });
+                })
+                .catch(console.error);
         }
-        getPostsFromAPI(); 
-    
+        getPostsFromAPI();
     }, []);
 
     
