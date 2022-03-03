@@ -1,6 +1,4 @@
 import { h } from 'preact';
-import { Button } from '@mui/material';
-import Logo from '../assets/images/tiktaktoe-logo.png';
 
 function Header() {
     return (

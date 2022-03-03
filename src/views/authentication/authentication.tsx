@@ -1,7 +1,4 @@
-import React from 'react'
 import { h, Component, ComponentChild } from 'preact'
-import Divider from '../../components/or-divider'
-import Footer from '../../components/Footer'
 
 type AuthProps = {
   path: string

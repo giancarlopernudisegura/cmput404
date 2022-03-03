@@ -1,4 +1,3 @@
-import React from "react";
 import { h } from "preact";
 import DrawerMenu from "../components/sidemenu-components/Drawer";
 

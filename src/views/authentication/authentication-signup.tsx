@@ -1,8 +1,5 @@
-import React from 'react'
 import { h, Component, ComponentChild } from 'preact'
 import Input from '../../components/Auth-Components/input'
-import Divider from '../../components/or-divider'
-import Footer from '../../components/Footer'
 import Link from 'preact-router'
 
 type AuthProps = {
@@ -68,7 +65,6 @@ function SignUp({path}: AuthProps) {
             </div>
         </form>
         </div>
-        <Footer></Footer>
     </div>
   )
 }
