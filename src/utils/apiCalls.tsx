@@ -78,9 +78,7 @@ export function newPublicPost(authorId: number, postData: any) {
       'Content-Type': 'application/json; charset=utf-8',
     },
     body: postData
-  }).then(res => res.json())
-    .then(data => {console.log(data)})
-    .catch(err => {alert(err);});
+  }).catch(err => {console.log(err)});
 
 
 }
