@@ -231,7 +231,7 @@ class Like(db.Model):
 class Requests(db.Model):  # follow requests
     __tablename__ = "requests"
     id = db.Column(db.Integer, primary_key=True)
-    initiated = db.Column(db.ForeignKey("author.id"))
+    initiated = db.Column(db.ForeignKey("author.id"))#follower
     to = db.Column(db.ForeignKey("author.id"))
     timestamp = db.Column(db.DateTime())
 
@@ -246,6 +246,11 @@ class Requests(db.Model):  # follow requests
 
     def __repr__(self):
         return f"<id {self.id}>"
+
+    def get_follower_josn(self) -> Dict[str, Any]:#
+        follower = Author.query.filter_by(id=self.initiated).first()
+        print(f"follower type {type(follower)}")
+        return follower.json()
 
     @staticmethod
     def are_friends(author_id1: int, author_id2: int) -> bool:
