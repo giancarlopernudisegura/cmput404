@@ -12,16 +12,14 @@ import { Button, ListItemIcon } from "@mui/material";
 import { ListItemText } from "@mui/material";
 import Home from "@mui/icons-material/Home";
 import Notification from "@mui/icons-material/Notifications";
-import Logout from "@mui/icons-material/Logout";
-import MyProfile from "@mui/icons-material/Person";
 import { Toolbar } from "@mui/material";
 import { Typography } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import Person from "@mui/icons-material/Person";
 import { Settings } from "@mui/icons-material";
 import { route } from 'preact-router';
-import { Link } from "preact-router";
 import { useState } from "preact/hooks";
+import { logOutCall } from '../../utils/apiCalls';
 
 const drawerWidth = 240;
 
@@ -48,6 +46,14 @@ function DrawerMenu(props: any) {
     setMobileOpen(!mobileOpen);
   };
 
+  const logOutHandler = async () => {
+    try {
+      await logOutCall();
+      route('/app/login')
+    } catch (err) {
+      // TODO: handle error with logging out
+    }
+  }
 
   const drawer = (
     <div id="drawer-component">
@@ -106,7 +112,7 @@ function DrawerMenu(props: any) {
           <Typography variant="h6" noWrap component="div">
             {props.pageName}
           </Typography>
-          <Button>Log out</Button>
+          <Button onClick={logOutHandler}>Log out</Button>
         </Toolbar>
       </AppBar>
       <Box
