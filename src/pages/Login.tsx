@@ -37,5 +37,19 @@ export default class Login extends Component<Props, State> {
     </div>
     </div>
     );
+
+    // return (
+    //   <div class="text-3xl">
+    //     {message}
+    //     <h1>Welcome to TikTakToe</h1>
+    //     <p>Connect with your friends in a private manner.</p>
+    //     <p>Currently we only support login with Github</p>
+    //     <div>
+    //       <h2>Log in to your account</h2>
+    //       <Button onClick={signUpWithGithub} variant="contained">Sign up with Github</Button>
+    //       <Button onClick={signInWithGithub} variant="contained">Log in with Github</Button>
+    //     </div>
+    //   </div>
+    // );
   }
 }
