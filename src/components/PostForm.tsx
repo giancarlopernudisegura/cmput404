@@ -59,8 +59,8 @@ class PostForm extends Component<Props, State> {
             "visibility": "PUBLIC",
             "unlisted": false,
         }
-        var encodedPostData = encodeURIComponent(JSON.stringify(postData));
 
+        const encodedPostData = JSON.stringify(postData);
         newPublicPost(authorId, encodedPostData);
 
         alert('Shared a post');

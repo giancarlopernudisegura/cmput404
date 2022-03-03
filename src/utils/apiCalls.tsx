@@ -75,7 +75,7 @@ export function newPublicPost(authorId: number, postData: any) {
     method: 'POST',
     credentials: 'include',
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
+      'Content-Type': 'application/json; charset=utf-8',
     },
     body: postData
   }).then(res => res.json())

@@ -114,19 +114,21 @@ def post(author_id: int) -> Response:
                 httpStatus.UNAUTHORIZED,
             )
         author = author_id
+
+        json_val = request.json
         try:
-            title = request.form["title"]
-            category = request.form["category"]
-            content = request.form["content"]
-            unlisted = request.form.get("unlisted") or False
-            contentType = ContentType(request.form["contentType"])
+            title = json_val["title"]
+            category = json_val["category"]
+            content = json_val["content"]
+            unlisted = json_val.get("unlisted", False)
+            contentType = ContentType(json_val["contentType"])
         except KeyError:
             return Response(status=httpStatus.BAD_REQUEST)
         except ValueError:
             return Response(status=httpStatus.BAD_REQUEST)
 
         if (
-            not (visibility := request.form.get("visibility").upper())
+            not (visibility := json_val["visibility"].upper())
             in post_visibility_map
         ):
             # bad visibility type or no visibility given
