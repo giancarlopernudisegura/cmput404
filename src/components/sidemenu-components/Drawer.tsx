@@ -8,7 +8,7 @@ import { IconButton } from "@mui/material";
 import ExploreIcon from "@mui/icons-material/Explore";
 import { List } from "@mui/material";
 import { ListItem } from "@mui/material";
-import { ListItemIcon } from "@mui/material";
+import { Button, ListItemIcon } from "@mui/material";
 import { ListItemText } from "@mui/material";
 import Home from "@mui/icons-material/Home";
 import Notification from "@mui/icons-material/Notifications";
@@ -106,6 +106,7 @@ function DrawerMenu(props: any) {
           <Typography variant="h6" noWrap component="div">
             {props.pageName}
           </Typography>
+          <Button>Log out</Button>
         </Toolbar>
       </AppBar>
       <Box
