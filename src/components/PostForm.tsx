@@ -1,14 +1,14 @@
 import { h, Component } from 'preact';
 import { Button } from '@mui/material';
-import { newPublicPost } from '../utils/apiCalls';
-
-import { generateId } from '../utils/utilMethods';
+import { newPublicPost, getCurrentAuthor } from '../utils/apiCalls';
 
 type Props = {  };
 type State = { 
     body: string
-    tags: Array<string>
+    category: string
     title: string
+    authorDisplayName: string
+    authorId: number
 };
 
 class PostForm extends Component<Props, State> {
@@ -16,15 +16,19 @@ class PostForm extends Component<Props, State> {
         super();
         this.state = { 
             body: "What's on your mind?",
-            tags: [''],
-            title: ""
+            category: "",
+            title: "",
+            authorDisplayName: "",
+            authorId: 2
         };
         
         this.handleBody = this.handleBody.bind(this);
         this.handleTitle = this.handleTitle.bind(this);
-        // this.handleTags = this.handleTags.bind(this);
-        
+        this.handleCategory = this.handleCategory.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.setAuthorDetails = this.setAuthorDetails.bind(this);
+
+        this.setAuthorDetails();
     }
 
 
@@ -40,34 +44,36 @@ class PostForm extends Component<Props, State> {
         }
     }
 
-    // handleTags(event: Event) { 
-    //     if (event){
-    //         this.setState({ tags: (event.target as HTMLInputElement).value });
-    //     }
-    // }
+    handleCategory(event: Event) { 
+        if (event){
+            this.setState({ category: (event.target as HTMLInputElement).value });
+        }
+    }
+
+    setAuthorDetails() {
+        getCurrentAuthor().then(data => {
+            this.setState({ 
+                authorDisplayName: data.displayName,
+                authorId: data.id
+            });
+        });
+    }
 
     handleSubmit = (event: Event): void => {
-        console.log("The message: " + this.state.title + "\n" + this.state.body);
-        
-        const authorId = 2; // temp
-
-        var postData = {
+        const postData = {
             "title": this.state.title,
             "content": this.state.body,
-            "category": "temp",
-            "contentType": "text/plain", //temp writing plain text
+            "category": this.state.category,
+            "contentType": "text/plain", //TODO: check for markdown 
             "visibility": "PUBLIC",
             "unlisted": false,
         }
-
         const encodedPostData = JSON.stringify(postData);
-        newPublicPost(authorId, encodedPostData);
-
-        alert('Shared a post');
+        newPublicPost(this.state.authorId, encodedPostData);
+        
+        alert('You have successfully posted to your public page!');
         event.preventDefault();
     };
-
-
 
     render() {
 
@@ -75,19 +81,29 @@ class PostForm extends Component<Props, State> {
             <div class="create-post"
                 className="bg-zinc-100 border-solid border-1 border-slate-600 w-2/3 m-auto rounded-lg py-4 px-5  my-5">
                     {/* TODO: Create a markdown editor  */}
-                    {/* TODO: add current user's username and displayImage from /user_me */}
+                    <div class="displayname"
+                        className="mb-4 font-semibold">
+                        {this.state.authorDisplayName}
+                    </div>
 
                     <form onSubmit={this.handleSubmit} className="grid grid-cols-1 gap-y-3">
-                        <label>Title</label>
-                        <input type="text"
-                            onChange={this.handleTitle}></input>
+                        <div className='grid grid-cols-1 gap-y-2'>
+                            <label className=''>Title</label>
+                            <input type="text"
+                                onChange={this.handleTitle}></input>
+                        </div>
+
                         <textarea type="text"
                             value={this.state.body}
                             onChange={this.handleBody}
-                            className="w-full" >    
+                            className="w-full" 
+                        >    
                         </textarea>
-                        <label>Tags</label>
-                        <input type="text"></input>
+
+                        <div className='grid grid-cols-1 gap-y-2'>
+                            <label>Category</label>
+                            <input type="text"></input>
+                        </div>
 
                         <Button variant="contained"
                             type="submit"

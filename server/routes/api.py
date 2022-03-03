@@ -402,3 +402,21 @@ def logout() -> Response:
 @ login_required
 def login_test() -> Response:
     return make_response(jsonify(message="Successful log in")), httpStatus.OK
+
+
+@bp.route('/user_me')
+@login_required
+def get_user_me() -> Response:
+    try:
+        return utils.json_response(
+            httpStatus.OK,
+            {
+                "message": res_msg.SUCCESS_VERIFY_USER,
+                "data": current_user.json()
+            }
+        )
+    except Exception as e:
+        return utils.json_response(
+            httpStatus.INTERNAL_SERVER_ERROR,
+            {"message": res_msg.GENERAL_ERROR + str(e)}
+        )

@@ -1,14 +1,26 @@
 const BACKEND_HOST = process.env.FLASK_HOST;
-
-export const get_author_me = async () => {
-  let res = await fetch(`${BACKEND_HOST}/user_me`, {
+/**
+ * Returns the current user's information.
+ * 
+ * Reference: https://dev.to/ramonak/javascript-how-to-access-the-return-value-of-a-promise-object-1bck
+ */
+export function getCurrentAuthor() {
+  const currentAuthor = fetch(`${BACKEND_HOST}/user_me`, {
     mode: 'cors',
     credentials: 'include',
     method: 'GET',
-  });
-  let json = await res.json();
-  let data = json.data()
-  return data;
+  })
+  .then(res => res.json())
+  .then(user_data => { return user_data.data })
+  .catch(err => { console.log("ERROR:", err) });
+
+  const getAuthor = async () => {
+    const author = await currentAuthor;
+    return author;
+  }
+  
+  return getAuthor();
+
 };
 
 /**
@@ -68,7 +80,7 @@ export function getAllAuthors() {
  * @param authorId  the id of the author
  * @param postData  form data of the post 
  */
-export function newPublicPost(authorId: number, postData: any) {
+export function newPublicPost(authorId: any, postData: any) {
   // postData contains data from the forms 
   fetch(`${BACKEND_HOST}/authors/${authorId}/posts/`, {
     mode: 'cors',
@@ -79,6 +91,5 @@ export function newPublicPost(authorId: number, postData: any) {
     },
     body: postData
   }).catch(err => {console.log(err)});
-
 
 }

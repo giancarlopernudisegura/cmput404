@@ -4,7 +4,7 @@ import json
 import random
 from random import randint
 
-def make_authors_admin_verified():
+def make_authors():
     f = open('./utils/fake_data/team_data.json')
     data = json.load(f)
     for member in data['members']:
@@ -59,7 +59,7 @@ def make_posts():
 
 
 def add_and_commit():
-    make_authors_admin_verified()
+    make_authors()
     make_posts()
     db.session.commit()
 
