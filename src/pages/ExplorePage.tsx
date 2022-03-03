@@ -1,6 +1,7 @@
 import { h } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import Post from '../components/Post';
+import DrawerMenu from '../components/sidemenu-components/Drawer';
 import { getPosts, getAllAuthors, get_author_id } from '../utils/apiCalls';
 
 type ExplorePageProps = { path: string };
@@ -31,7 +32,8 @@ function ExplorePage({ path }: ExplorePageProps) {
     }, []);
 
     return (
-        <div>
+        <DrawerMenu pageName="Explore">
+            <div>
             {posts.length > 0 &&
                 <ul>
                     {posts.map(post => (
@@ -52,7 +54,7 @@ function ExplorePage({ path }: ExplorePageProps) {
                 </div>
             }
         </div>
-
+        </DrawerMenu>
     );
 }
 
