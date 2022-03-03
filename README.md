@@ -54,6 +54,7 @@ flask run
 
 ### Material UI Drawer Implementation
 - MUI Official Documentation. (n.d.). React drawer component. MUI. Retrieved March 3, 2022, from https://mui.com/components/drawers/#responsive-drawer
+- cclloyd. (2018, April 25). Both right and left aligned icons in appbar with material-ui next. Stack Overflow. Retrieved March 3, 2022, from https://stackoverflow.com/questions/50012686/both-right-and-left-aligned-icons-in-appbar-with-material-ui-next. Answered By sanky2020(2022, February 22).
 
 ### Tailwind NavBar Implementation
 - Flowbite Documentation. (n.d.). Tailwind CSS Navbar. Flowbite. Retrieved March 3, 2022, from https://flowbite.com/docs/components/navbar/  

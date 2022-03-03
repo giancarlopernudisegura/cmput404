@@ -95,7 +95,7 @@ function DrawerMenu(props: any) {
         elevation={0}
         color="default"
       >
-        <Toolbar>
+        <Toolbar style={{display:'flex', justifyContent:"space-between", width:'100%'}}>
           <IconButton
             color="inherit"
             aria-label="open drawer"
