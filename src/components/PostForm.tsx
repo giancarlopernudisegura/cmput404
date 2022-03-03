@@ -19,7 +19,7 @@ class PostForm extends Component<Props, State> {
             category: "",
             title: "",
             authorDisplayName: "",
-            authorId: 2
+            authorId: null
         };
         
         this.handleBody = this.handleBody.bind(this);
