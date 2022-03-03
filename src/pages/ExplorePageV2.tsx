@@ -1,10 +1,5 @@
 import { h } from "preact";
-import Sidebar from "../components/sidemenu-components/sidebar";
-import SideNav from "../components/sidemenu-components/SideNav";
 import DrawerMenu from "../components/sidemenu-components/Drawer";
-import { Box } from "@mui/material";
-import { Toolbar } from "@mui/material";
-import { Typography } from "@mui/material";
 import MakePost from '../components/Post-Components/MakePost'
 
 const drawerWidth = 240

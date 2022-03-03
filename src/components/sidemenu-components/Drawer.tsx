@@ -1,4 +1,3 @@
-import React from "react";
 import { h } from "preact";
 import { AppBar } from "@mui/material";
 import { Box } from "@mui/material";
@@ -22,6 +21,7 @@ import Person from "@mui/icons-material/Person";
 import { Settings } from "@mui/icons-material";
 import { route } from 'preact-router';
 import { Link } from "preact-router";
+import { useState } from "preact/hooks";
 
 const drawerWidth = 240;
 
@@ -42,7 +42,7 @@ interface Props {
 
 function DrawerMenu(props: any) {
   const { window } = props;
-  const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);

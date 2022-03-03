@@ -1,4 +1,3 @@
-import React from 'react'
 import { h } from 'preact'
 import { Box, FormControl } from '@mui/material';
 import { Avatar } from '@mui/material';
