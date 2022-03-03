@@ -8,13 +8,8 @@ type State = {
     category: string
     title: string
     authorDisplayName: string
-    authorId: number
+    authorId: any
 };
-
-const placeholderContent = {
-    tempBody: "What's on your mind?",
-    tempTitle: "Enter your title here",
-}
 
 class PostForm extends Component<Props, State> {
     constructor() {
@@ -95,12 +90,10 @@ class PostForm extends Component<Props, State> {
                         <div className='grid grid-cols-1 gap-y-2'>
                             <label className=''>Title</label>
                             <input type="text"
-                                placeholder={placeholderContent.tempTitle}
                                 onChange={this.handleTitle}></input>
                         </div>
 
                         <textarea type="text"
-                            placeholder={placeholderContent.tempBody}
                             value={this.state.body}
                             onChange={this.handleBody}
                             className="w-full" 
@@ -118,7 +111,7 @@ class PostForm extends Component<Props, State> {
                     </form>
 
             </div>
-
+           
         );
     }
 
