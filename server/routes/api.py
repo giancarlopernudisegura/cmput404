@@ -248,7 +248,7 @@ def post_comment(author_id: int, post_id: int) -> Response:
 def get_followers(author_id: int) -> Response:
     followers = Requests.query.filter_by(to=author_id).all()
     return (
-        make_response(jsonify(type="followers", items=[f.get_follower_josn() for f in followers])),
+        make_response(jsonify(type="followers", items=[f.get_follower_json() for f in followers])),
         httpStatus.OK,
     )
 
@@ -258,7 +258,7 @@ def is_follower(author_id: int, follower_id: int) -> Response:
     follower = Requests.query.filter_by(to=author_id, initiated=follower_id).first()
     return (
         make_response(
-            jsonify(type="followers", items=([follower.get_follower_josn()] if follower else []))
+            jsonify(type="followers", items=([follower.get_follower_json()] if follower else []))
         ),
         httpStatus.OK,
     )

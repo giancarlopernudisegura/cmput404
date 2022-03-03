@@ -247,7 +247,7 @@ class Requests(db.Model):  # follow requests
     def __repr__(self):
         return f"<id {self.id}>"
 
-    def get_follower_josn(self) -> Dict[str, Any]:#
+    def get_follower_json(self) -> Dict[str, Any]:#
         follower = Author.query.filter_by(id=self.initiated).first()
         print(f"follower type {type(follower)}")
         return follower.json()
