@@ -21,8 +21,7 @@ const authenticateWithGithub = async (signup: Boolean) => {
         token = await result.user.getIdToken();
     } catch (err) {
         // Handle errors
-        console.log(err);
-        throw err;
+        throw Error("Unable to authenticate with Github");
     }
 
     try {

@@ -77,7 +77,6 @@ function ExplorePage({ path }: ExplorePageProps) {
                 <ul>
                     {githubActivity.map(event => (
                         <li>
-                            {console.log(event)}
                             <GitHubActivity
                                 eventType={event.type}
                                 repo={event.repo}

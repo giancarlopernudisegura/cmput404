@@ -1,6 +1,5 @@
 import { h } from 'preact';
 import { Button, Card, CardContent, CardMedia } from '@mui/material';
-import { route } from 'preact-router';
 
 
 type AuthorProps = {

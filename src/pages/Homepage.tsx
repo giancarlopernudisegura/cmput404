@@ -16,7 +16,7 @@ function Homepage(props : FeedProps) {
         <DrawerMenu
         pageName="Home"
         >
-            This is a sample homepage.
+            This is to be implemented to show the relationship between the posts from your friends and followers
         </DrawerMenu>
     </div>
   )
