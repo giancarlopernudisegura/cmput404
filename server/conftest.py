@@ -24,5 +24,11 @@ def pytest_configure(config):
 def pytest_unconfigure(config):
     conn = sqlite3.connect(DB)
     conn.execute("DELETE FROM author;")
+    conn.execute("DELETE FROM post;")
+    conn.execute("DELETE FROM comment;")
+    conn.execute("DELETE FROM like;")
+    conn.execute("DELETE FROM inbox;")
+    conn.execute("DELETE FROM requests;")
+    conn.execute("DELETE FROM viewablePostRelation;")
     conn.commit()
     conn.close()

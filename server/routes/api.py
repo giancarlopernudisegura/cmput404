@@ -107,7 +107,7 @@ def post(author_id: int) -> Response:
             httpStatus.OK,
         )
     elif request.method == "POST":
-        if current_user.is_anonymous or current_user.id != author_id:
+        if not current_user.is_authenticated or current_user.id != author_id:
             return (
                 make_response(jsonify(error=res_msg.NO_PERMISSION)),
                 httpStatus.UNAUTHORIZED,
@@ -121,13 +121,17 @@ def post(author_id: int) -> Response:
             content = json_val["content"]
             unlisted = json_val.get("unlisted", False)
             contentType = ContentType(json_val["contentType"])
+            if (
+                not (visibility := json_val["visibility"].upper())
+                in post_visibility_map
+            ):
+                # bad visibility type or no visibility given
+                return Response(status=httpStatus.BAD_REQUEST)
         except KeyError:
             return Response(status=httpStatus.BAD_REQUEST)
         except ValueError:
             return Response(status=httpStatus.BAD_REQUEST)
-
-        if not (visibility := json_val["visibility"].upper()) in post_visibility_map:
-            # bad visibility type or no visibility given
+        except TypeError:
             return Response(status=httpStatus.BAD_REQUEST)
         private = post_visibility_map[visibility.upper()]
 
@@ -154,17 +158,19 @@ def specific_post(author_id: int, post_id: int) -> Response:
     if request.method != "DELETE":
         try:
             author = author_id
-            title = request.form["title"]
-            category = request.form["category"]
-            content = request.form["content"]
-            unlisted = request.form.get("unlisted") or False
-            contentType = ContentType(request.form["contentType"])
+            title = request.json["title"]
+            category = request.json["category"]
+            content = request.json["content"]
+            unlisted = request.json.get("unlisted") or False
+            contentType = ContentType(request.json["contentType"])
         except KeyError:
             return Response(status=httpStatus.BAD_REQUEST)
         except ValueError:
             return Response(status=httpStatus.BAD_REQUEST)
+        except TypeError:
+            return Response(status=httpStatus.BAD_REQUEST)
         if request.method == "PUT" and (
-            (visibility := request.form.get("visibility")) is None
+            (visibility := request.json.get("visibility").upper()) is None
             or not visibility.upper() in post_visibility_map
         ):
             return Response(status=httpStatus.BAD_REQUEST)

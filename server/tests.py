@@ -14,7 +14,6 @@ def login(client):
         content_type="application/json",
         follow_redirects=True,
     )
-    print(r.data)
     assert r.status_code == 200
 
 
@@ -62,6 +61,85 @@ def test_login(test_client):
 
 
 def test_get_authors(test_client):
-
     r = test_client.get("/authors")
     assert r.status_code == 200
+    r = test_client.get("/authors/1")
+    assert r.status_code == 200
+    r = test_client.get("/authors/2")
+    assert r.status_code == 404
+
+
+def test_posts(test_client):
+    r = test_client.get("/authors/1/posts", follow_redirects=True)
+    assert r.status_code == 200
+    r = test_client.get("/authors/1/posts/1", follow_redirects=True)
+    assert r.status_code == 404
+    login(test_client)
+    r = test_client.post(
+        "/authors/1/posts/",
+        data=json.dumps(
+            {
+                "title": "test invalid",
+                "content": "test invalid",
+                "category": "test invalid",
+                "contentType": "text/html",
+                "visibility": "public",
+            }
+        ),
+        content_type="application/json",
+        follow_redirects=True,
+    )
+    assert r.status_code == 400
+    r = test_client.post(
+        "/authors/1/posts/",
+        data=json.dumps(
+            {
+                "title": "test invalid",
+                "content": "test invalid",
+                "category": "test invalid",
+                "contentType": "text/plain",
+            }
+        ),
+        content_type="application/json",
+        follow_redirects=True,
+    )
+    assert r.status_code == 400
+    r = test_client.post(
+        "/authors/1/posts/",
+        data=json.dumps(
+            {
+                "title": "test title",
+                "content": "test content",
+                "category": "test category",
+                "contentType": "text/markdown",
+                "visibility": "public",
+            }
+        ),
+        content_type="application/json",
+        follow_redirects=True,
+    )
+    assert r.status_code == 200
+    r = test_client.get("/authors/1/posts/1", follow_redirects=True)
+    assert r.status_code == 200
+    r = test_client.get("/authors/1/posts/2", follow_redirects=True)
+    assert r.status_code == 404
+    r = test_client.put(
+        "/authors/1/posts/3",
+        data=json.dumps(
+            {
+                "title": "test title 2",
+                "content": "test content 2",
+                "category": "test category",
+                "contentType": "text/plain",
+                "visibility": "public",
+            }
+        ),
+        content_type="application/json",
+        follow_redirects=True,
+    )
+    print(r.data)
+    assert r.status_code == 201
+    r = test_client.get("/authors/1/posts/3", follow_redirects=True)
+    assert r.status_code == 200
+    r = test_client.delete("/authors/1/posts/3", follow_redirects=True)
+    assert r.status_code == 204
