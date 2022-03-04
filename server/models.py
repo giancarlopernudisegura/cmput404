@@ -7,7 +7,7 @@ import os
 from dotenv import load_dotenv
 from urllib.request import urlopen
 import json
-from typing import Any, Dict, Union
+from typing import Any, Dict, Union, Sequence
 
 
 load_dotenv()
@@ -27,7 +27,7 @@ class InboxItem(object):
     """
 
     @staticmethod
-    def get_subscribers(author_id: int) -> list[int]:
+    def get_subscribers(author_id: int) -> Sequence[int]:
         subscribers = Requests.query.filter_by(to=author_id).all()
         return [s.initiated for s in subscribers]
 
