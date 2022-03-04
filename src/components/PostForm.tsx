@@ -82,7 +82,7 @@ class PostForm extends Component<Props, State> {
             "title": this.state.title,
             "content": this.state.body,
             "category": this.state.category,
-            "contentType": contentType, //TODO: check for markdown 
+            "contentType": contentType, 
             "visibility": "PUBLIC",
             "unlisted": false,
         }
@@ -127,8 +127,6 @@ class PostForm extends Component<Props, State> {
                             <input type="text"></input>
                         </div>
 
-                        {/* TODO: toggle markdown/plaintext */}
-                        {/* TODO: toggle public or private */}
                         <div className="flex flex-row justify-between mt-3">
                             <FormControlLabel 
                                 control={<Switch />} 
@@ -141,6 +139,7 @@ class PostForm extends Component<Props, State> {
                                 className="w-1/3"
                             >Share
                             </Button>
+                        {/* TODO: toggle public or private */}
                         </div>
                     </form>
 
