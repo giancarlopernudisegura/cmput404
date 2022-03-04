@@ -24,3 +24,5 @@ TOKEN_MISSING = "Token was not included in request."
 
 NO_PERMISSION = "You do not have permission to perform this action."
 CREATE_CONFLICT = "The resource you are trying to create is already exists."
+
+NOT_IMAGE = "The given post is not an image."
