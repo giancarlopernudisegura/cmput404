@@ -5,7 +5,8 @@ import { getPosts, get_author_id } from '../utils/apiCalls';
 import Post from '../components/Post';
 import PostForm from '../components/PostForm';
 import DrawerMenu from '../components/sidemenu-components/Drawer';
-import SearchField from '../components/search/SearchField';
+import SearchBar from './SearchBar';
+
 
 type ExplorePageProps = { path: string };
 
@@ -36,6 +37,7 @@ function ExplorePage({ path }: ExplorePageProps) {
 
     return (
         <DrawerMenu pageName="Explore">
+            <SearchBar />
             <PostForm />
             
             <div id="post-grid">

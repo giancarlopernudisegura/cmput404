@@ -1,21 +1,19 @@
 import { h } from 'preact';
 import { useEffect, useState } from "preact/hooks";
-import SearchField from "../components/search/SearchField";
-import DrawerMenu from "../components/sidemenu-components/Drawer";
 import { getAllAuthors } from "../utils/apiCalls";
 import ShowAuthor from "../components/search/ShowAuthor";
-import { Link } from 'preact-router/match'
 import { Router, route } from 'preact-router';
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from "@mui/material/TextField";
+import { Button, Card, CardContent, CardMedia } from '@mui/material';
 
 
-type Props = {
-    path: string;
-};
 
-const Search = ({ path }: Props) => {
-    const [ infoSearch, setInfoSearch ] = useState('');
-    const [ currentUserId, setCurrentUserId ] = useState();
+
+const Search = () => {
+    const [ currentUserId, setCurrentUserId ] = useState<number | null>(null);
     const [ authors, setAuthors ] = useState(Array());
+    const [ searchResult, setSearchResult ] = useState(Array());
 
     useEffect(() => {
         async function getAllAuthorsFromAPI() {
@@ -23,7 +21,7 @@ const Search = ({ path }: Props) => {
             let page : number = 1;
             let allAuthors = Array();
             let listOfAuthors = Array();
-            let userId = null;
+            let userId : number | null = null;
             while (true) {
                 try {
                     res = await getAllAuthors(page);
@@ -43,36 +41,36 @@ const Search = ({ path }: Props) => {
                     break;
                 }
             }
-            setAuthors(allAuthors);
+
+            const otherAuthors = allAuthors.filter(author => {
+                if (author.id != userId) {
+                    return author;
+                }
+            });
+
+            setAuthors(otherAuthors);
         }
         getAllAuthorsFromAPI();
     }, []);
 
-    const updateSearchButton = (event : any) => {
-        setInfoSearch(event.target.value);
-    }
-
-    const searchButton = () => {
-
+    const handleClick = (authorId : number) => {
+        route(`/app/user/${authorId}`);
     }
 
     return (
         <div>
-            <DrawerMenu
-            pageName="Notifications"
-            >
-                <SearchField 
-                    searchInfo={infoSearch}
-                    updateSearchButton={updateSearchButton}
-                    searchButton={searchButton}
-                />
 
-                {authors.filter(author => {
-                    if (author.id != currentUserId) {
-                        return author;
-                    }
-                }).map(author => ShowAuthor(author))}
-            </DrawerMenu>
+            {searchResult.map(author => ShowAuthor(author))}
+
+            <Autocomplete 
+                freeSolo
+                options={[...authors]}
+                renderOption={(props, option, {selected}) => (
+                    <ShowAuthor author={option} handleClick={handleClick} />
+                )}
+                getOptionLabel={(option) => option.github}
+                renderInput={params => <TextField {...params} label="freeSolo" />}
+            />
 
         </div>
     );

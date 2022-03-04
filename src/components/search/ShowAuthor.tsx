@@ -10,23 +10,16 @@ type AuthorProps = {
     profileImage: string
 }
 
-const ShowAuthor = ( author : AuthorProps) => {
-    const handleClick = () => {
-        route(`/app/user/${author.id}`);
-    }
+const ShowAuthor = ({ author, handleClick } : any) => {
 
     return (
-        <Card
-            sx={{
-                marginBottom: "em"
-            }}
+        <div  style={{cursor: 'pointer'}} onClick={() => handleClick(author.id)}
         >
             <CardContent>
-                <Button onClick={() => { return handleClick()}}>{author.displayName}</Button>
                 <p>{author.github}</p>
             </CardContent>
             <img src={author.profileImage} style={{ width: "30%"}} />
-        </Card>
+        </div>
     );
 }
 

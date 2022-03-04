@@ -8,10 +8,10 @@ import { Button } from "@mui/material";
 
 type UserProps = {
     path: string,
-    userId?: number
+    followId?: number
 };
 
-const UserPage = ({ path, userId }: UserProps) => {
+const UserPage = ({ path, followId }: UserProps) => {
     const [ doesFollow, setDoesFollow ] = useState(false);
     const [ isLoading, setIsLoading ] = useState(true);
     const [ currentUserId, setCurrentUserId ] = useState(-1);
@@ -24,8 +24,8 @@ const UserPage = ({ path, userId }: UserProps) => {
             setCurrentUserId(myUserId);
 
             let res;
-            if (userId !== undefined) {
-                res = await followerCall(myUserId, userId, "GET");
+            if (followId !== undefined) {
+                res = await followerCall(followId, myUserId, "GET");
             } else {
                 return;
             }
@@ -48,15 +48,15 @@ const UserPage = ({ path, userId }: UserProps) => {
     }, []);
 
     const handleFollow = async () => {
-        if (userId !== undefined) {
+        if (followId !== undefined) {
             let res;
             if (doesFollow === true) {
-                res = await followerCall(currentUserId, userId, "DELETE");
+                res = await followerCall(followId, currentUserId, "DELETE");
                 if (res.status === 204) {
                     setDoesFollow(false)
                 }
             } else {
-                res = await followerCall(currentUserId, userId, "PUT");
+                res = await followerCall(followId, currentUserId, "PUT");
                 if (res.status === 200) {
                     setDoesFollow(true);
                 }
