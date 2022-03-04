@@ -2,10 +2,10 @@ from flask_login import UserMixin
 from flask import current_app
 from server.exts import db
 from server.enums import ContentType
+from server.utils.exts import get_github_info
 import datetime
 import os
 from dotenv import load_dotenv
-from urllib.request import urlopen
 import json
 from typing import Any, Dict, Union, Sequence
 
@@ -64,8 +64,7 @@ class Author(db.Model, UserMixin, JSONSerializable):
 
     def json(self) -> Dict[str, str]:
         # get username from github id
-        resp = urlopen(f"https://api.github.com/user/{self.githubId}")
-        data = json.loads(resp.read().decode("utf-8"))
+        data = get_github_info(self.githubId)
 
         return {
             "type": "author",
@@ -249,10 +248,10 @@ class Like(db.Model, JSONSerializable, InboxItem):
         db.session.commit()
 
 
-class Requests(db.Model):  # follow requests
+class Requests(db.Model, JSONSerializable):  # follow requests
     __tablename__ = "requests"
     id = db.Column(db.Integer, primary_key=True)
-    initiated = db.Column(db.ForeignKey("author.id"))#follower
+    initiated = db.Column(db.ForeignKey("author.id"))  # follower
     to = db.Column(db.ForeignKey("author.id"))
     timestamp = db.Column(db.DateTime())
 
@@ -268,9 +267,8 @@ class Requests(db.Model):  # follow requests
     def __repr__(self):
         return f"<id {self.id}>"
 
-    def get_follower_json(self) -> Dict[str, Any]:#
+    def get_follower_json(self) -> Dict[str, Any]:
         follower = Author.query.filter_by(id=self.initiated).first()
-        print(f"follower type {type(follower)}")
         return follower.json()
 
     @staticmethod
@@ -278,6 +276,12 @@ class Requests(db.Model):  # follow requests
         r1 = Requests.query.filter_by(initiated=author_id1, to=author_id2).first()
         r2 = Requests.query.filter_by(initiated=author_id2, to=author_id1).first()
         return r1 and r2
+
+    def json(self) -> Dict[str, Any]:
+        return {
+            "type": "followers",
+            "items": [self.get_follower_json()],
+        }
 
 
 class ViewablePostRelation(db.Model):
@@ -316,13 +320,14 @@ class Inbox(db.Model, JSONSerializable):
         if argNoneCount < 2:
             raise Exception("Inbox can't relate multiple objects")
         elif argNoneCount == 3:
+            print(like, post, follow)
             raise Exception("Inbox must relate one object")
         self.post = post
         self.like = like
         self.follow = follow
 
     def __repr__(self):
-        return f"<id {self.id}>"
+        return f"<id {self.id} {self.post} {self.like} {self.follow}>"
 
     def json(self) -> Dict[str, Any]:
         if self.post:
