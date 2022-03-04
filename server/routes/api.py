@@ -113,19 +113,21 @@ def post(author_id: int) -> Response:
                 httpStatus.UNAUTHORIZED,
             )
         author = author_id
+
+        json_val = request.json
         try:
-            title = request.form["title"]
-            category = request.form["category"]
-            content = request.form["content"]
-            unlisted = request.form.get("unlisted") or False
-            contentType = ContentType(request.form["contentType"])
+            title = json_val["title"]
+            category = json_val["category"]
+            content = json_val["content"]
+            unlisted = json_val.get("unlisted", False)
+            contentType = ContentType(json_val["contentType"])
         except KeyError:
             return Response(status=httpStatus.BAD_REQUEST)
         except ValueError:
             return Response(status=httpStatus.BAD_REQUEST)
 
         if (
-            not (visibility := request.form.get("visibility").upper())
+            not (visibility := json_val["visibility"].upper())
             in post_visibility_map
         ):
             # bad visibility type or no visibility given
@@ -250,7 +252,7 @@ def post_comment(author_id: int, post_id: int) -> Response:
 def get_followers(author_id: int) -> Response:
     followers = Requests.query.filter_by(to=author_id).all()
     return (
-        make_response(jsonify(type="followers", items=[f.json() for f in followers])),
+        make_response(jsonify(type="followers", items=[f.get_follower_json() for f in followers])),
         httpStatus.OK,
     )
 
@@ -260,7 +262,7 @@ def is_follower(author_id: int, follower_id: int) -> Response:
     follower = Requests.query.filter_by(to=author_id, initiated=follower_id).first()
     return (
         make_response(
-            jsonify(type="followers", items=([follower.json()] if follower else []))
+            jsonify(type="followers", items=([follower.get_follower_json()] if follower else []))
         ),
         httpStatus.OK,
     )
@@ -433,7 +435,7 @@ def login() -> Response:
         )
 
 
-@bp.route("/logout")
+@bp.route("/logout", methods=["POST"])
 @login_required
 def logout() -> Response:
     try:
@@ -449,3 +451,21 @@ def logout() -> Response:
 @login_required
 def login_test() -> Response:
     return make_response(jsonify(message="Successful log in")), httpStatus.OK
+
+
+@bp.route('/user_me')
+@login_required
+def get_user_me() -> Response:
+    try:
+        return utils.json_response(
+            httpStatus.OK,
+            {
+                "message": res_msg.SUCCESS_VERIFY_USER,
+                "data": current_user.json()
+            }
+        )
+    except Exception as e:
+        return utils.json_response(
+            httpStatus.INTERNAL_SERVER_ERROR,
+            {"message": res_msg.GENERAL_ERROR + str(e)}
+        )

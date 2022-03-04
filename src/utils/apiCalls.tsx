@@ -1,4 +1,27 @@
 const BACKEND_HOST = process.env.FLASK_HOST;
+/**
+ * Returns the current user's information.
+ * 
+ * Reference: https://dev.to/ramonak/javascript-how-to-access-the-return-value-of-a-promise-object-1bck
+ */
+export function getCurrentAuthor() {
+  const currentAuthor = fetch(`${BACKEND_HOST}/user_me`, {
+    mode: 'cors',
+    credentials: 'include',
+    method: 'GET',
+  })
+  .then(res => res.json())
+  .then(user_data => { return user_data.data })
+  .catch(err => { console.log("ERROR:", err) });
+
+  const getAuthor = async () => {
+    const author = await currentAuthor;
+    return author;
+  }
+  
+  return getAuthor();
+
+};
 
 export const get_author_id = async () => {
   const res = await fetch(`${BACKEND_HOST}/login_test`, {
@@ -11,6 +34,12 @@ export const get_author_id = async () => {
   }
   throw new Error('Could not get user id');
 };
+
+/**
+ * Gets the posts of the given author_id
+ * @param author_id 
+ * @returns Array<Post>
+ */
 
 export function getPosts(author_id: string): Promise<any> {
 
@@ -35,9 +64,13 @@ export function getPosts(author_id: string): Promise<any> {
   return listOfPosts;
 
 };
-
+/**
+ * Gets a list of all authenticated authors
+ * with their id and displayName
+ * @returns Array<Author>
+ */
 export function getAllAuthors() {
-  let listOfAuthors = fetch(`${BACKEND_HOST}/authors/`, {
+  const listOfAuthors = fetch(`${BACKEND_HOST}/authors/`, {
     mode: 'cors',
     method: 'GET',
   }).then(res => res.json())
@@ -52,9 +85,27 @@ export function getAllAuthors() {
       }
       return authors;
     })
-    .catch(err => { alert(err); });
+    .catch(err => {alert(err);});
+  
+    return listOfAuthors;
+} 
+/**
+ * Sends a post to the backend
+ * @param authorId  the id of the author
+ * @param postData  form data of the post 
+ */
+export function newPublicPost(authorId: any, postData: any) {
+  // postData contains data from the forms 
+  fetch(`${BACKEND_HOST}/authors/${authorId}/posts/`, {
+    mode: 'cors',
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+    },
+    body: postData
+  }).catch(err => {console.log(err)});
 
-  return listOfAuthors;
 }
 
 export async function getInbox(author_id: string) {
@@ -76,4 +127,15 @@ export async function clearInbox(author_id: string): Promise<boolean> {
     method: 'DELETE'
   })
   return res.status === 200;
+}
+
+export const logOutCall = async () => {
+  const res = await fetch(`${BACKEND_HOST}/logout`, {
+    mode: 'cors',
+    credentials: 'include',
+    method: 'POST',
+  });
+
+  let json = await res.json();
+  return json;
 }

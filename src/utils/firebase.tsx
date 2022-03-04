@@ -22,8 +22,7 @@ const authenticateWithGithub = async (signup: Boolean) => {
     } catch (err) {
         // Handle errors
         console.log(err);
-        console.log("ERROR", err);
-        return { isSuccess: false };
+        throw err;
     }
 
     try {
@@ -42,9 +41,9 @@ const authenticateWithGithub = async (signup: Boolean) => {
         });
 
         let json = res.json();
-        return { ...json, isSucess: true }
+        return json
     } catch (err) {
-        return { isSuccess: false };
+        throw err;
     }
 };
 

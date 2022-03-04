@@ -1,11 +1,13 @@
 import { h } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import GitHubActivity from '../components/GitHubActivity';
+import { getPosts, get_author_id, getInbox, getGithubStream } from '../utils/apiCalls';
 import Post from '../components/Post';
-import { get_author_id, getInbox, getGithubStream } from '../utils/apiCalls';
+import PostForm from '../components/PostForm';
+import DrawerMenu from '../components/sidemenu-components/Drawer';
+import SearchField from '../components/search/SearchField';
 
 type ExplorePageProps = { path: string };
-
 
 function ExplorePage({ path }: ExplorePageProps) {
 
@@ -42,8 +44,14 @@ function ExplorePage({ path }: ExplorePageProps) {
         })();
     }, []);
 
+    
+
     return (
-        <div>
+        <DrawerMenu pageName="Explore">
+            <SearchField />
+            <PostForm />
+            
+            <div id="post-grid">
             {posts.length > 0 &&
                 <ul>
                     {posts.map(post => (
@@ -78,7 +86,7 @@ function ExplorePage({ path }: ExplorePageProps) {
                 </ul>
             }
         </div>
-
+        </DrawerMenu>
     );
 }
 

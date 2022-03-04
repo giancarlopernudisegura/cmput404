@@ -3,3 +3,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+    .displayname {
+        @apply font-semibold tracking-wide text-lg;
+    }
+}

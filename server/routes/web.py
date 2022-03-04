@@ -26,3 +26,15 @@ def index():
 @bp.route("/login", methods=["GET"])
 def login():
     return frontend_page()
+
+@bp.route("/homepage", methods=["GET"])
+def homepage():
+    return frontend_page()
+
+@bp.route("/profile", methods=["GET"])
+def profile():
+    return frontend_page()
+
+@bp.route("/notifications", methods=["GET"])
+def notifications():
+    return frontend_page()
