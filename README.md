@@ -47,6 +47,13 @@ source venv/bin/activate
 flask run
 ```
 
+### Testing the server
+```bash
+cd server/
+DATABASE_URL=sqlite:///test.db flask db upgrade
+DATABASE_URL=sqlite:///test.db pytest tests.py
+```
+
 ## References
 ### Firebase Authentication
 - https://firebase.google.com/docs/reference/js/v8/firebase.auth.GithubAuthProvider

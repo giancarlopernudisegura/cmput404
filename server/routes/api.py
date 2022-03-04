@@ -1,7 +1,7 @@
+from flask import Blueprint, jsonify, make_response, request, Response, send_file, current_app
 import mimetypes
 from telnetlib import STATUS
 from urllib import response
-from flask import Blueprint, jsonify, make_response, request, Response, send_file
 from server.constants import res_msg
 from flask_login import login_user, login_required, logout_user, current_user
 from server.exts import db
@@ -110,7 +110,7 @@ def post(author_id: int) -> Response:
             httpStatus.OK,
         )
     elif request.method == "POST":
-        if current_user.is_anonymous or current_user.id != author_id:
+        if not current_user.is_authenticated or current_user.id != author_id:
             return (
                 make_response(jsonify(error=res_msg.NO_PERMISSION)),
                 httpStatus.UNAUTHORIZED,
@@ -124,16 +124,17 @@ def post(author_id: int) -> Response:
             content = json_val["content"]
             unlisted = json_val.get("unlisted", False)
             contentType = ContentType(json_val["contentType"])
+            if (
+                not (visibility := json_val["visibility"].upper())
+                in post_visibility_map
+            ):
+                # bad visibility type or no visibility given
+                return Response(status=httpStatus.BAD_REQUEST)
         except KeyError:
             return Response(status=httpStatus.BAD_REQUEST)
         except ValueError:
             return Response(status=httpStatus.BAD_REQUEST)
-
-        if (
-            not (visibility := json_val["visibility"].upper())
-            in post_visibility_map
-        ):
-            # bad visibility type or no visibility given
+        except TypeError:
             return Response(status=httpStatus.BAD_REQUEST)
         private = post_visibility_map[visibility.upper()]
 
@@ -160,17 +161,19 @@ def specific_post(author_id: int, post_id: int) -> Response:
     if request.method != "DELETE":
         try:
             author = author_id
-            title = request.form["title"]
-            category = request.form["category"]
-            content = request.form["content"]
-            unlisted = request.form.get("unlisted") or False
-            contentType = ContentType(request.form["contentType"])
+            title = request.json["title"]
+            category = request.json["category"]
+            content = request.json["content"]
+            unlisted = request.json.get("unlisted") or False
+            contentType = ContentType(request.json["contentType"])
         except KeyError:
             return Response(status=httpStatus.BAD_REQUEST)
         except ValueError:
             return Response(status=httpStatus.BAD_REQUEST)
+        except TypeError:
+            return Response(status=httpStatus.BAD_REQUEST)
         if request.method == "PUT" and (
-            (visibility := request.form.get("visibility")) is None
+            (visibility := request.json.get("visibility").upper()) is None
             or not visibility.upper() in post_visibility_map
         ):
             return Response(status=httpStatus.BAD_REQUEST)
@@ -238,12 +241,14 @@ def get_comment(author_id: int, post_id: int, comment_id: int) -> Response:
 @login_required
 def post_comment(author_id: int, post_id: int) -> Response:
     try:
-        title = request.form["title"]
-        content = request.form["content"]
-        contentType = ContentType(request.form.get("contentType"))
+        title = request.json["title"]
+        content = request.json["content"]
+        contentType = ContentType(request.json.get("contentType"))
     except KeyError:
         return Response(status=httpStatus.BAD_REQUEST)
     except ValueError:
+        return Response(status=httpStatus.BAD_REQUEST)
+    except TypeError:
         return Response(status=httpStatus.BAD_REQUEST)
     comment = Comment(current_user.id, post_id, title, contentType, content)
     db.session.add(comment)
@@ -273,7 +278,9 @@ def serve_image(author_id: int, post_id: int):
 def get_followers(author_id: int) -> Response:
     followers = Requests.query.filter_by(to=author_id).all()
     return (
-        make_response(jsonify(type="followers", items=[f.get_follower_json() for f in followers])),
+        make_response(
+            jsonify(type="followers", items=[f.get_follower_json() for f in followers])
+        ),
         httpStatus.OK,
     )
 
@@ -283,7 +290,10 @@ def is_follower(author_id: int, follower_id: int) -> Response:
     follower = Requests.query.filter_by(to=author_id, initiated=follower_id).first()
     return (
         make_response(
-            jsonify(type="followers", items=([follower.get_follower_json()] if follower else []))
+            jsonify(
+                type="followers",
+                items=([follower.get_follower_json()] if follower else []),
+            )
         ),
         httpStatus.OK,
     )
@@ -300,6 +310,7 @@ def remove_follower(author_id: int, follower_id: int) -> Response:
     follower = Requests.query.filter_by(to=author_id, initiated=follower_id).first()
     if not follower:
         return Response(status=httpStatus.NOT_FOUND)
+    Inbox.query.filter_by(follow=follower_id).delete()
     db.session.delete(follower)
     db.session.commit()
     return Response(status=httpStatus.NO_CONTENT)
@@ -321,7 +332,7 @@ def add_follower(author_id: int, follower_id: int) -> Response:
         )
     follower = Requests(follower_id, author_id)
     db.session.add(follower)
-    inbox = Inbox(author_id, follow=follower.id)
+    inbox = Inbox(author_id, follow=follower_id)
     db.session.add(inbox)
     db.session.commit()
     return Response(status=httpStatus.OK)
@@ -360,11 +371,11 @@ def post_inbox(author_id: int) -> Response:
             raise KeyError()
         req_id = request.json["id"]
         if req_type == "post":
-            inbox = Inbox(owner=author_id, post=req_id)
+            inbox = Inbox(author_id, post=req_id)
         elif req_type == "follow":
-            inbox = Inbox(owner=author_id, follow=req_id)
+            inbox = Inbox(author_id, follow=req_id)
         elif req_type == "like":
-            inbox = Inbox(owner=author_id, like=req_id)
+            inbox = Inbox(author_id, like=req_id)
         db.session.add(inbox)
         db.session.commit()
     except KeyError:
@@ -388,8 +399,7 @@ def clear_inbox(author_id: int) -> Response:
             make_response(jsonify(error=res_msg.NO_PERMISSION)),
             httpStatus.UNAUTHORIZED,
         )
-    inbox_items = Inbox.query.filter_by(owner=author_id).all()
-    db.session.delete(inbox_items)
+    Inbox.query.filter_by(owner=author_id).delete()
     db.session.commit()
     return Response(status=httpStatus.OK)
 
@@ -456,6 +466,23 @@ def login() -> Response:
         )
 
 
+@bp.route("/login/unit_test", methods=["POST"])
+def login_unit_test() -> Response:
+    if current_app.testing:
+        author_id = request.json.get("author_id")
+        author = Author.query.filter_by(id=author_id).first()
+        login_user(author)
+        return make_response(jsonify({"message": "login ok"})), httpStatus.OK
+    return (
+        make_response(
+            jsonify(
+                message="Server needs to run with testing mode enabled for this endpoint"
+            )
+        ),
+        httpStatus.BAD_REQUEST,
+    )
+
+
 @bp.route("/logout", methods=["POST"])
 @login_required
 def logout() -> Response:
@@ -474,19 +501,16 @@ def login_test() -> Response:
     return make_response(jsonify(message="Successful log in")), httpStatus.OK
 
 
-@bp.route('/user_me')
+@bp.route("/user_me")
 @login_required
 def get_user_me() -> Response:
     try:
         return utils.json_response(
             httpStatus.OK,
-            {
-                "message": res_msg.SUCCESS_VERIFY_USER,
-                "data": current_user.json()
-            }
+            {"message": res_msg.SUCCESS_VERIFY_USER, "data": current_user.json()},
         )
     except Exception as e:
         return utils.json_response(
             httpStatus.INTERNAL_SERVER_ERROR,
-            {"message": res_msg.GENERAL_ERROR + str(e)}
+            {"message": res_msg.GENERAL_ERROR + str(e)},
         )
