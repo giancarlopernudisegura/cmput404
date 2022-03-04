@@ -35,6 +35,24 @@ jobs:
           APP_SETTINGS: ${{ secrets.APP_SETTINGS }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           FLASK_HOST: ${{ secrets.FLASK_HOST }}
+          FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+          FIREBASE_AUTH_DOMAIN: ${{ secrets.FIREBASE_AUTH_DOMAIN }}
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          FIREBASE_STG_BUCKET: ${{ secrets.FIREBASE_STG_BUCKET }}
+          FIREBASE_MESSAGING_SDR_ID: ${{ secrets.FIREBASE_MESSAGING_SDR_ID }}
+          FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
+          FIREBASE_MEASUREMENT_ID: ${{ secrets.FIREBASE_MEASUREMENT_ID }}
+          FBS_SVC_CRED_FILENAME: ${{ secrets.FBS_SVC_CRED_FILENAME }}
+          FBS_SVC_ACCOUNT: ${{ secrets.FBS_SVC_ACCOUNT }}
+          FBS_SVC_PROJECT_ID: ${{ secrets.FBS_SVC_PROJECT_ID }}
+          FBS_SVC_PRIVATE_KEY_ID: ${{ secrets.FBS_SVC_PRIVATE_KEY_ID }}
+          FBS_SVC_PRIVATE_KEY: ${{ secrets.FBS_SVC_PRIVATE_KEY }}
+          FBS_SVC_CLIENT_EMAIL: ${{ secrets.FBS_SVC_CLIENT_EMAIL }}
+          FBS_SVC_CLIENT_ID: ${{ secrets.FBS_SVC_CLIENT_ID }}
+          FBS_SVC_AUTH_URI: ${{ secrets.FBS_SVC_AUTH_URI }}
+          FBS_SVC_TOKEN_URI: ${{ secrets.FBS_SVC_TOKEN_URI }}
+          FBS_SVC_AUTH_PROV: ${{ secrets.FBS_SVC_AUTH_PROV }}
+          FBS_SVC_CLIENT_CERT_URL: ${{ secrets.FBS_SVC_CLIENT_CERT_URL }}
         run: |
           . venv/bin/activate
           flask db upgrade
