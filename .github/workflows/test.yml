@@ -28,8 +28,7 @@ jobs:
 
       - name: pytest
         run: |
-          pip freeze
-          pip install flask
+          . venv/bin/activate
           flask db upgrade
           pytest --cov=. tests.py
 
