@@ -44,30 +44,6 @@ export const get_author_id = async () => {
  * @param author_id 
  * @returns Array<Post>
  */
-
-// export function getPosts(author_id: string): Promise<any> {
-
-//   let listOfPosts = fetch(`${BACKEND_HOST}/authors/${author_id}/posts/`, {
-//     mode: 'cors',
-//     method: 'GET',
-//   }).then(res => res.json())
-//     .then(data => {
-//       var posts = Array();
-//       for (let i = 0; i < data.items.length; i++) {
-//         const post: any = {
-//           'author': data.items[i].author.displayName,
-//           'title': data.items[i].title,
-//           'description': data.items[i].description,
-//         };
-//         posts.push(post);
-//       }
-//       return posts;
-//     })
-//     .catch(err => { alert(err); });
-
-//   return listOfPosts;
-// };
-
 export async function getPosts(author_id: string): Promise<any> {
 
   try {
