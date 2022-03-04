@@ -2,10 +2,9 @@ import { h } from 'preact';
 import { useEffect, useState } from "preact/hooks";
 import { getAllAuthors } from "../utils/apiCalls";
 import ShowAuthor from "../components/search/ShowAuthor";
-import { Router, route } from 'preact-router';
+import { route } from 'preact-router';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from "@mui/material/TextField";
-import { Button, Card, CardContent, CardMedia } from '@mui/material';
 
 
 
@@ -13,7 +12,6 @@ import { Button, Card, CardContent, CardMedia } from '@mui/material';
 const Search = () => {
     const [ currentUserId, setCurrentUserId ] = useState<number | null>(null);
     const [ authors, setAuthors ] = useState(Array());
-    const [ searchResult, setSearchResult ] = useState(Array());
 
     useEffect(() => {
         async function getAllAuthorsFromAPI() {
@@ -59,9 +57,6 @@ const Search = () => {
 
     return (
         <div>
-
-            {searchResult.map(author => ShowAuthor(author))}
-
             <Autocomplete 
                 freeSolo
                 options={[...authors]}

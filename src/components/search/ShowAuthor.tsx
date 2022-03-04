@@ -13,9 +13,10 @@ type AuthorProps = {
 const ShowAuthor = ({ author, handleClick } : any) => {
 
     return (
-        <div  style={{cursor: 'pointer'}} onClick={() => handleClick(author.id)}
+        <div style={{cursor: 'pointer'}} onClick={() => handleClick(author.id)}
         >
             <CardContent>
+                <p>{author.displayName}</p>
                 <p>{author.github}</p>
             </CardContent>
             <img src={author.profileImage} style={{ width: "30%"}} />

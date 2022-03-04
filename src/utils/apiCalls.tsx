@@ -82,7 +82,6 @@ export const getAllAuthors = async (page: number) => {
       console.log("RESPONES", currentUserId);
       let listOfAuthors = await res.json();
       return {...listOfAuthors, currentUserId};
-      // return {...listOfAuthors, id: currentUserId };
     } else {
       return {items: []}
     }
@@ -145,14 +144,21 @@ export const followerCall = async (currentUserId : number, toFollowId : number, 
   }
 }
 
-// export const addFollower = async (currentUserId : number, toFollowId : number) => {
-//   try {
-//     const res = await fetch(`${BACKEND_HOST}/authors/${currentUserId}/followers/${toFollowId}`, {
-//       mode: 'cors',
-//       credentials: 'include',
-//       method: 'PUT'
-//     });
-//   } catch (err) {
-//     console.log("ERROR", err);
-//   }
-// };
+export const getSpecAuthor = async (author_id : number) => {
+  try {
+    const res = await fetch(`${BACKEND_HOST}/authors/${author_id}`, {
+      mode: 'cors',
+      credentials: 'include',
+      method: 'GET',
+    });
+
+    let json = [];
+    if (res.status === 200) {
+      json = await res.json();
+    }
+
+    return { status: res.status, ...json};
+  } catch(err) {
+    console.log("ERROR", err);
+  }
+}

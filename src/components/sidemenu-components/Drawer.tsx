@@ -63,14 +63,12 @@ function DrawerMenu(props: any) {
                 if (text === 'Explore') {route('/app', true)}
                 if (text === 'My Profile') {route('/app/profile', true)}
                 if (text === 'Notifications') {route('/app/notifications', true)}
-                if (text === 'Notifications') {route('/app/notifications', true)}
             }}>
               <ListItemIcon>
                   {index * 3 === 0 ? <Home /> : ''}
                   {index * 3 === 3 ? <ExploreIcon /> : ''}
                   {index * 3 === 6 ? <Person /> : ''}
                   {index * 3 === 9 ? <Notification /> : ''}
-                  {index * 3 === 12 ? <Settings/> : ''}
                 {/* <MyProfile /> */}
               </ListItemIcon>
               <ListItemText primary={text} />

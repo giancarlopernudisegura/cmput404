@@ -2,7 +2,7 @@ import { h } from 'preact';
 import DrawerMenu from "../components/sidemenu-components/Drawer";
 import { CircularProgress } from '@mui/material';
 import { useEffect, useState } from "preact/hooks";
-import { get_author_id, followerCall } from '../utils/apiCalls';
+import { get_author_id, followerCall, getSpecAuthor } from '../utils/apiCalls';
 import { Button } from "@mui/material";
 
 
@@ -15,6 +15,7 @@ const UserPage = ({ path, followId }: UserProps) => {
     const [ doesFollow, setDoesFollow ] = useState(false);
     const [ isLoading, setIsLoading ] = useState(true);
     const [ currentUserId, setCurrentUserId ] = useState(-1);
+    const [ userInfo, setUserInfo ] = useState<null | any>(null);
 
     useEffect(() => {
         // TODO CHANGE THIS!!! to a single call in the running time
@@ -24,11 +25,15 @@ const UserPage = ({ path, followId }: UserProps) => {
             setCurrentUserId(myUserId);
 
             let res;
+            let userRes;
             if (followId !== undefined) {
+                userRes = await getSpecAuthor(followId);
                 res = await followerCall(followId, myUserId, "GET");
             } else {
                 return;
             }
+
+            console.log("REST", res)
 
             let follower = [];
             if (res.status === 200) {
@@ -40,6 +45,10 @@ const UserPage = ({ path, followId }: UserProps) => {
                 }
             } else {
                 setDoesFollow(false)
+            }
+            
+            if (userRes.status === 200) {
+                setUserInfo(userRes);
             }
             setIsLoading(false);
         }
@@ -73,6 +82,7 @@ const UserPage = ({ path, followId }: UserProps) => {
             >
                 {isLoading === true ? <CircularProgress /> : (
                     <div>
+                        <p>{userInfo && userInfo.github}</p>
                         <Button onClick={() => handleFollow()}>
                             {doesFollow === true ? "Following": "Follow"}
                         </Button>
