@@ -47,6 +47,12 @@ source venv/bin/activate
 flask run
 ```
 
+### Testing the server
+```bash
+cd server/
+pytest tests.py
+```
+
 ## References
 ### Firebase Authentication
 - https://firebase.google.com/docs/reference/js/v8/firebase.auth.GithubAuthProvider
