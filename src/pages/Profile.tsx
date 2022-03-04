@@ -15,7 +15,7 @@ function Profile({path}: profileProps) {
 
   useEffect(() => {
     function getAuthorAndPosts() {
-      getCurrentAuthor()
+      getCurrentAuthor() // TODO: can be added as a prop to view other author's profile 
         .then(data => { setAuthor(data); 
           return data.id;
         })
