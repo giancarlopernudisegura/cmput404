@@ -27,9 +27,16 @@ jobs:
           python -m pip install -r requirements.txt
 
       - name: pytest
+        env:
+          DEBUG: ${{ secrets.DEBUG }}
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          FLASK_ENV: ${{ secrets.FLASK_ENV }}
+          FLASK_APP: ${{ secrets.FLASK_APP }}
+          APP_SETTINGS: ${{ secrets.APP_SETTINGS }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          FLASK_HOST: ${{ secrets.FLASK_HOST }}
         run: |
           . venv/bin/activate
-          printenv
           flask db upgrade
           pytest --cov=. tests.py
 
