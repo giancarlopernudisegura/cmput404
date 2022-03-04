@@ -64,8 +64,7 @@ class Author(db.Model, UserMixin, JSONSerializable):
 
     def json(self) -> Dict[str, str]:
         # get username from github id
-        resp = get_github_info(self.githubId)
-        data = json.loads(resp.read().decode("utf-8"))
+        data = get_github_info(self.githubId)
 
         return {
             "type": "author",

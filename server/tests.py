@@ -62,7 +62,7 @@ def test_login(test_client):
     assert r.status_code == 200
     data = json.loads(r.data.decode("utf-8"))["data"]
     assert data["type"] == "author"
-    assert data["author_id"] == 1
+    assert data["id"] == 1
     assert data["displayName"] == "Giancarlo"
 
 
@@ -143,7 +143,6 @@ def test_posts(test_client):
         content_type="application/json",
         follow_redirects=True,
     )
-    print(r.data)
     assert r.status_code == 201
     r = test_client.get("/authors/1/posts/3", follow_redirects=True)
     assert r.status_code == 200
