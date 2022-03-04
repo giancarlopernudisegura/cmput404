@@ -29,6 +29,7 @@ jobs:
       - name: pytest
         run: |
           . venv/bin/activate
+          printenv
           flask db upgrade
           pytest --cov=. tests.py
 
