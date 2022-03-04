@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, make_response, request, Response
 from server.constants import res_msg
 from flask_login import login_user, login_required, logout_user, current_user
 from server.exts import db
-from server.models import Author, Post, Comment, Requests
+from server.models import Author, Inbox, Post, Comment, Requests
 from server.enums import ContentType
 from http import HTTPStatus as httpStatus
 import os
@@ -137,6 +137,7 @@ def post(author_id: int) -> Response:
         post = Post(author, title, category, content, contentType, private, unlisted)
         db.session.add(post)
         db.session.commit()
+        post.push()
         return Response(status=httpStatus.OK)
 
 
@@ -192,6 +193,7 @@ def specific_post(author_id: int, post_id: int) -> Response:
         )
         db.session.add(post)
         db.session.commit()
+        post.push()
         return Response(status=httpStatus.CREATED)
     elif request.method == "DELETE":
         db.session.delete(post)
@@ -298,6 +300,75 @@ def add_follower(author_id: int, follower_id: int) -> Response:
         )
     follower = Requests(follower_id, author_id)
     db.session.add(follower)
+    inbox = Inbox(author_id, follow=follower.id)
+    db.session.add(inbox)
+    db.session.commit()
+    return Response(status=httpStatus.OK)
+
+
+@bp.route("/authors/<int:author_id>/inbox", methods=["GET"])
+@login_required
+def get_inbox(author_id: int) -> Response:
+    if current_user.id != author_id:
+        return (
+            make_response(jsonify(error=res_msg.NO_PERMISSION)),
+            httpStatus.UNAUTHORIZED,
+        )
+    page, size = pagination(request.args)
+    inbox_items = (
+        Inbox.query.filter_by(owner=author_id).paginate(page=page, per_page=size).items
+    )
+    return (
+        make_response(
+            jsonify(
+                type="inbox",
+                author=f"{HOST}/authors/{author_id}",
+                items=[i.json() for i in inbox_items],
+            )
+        ),
+        httpStatus.OK,
+    )
+
+
+@bp.route("/authors/<int:author_id>/inbox", methods=["POST"])
+@login_required
+def post_inbox(author_id: int) -> Response:
+    try:
+        req_type = request.json["type"]
+        if req_type not in ("post", "follow", "like"):
+            raise KeyError()
+        req_id = request.json["id"]
+        if req_type == "post":
+            inbox = Inbox(owner=author_id, post=req_id)
+        elif req_type == "follow":
+            inbox = Inbox(owner=author_id, follow=req_id)
+        elif req_type == "like":
+            inbox = Inbox(owner=author_id, like=req_id)
+        db.session.add(inbox)
+        db.session.commit()
+    except KeyError:
+        return Response(status=httpStatus.BAD_REQUEST)
+    return (
+        make_response(
+            jsonify(
+                type="inbox",
+                author=f"{HOST}/authors/{author_id}",
+            )
+        ),
+        httpStatus.OK,
+    )
+
+
+@bp.route("/authors/<int:author_id>/inbox", methods=["DELETE"])
+@login_required
+def clear_inbox(author_id: int) -> Response:
+    if current_user.id != author_id:
+        return (
+            make_response(jsonify(error=res_msg.NO_PERMISSION)),
+            httpStatus.UNAUTHORIZED,
+        )
+    inbox_items = Inbox.query.filter_by(owner=author_id).all()
+    db.session.delete(inbox_items)
     db.session.commit()
     return Response(status=httpStatus.OK)
 

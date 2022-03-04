@@ -108,6 +108,27 @@ export function newPublicPost(authorId: any, postData: any) {
 
 }
 
+export async function getInbox(author_id: string) {
+  const res = await fetch(`${BACKEND_HOST}/authors/${author_id}/inbox/`)
+  return await res.json();
+}
+
+export async function getGithubStream(author_id: string, per_page = 30, page = 1): Promise<any> {
+  const res = await fetch(`${BACKEND_HOST}/authors/${author_id}`)
+  const { github } = await res.json();
+  const regexPattern = /^https:\/\/github.com\/(\w+)\/?/;
+  const githubID = regexPattern.exec(github)![1];
+  const stream = await fetch(`https://api.github.com/users/${githubID}/events?per_page=${per_page}&page=${page}`);
+  return await stream.json();
+}
+
+export async function clearInbox(author_id: string): Promise<boolean> {
+  const res = await fetch(`${BACKEND_HOST}/authors/${author_id}/inbox/`, {
+    method: 'DELETE'
+  })
+  return res.status === 200;
+}
+
 export const logOutCall = async () => {
   const res = await fetch(`${BACKEND_HOST}/logout`, {
     mode: 'cors',
