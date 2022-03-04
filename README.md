@@ -51,7 +51,7 @@ flask run
 ```bash
 cd server/
 DATABASE_URL=sqlite:///test.db flask db upgrade
-pytest tests.py
+DATABASE_URL=sqlite:///test.db pytest tests.py
 ```
 
 ## References
