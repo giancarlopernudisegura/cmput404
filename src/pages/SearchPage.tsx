@@ -4,13 +4,14 @@ import SearchField from "../components/search/SearchField";
 import DrawerMenu from "../components/sidemenu-components/Drawer";
 import { getAllAuthors } from "../utils/apiCalls";
 import ShowAuthor from "../components/search/ShowAuthor";
-
+import { Link } from 'preact-router/match'
 type Props = {
     path: string;
 };
 
 const Search = ({ path }: Props) => {
     const [ infoSearch, setInfoSearch ] = useState('');
+    const [ currentUserId, setCurrentUserId ] = useState();
     const [ authors, setAuthors ] = useState(Array());
 
     useEffect(() => {
@@ -19,6 +20,7 @@ const Search = ({ path }: Props) => {
             let page : number = 1;
             let allAuthors = Array();
             let listOfAuthors = Array();
+            let userId = null;
             while (true) {
                 try {
                     res = await getAllAuthors(page);
@@ -26,6 +28,12 @@ const Search = ({ path }: Props) => {
                     if (listOfAuthors.length == 0){
                         break;
                     }
+
+                    if (userId === null) {
+                        userId = res.currentUserId;
+                        setCurrentUserId(userId);
+                    }
+
                     allAuthors.push(...listOfAuthors);
                     page += 1;
                 } catch (err) {
@@ -33,7 +41,6 @@ const Search = ({ path }: Props) => {
                 }
             }
             setAuthors(allAuthors);
-            console.log("ALL authors", allAuthors);
         }
         getAllAuthorsFromAPI();
     }, []);
@@ -57,7 +64,14 @@ const Search = ({ path }: Props) => {
                     searchButton={searchButton}
                 />
 
-                {authors.map(author => ShowAuthor(author))}
+                {authors.filter(author => {
+                    if (author.id != currentUserId) {
+                        return author;
+                    }
+                }).map(author => ShowAuthor(author))}
+                <Link activeClassName="active" href="/">
+                    Home
+                </Link>
             </DrawerMenu>
 
         </div>

@@ -77,8 +77,11 @@ export const getAllAuthors = async (page: number) => {
     });
 
     if (res.status == 200) {
+      const currentUserId = res.headers.get('X-User-Id');
+      console.log("RESPONES", currentUserId);
       let listOfAuthors = await res.json();
-      return listOfAuthors;
+      return {...listOfAuthors, currentUserId};
+      // return {...listOfAuthors, id: currentUserId };
     } else {
       return {items: []}
     }
