@@ -2,20 +2,41 @@ from flask_login import UserMixin
 from flask import current_app
 from server.exts import db
 from server.enums import ContentType
+from server.utils.exts import get_github_info
 import datetime
 import os
 from dotenv import load_dotenv
-from urllib.request import urlopen
 import json
-from typing import Any, Dict, Union
+from typing import Any, Dict, Union, Sequence
 
 
 load_dotenv()
 
 HOST = os.getenv("FLASK_HOST")
 
+
+class JSONSerializable(object):
+    def json(self) -> Dict[str, str]:
+        raise NotImplementedError()
+
+
+class InboxItem(object):
+    """
+    Classes that inherit this class must implement the `push` method which pushes
+    the item to the inbox of all subscribers.
+    """
+
+    @staticmethod
+    def get_subscribers(author_id: int) -> Sequence[int]:
+        subscribers = Requests.query.filter_by(to=author_id).all()
+        return [s.initiated for s in subscribers]
+
+    def push(self):
+        raise NotImplementedError()
+
+
 # Models go here
-class Author(db.Model, UserMixin):
+class Author(db.Model, UserMixin, JSONSerializable):
     __tablename__ = "author"
     id = db.Column(db.Integer, primary_key=True)
     displayName = db.Column(db.String())
@@ -42,22 +63,8 @@ class Author(db.Model, UserMixin):
         return f"<id {self.id}>"
 
     def json(self) -> Dict[str, str]:
-        
-        # Hardcoded author data
-        if current_app.debug:
-            return {
-            "type": "author",
-            "id": self.id,
-            "host": f"{HOST}/",
-            "displayName": self.displayName,
-            "url": f"{HOST}/authors/{self.id}",
-            "github": "https://github.com/dellahumanita",
-            "profileImage": self.profileImageId,
-            }
-
         # get username from github id
-        resp = urlopen(f"https://api.github.com/user/{self.githubId}")
-        data = json.loads(resp.read().decode("utf-8"))
+        data = get_github_info(self.githubId)
 
         return {
             "type": "author",
@@ -68,10 +75,9 @@ class Author(db.Model, UserMixin):
             "github": data["html_url"],
             "profileImage": self.profileImageId,
         }
-    
 
 
-class Post(db.Model):
+class Post(db.Model, JSONSerializable, InboxItem):
     __tablename__ = "post"
     id = db.Column(db.Integer, primary_key=True)
     author = db.Column(db.ForeignKey("author.id"))
@@ -151,8 +157,15 @@ class Post(db.Model):
             "unlisted": self.unlisted,
         }
 
+    def push(self):
+        subscribers = InboxItem.get_subscribers(self.author)
+        for subscriber in subscribers:
+            inbox = Inbox(subscriber, post=self.id)
+            db.session.add(inbox)
+        db.session.commit()
 
-class Comment(db.Model):
+
+class Comment(db.Model, JSONSerializable):
     __tablename__ = "comment"
     id = db.Column(db.Integer, primary_key=True)
     author = db.Column(db.ForeignKey("author.id"))
@@ -189,7 +202,7 @@ class Comment(db.Model):
         }
 
 
-class Like(db.Model):
+class Like(db.Model, JSONSerializable, InboxItem):
     id = db.Column(db.Integer, primary_key=True)
     author = db.Column(db.ForeignKey("author.id"))
     post = db.Column(db.ForeignKey("post.id"))
@@ -227,11 +240,18 @@ class Like(db.Model):
             "id": liked_object,
         }
 
+    def push(self):
+        DbObject = Post if self.post else Comment
+        recepient = DbObject.query.filter_by(id=self.comment).first().author
+        inbox = Inbox(recepient, like=self.id)
+        db.session.add(inbox)
+        db.session.commit()
 
-class Requests(db.Model):  # follow requests
+
+class Requests(db.Model, JSONSerializable):  # follow requests
     __tablename__ = "requests"
     id = db.Column(db.Integer, primary_key=True)
-    initiated = db.Column(db.ForeignKey("author.id"))#follower
+    initiated = db.Column(db.ForeignKey("author.id"))  # follower
     to = db.Column(db.ForeignKey("author.id"))
     timestamp = db.Column(db.DateTime())
 
@@ -247,9 +267,8 @@ class Requests(db.Model):  # follow requests
     def __repr__(self):
         return f"<id {self.id}>"
 
-    def get_follower_json(self) -> Dict[str, Any]:#
+    def get_follower_json(self) -> Dict[str, Any]:
         follower = Author.query.filter_by(id=self.initiated).first()
-        print(f"follower type {type(follower)}")
         return follower.json()
 
     @staticmethod
@@ -257,6 +276,12 @@ class Requests(db.Model):  # follow requests
         r1 = Requests.query.filter_by(initiated=author_id1, to=author_id2).first()
         r2 = Requests.query.filter_by(initiated=author_id2, to=author_id1).first()
         return r1 and r2
+
+    def json(self) -> Dict[str, Any]:
+        return {
+            "type": "followers",
+            "items": [self.get_follower_json()],
+        }
 
 
 class ViewablePostRelation(db.Model):
@@ -275,7 +300,7 @@ def __init__(self, post, viewConsumer):
         return f"<id {self.id}>"
 
 
-class Inbox(db.Model):
+class Inbox(db.Model, JSONSerializable):
     __tablename__ = "inbox"
     id = db.Column(db.Integer, primary_key=True)
     owner = db.Column(db.ForeignKey("author.id"))
@@ -295,10 +320,22 @@ class Inbox(db.Model):
         if argNoneCount < 2:
             raise Exception("Inbox can't relate multiple objects")
         elif argNoneCount == 3:
-            raise Exception("Inbox must releate one object")
+            print(like, post, follow)
+            raise Exception("Inbox must relate one object")
         self.post = post
         self.like = like
         self.follow = follow
 
     def __repr__(self):
-        return f"<id {self.id}>"
+        return f"<id {self.id} {self.post} {self.like} {self.follow}>"
+
+    def json(self) -> Dict[str, Any]:
+        if self.post:
+            post = Post.query.filter_by(id=self.post).first()
+            return post.json()
+        elif self.like:
+            like = Like.query.filter_by(id=self.like).first()
+            return like.json()
+        elif self.follow:
+            follow = Requests.query.filter_by(id=self.follow).first()
+            return follow.json()

@@ -6,8 +6,8 @@ class ContentType(enum.Enum):
     markdown ="text/markdown"
     plain = "text/plain"
     #application = "application/base64"
-    png = "image/png;base64"
-    jpeg = "image/jpeg;base64"
+    png = "image/png"
+    jpg = "image/jpeg"
 
     def __str__(self) -> str:
         return self.value

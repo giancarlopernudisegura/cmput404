@@ -4,6 +4,6 @@ __pycache__/
 *.pyc
 .env
 .vscode/*
-public/bundle.js
+public/bundle.js*
 .coverage
 *.db
