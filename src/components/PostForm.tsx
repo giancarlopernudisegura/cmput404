@@ -113,6 +113,9 @@ class PostForm extends Component<Props, State> {
                             <input type="text"></input>
                         </div>
 
+                        {/* TODO: toggle markdown/plaintext */}
+                        {/* TODO: toggle public or private */}
+
                         <Button variant="contained"
                             type="submit"
                             className="w-1/3">Share</Button>
