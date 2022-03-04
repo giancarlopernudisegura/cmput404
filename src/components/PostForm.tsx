@@ -11,6 +11,11 @@ type State = {
     authorId: number | null
 };
 
+const placeholderContent = {
+    tempBody: "What's on your mind?",
+    tempTitle: "Enter your title here",
+};
+
 class PostForm extends Component<Props, State> {
     constructor() {
         super();
@@ -89,11 +94,14 @@ class PostForm extends Component<Props, State> {
                     <form onSubmit={this.handleSubmit} className="grid grid-cols-1 gap-y-3">
                         <div className='grid grid-cols-1 gap-y-2'>
                             <label className=''>Title</label>
-                            <input type="text"
+                            <input 
+                                type="text"
+                                placeholder={placeholderContent.tempTitle}
                                 onChange={this.handleTitle}></input>
                         </div>
 
                         <textarea type="text"
+                            placeholder={placeholderContent.tempBody}
                             value={this.state.body}
                             onChange={this.handleBody}
                             className="w-full" 

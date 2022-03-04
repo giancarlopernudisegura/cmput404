@@ -22,7 +22,6 @@ const authenticateWithGithub = async (signup: Boolean) => {
     } catch (err) {
         // Handle errors
         console.log(err);
-        console.log("ERROR", err);
         throw err;
     }
 
