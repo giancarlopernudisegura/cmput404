@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, make_response, request, Response
+from flask import Blueprint, jsonify, make_response, request, Response, current_app
 from server.constants import res_msg
 from flask_login import login_user, login_required, logout_user, current_user
 from server.exts import db
@@ -126,10 +126,7 @@ def post(author_id: int) -> Response:
         except ValueError:
             return Response(status=httpStatus.BAD_REQUEST)
 
-        if (
-            not (visibility := json_val["visibility"].upper())
-            in post_visibility_map
-        ):
+        if not (visibility := json_val["visibility"].upper()) in post_visibility_map:
             # bad visibility type or no visibility given
             return Response(status=httpStatus.BAD_REQUEST)
         private = post_visibility_map[visibility.upper()]
@@ -252,7 +249,9 @@ def post_comment(author_id: int, post_id: int) -> Response:
 def get_followers(author_id: int) -> Response:
     followers = Requests.query.filter_by(to=author_id).all()
     return (
-        make_response(jsonify(type="followers", items=[f.get_follower_json() for f in followers])),
+        make_response(
+            jsonify(type="followers", items=[f.get_follower_json() for f in followers])
+        ),
         httpStatus.OK,
     )
 
@@ -262,7 +261,10 @@ def is_follower(author_id: int, follower_id: int) -> Response:
     follower = Requests.query.filter_by(to=author_id, initiated=follower_id).first()
     return (
         make_response(
-            jsonify(type="followers", items=([follower.get_follower_json()] if follower else []))
+            jsonify(
+                type="followers",
+                items=([follower.get_follower_json()] if follower else []),
+            )
         ),
         httpStatus.OK,
     )
@@ -435,6 +437,23 @@ def login() -> Response:
         )
 
 
+@bp.route("/login/unit_test", methods=["POST"])
+def login_unit_test() -> Response:
+    if current_app.testing:
+        author_id = request.json.get("author_id")
+        author = Author.query.filter_by(id=author_id).first()
+        login_user(author)
+        return make_response(jsonify({"message": "login ok"})), httpStatus.OK
+    return (
+        make_response(
+            jsonify(
+                message="Server needs to run with testing mode enabled for this endpoint"
+            )
+        ),
+        httpStatus.BAD_REQUEST,
+    )
+
+
 @bp.route("/logout", methods=["POST"])
 @login_required
 def logout() -> Response:
@@ -453,19 +472,16 @@ def login_test() -> Response:
     return make_response(jsonify(message="Successful log in")), httpStatus.OK
 
 
-@bp.route('/user_me')
+@bp.route("/user_me")
 @login_required
 def get_user_me() -> Response:
     try:
         return utils.json_response(
             httpStatus.OK,
-            {
-                "message": res_msg.SUCCESS_VERIFY_USER,
-                "data": current_user.json()
-            }
+            {"message": res_msg.SUCCESS_VERIFY_USER, "data": current_user.json()},
         )
     except Exception as e:
         return utils.json_response(
             httpStatus.INTERNAL_SERVER_ERROR,
-            {"message": res_msg.GENERAL_ERROR + str(e)}
+            {"message": res_msg.GENERAL_ERROR + str(e)},
         )
