@@ -58,6 +58,12 @@ def test_login(test_client):
     login(test_client)
     r = test_client.get("/login_test")
     assert r.status_code == 200
+    r = test_client.get("/user_me")
+    assert r.status_code == 200
+    data = json.JSONDecoder().decode(r.data.decode("utf-8"))["data"]
+    assert data["type"] == "author"
+    assert data["author_id"] == 1
+    assert data["displayName"] == "Giancarlo"
 
 
 def test_get_authors(test_client):

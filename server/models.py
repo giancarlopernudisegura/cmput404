@@ -2,10 +2,10 @@ from flask_login import UserMixin
 from flask import current_app
 from server.exts import db
 from server.enums import ContentType
+from server.utils.exts import get_github_info
 import datetime
 import os
 from dotenv import load_dotenv
-from urllib.request import urlopen
 import json
 from typing import Any, Dict, Union, Sequence
 
@@ -64,7 +64,7 @@ class Author(db.Model, UserMixin, JSONSerializable):
 
     def json(self) -> Dict[str, str]:
         # get username from github id
-        resp = urlopen(f"https://api.github.com/user/{self.githubId}")
+        resp = get_github_info(self.githubId)
         data = json.loads(resp.read().decode("utf-8"))
 
         return {
@@ -252,7 +252,7 @@ class Like(db.Model, JSONSerializable, InboxItem):
 class Requests(db.Model):  # follow requests
     __tablename__ = "requests"
     id = db.Column(db.Integer, primary_key=True)
-    initiated = db.Column(db.ForeignKey("author.id"))#follower
+    initiated = db.Column(db.ForeignKey("author.id"))  # follower
     to = db.Column(db.ForeignKey("author.id"))
     timestamp = db.Column(db.DateTime())
 
@@ -268,7 +268,7 @@ class Requests(db.Model):  # follow requests
     def __repr__(self):
         return f"<id {self.id}>"
 
-    def get_follower_json(self) -> Dict[str, Any]:#
+    def get_follower_json(self) -> Dict[str, Any]:  #
         follower = Author.query.filter_by(id=self.initiated).first()
         print(f"follower type {type(follower)}")
         return follower.json()
