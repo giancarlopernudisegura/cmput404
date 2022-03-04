@@ -1,5 +1,7 @@
 import { h } from 'preact';
-import { Box, Card, CardContent, CardMedia } from '@mui/material';
+import { Button, Card, CardContent, CardMedia } from '@mui/material';
+import { route } from 'preact-router';
+
 
 type AuthorProps = {
     displayName: string,
@@ -9,6 +11,10 @@ type AuthorProps = {
 }
 
 const ShowAuthor = ( author : AuthorProps) => {
+    const handleClick = () => {
+        route(`/app/user/${author.id}`);
+    }
+
     return (
         <Card
             sx={{
@@ -16,7 +22,7 @@ const ShowAuthor = ( author : AuthorProps) => {
             }}
         >
             <CardContent>
-                <h1>{author.displayName}</h1>
+                <Button onClick={() => { return handleClick()}}>{author.displayName}</Button>
                 <p>{author.github}</p>
             </CardContent>
             <img src={author.profileImage} style={{ width: "30%"}} />

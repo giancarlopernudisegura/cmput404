@@ -10,8 +10,10 @@ import Profile from './pages/Profile'
 import SearchPage from './pages/SearchPage';
 import './css/main.css';
 import Notifications from './pages/Notifications';
+import UserPage from './pages/UserPage';
 
 const App = () => {
+
   return (
     <div class="app" className="min-h-screen static bg-stone-50">
       {/* <Header /> */}
@@ -22,6 +24,7 @@ const App = () => {
         <Profile path="/app/profile"/>
         <Notifications path="/app/notifications"/>
         <SearchPage path="/app/search" />
+        <UserPage path="/app/user/:userId" />
       </Router>
     </div>
   )

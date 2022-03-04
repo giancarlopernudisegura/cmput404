@@ -30,7 +30,8 @@ export const get_author_id = async () => {
     method: 'GET',
   });
   if (res.status === 200) {
-    return res.headers.get('X-User-Id') as string;
+    const currentUserId = res.headers.get('X-User-Id') as string;
+    return currentUserId;
   }
   throw new Error('Could not get user id');
 };
@@ -120,3 +121,38 @@ export const logOutCall = async () => {
   let json = await res.json();
   return json;
 }
+
+export const followerCall = async (currentUserId : number, toFollowId : number, method: string) => {
+  try {
+    const res = await fetch(`${BACKEND_HOST}/authors/${currentUserId}/followers/${toFollowId}`, {
+      mode: 'cors',
+      credentials: 'include',
+      method,
+    });
+
+    if (res.status === 200) {
+      let json = [];
+
+      if (method === "GET") {
+        json = await res.json();
+      }
+
+      return { ...json, status: res.status };
+    }
+    return { status: res.status }
+  } catch (err) {
+    console.log("ERROR", err);
+  }
+}
+
+// export const addFollower = async (currentUserId : number, toFollowId : number) => {
+//   try {
+//     const res = await fetch(`${BACKEND_HOST}/authors/${currentUserId}/followers/${toFollowId}`, {
+//       mode: 'cors',
+//       credentials: 'include',
+//       method: 'PUT'
+//     });
+//   } catch (err) {
+//     console.log("ERROR", err);
+//   }
+// };

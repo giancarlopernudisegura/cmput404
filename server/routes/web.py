@@ -45,3 +45,7 @@ def notifications():
 @bp.route("/search", methods=["GET"])
 def search():
     return frontend_page()
+
+@bp.route('/user/<int:user_id>', methods=["GET"])
+def user(user_id):
+    return frontend_page()

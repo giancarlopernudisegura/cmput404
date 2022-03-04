@@ -5,6 +5,9 @@ import DrawerMenu from "../components/sidemenu-components/Drawer";
 import { getAllAuthors } from "../utils/apiCalls";
 import ShowAuthor from "../components/search/ShowAuthor";
 import { Link } from 'preact-router/match'
+import { Router, route } from 'preact-router';
+
+
 type Props = {
     path: string;
 };
@@ -69,9 +72,6 @@ const Search = ({ path }: Props) => {
                         return author;
                     }
                 }).map(author => ShowAuthor(author))}
-                <Link activeClassName="active" href="/">
-                    Home
-                </Link>
             </DrawerMenu>
 
         </div>
