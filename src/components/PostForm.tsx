@@ -1,5 +1,5 @@
 import { h, Component } from 'preact';
-import { Button } from '@mui/material';
+import { Button, Switch, FormControlLabel } from '@mui/material';
 import { newPublicPost, getCurrentAuthor } from '../utils/apiCalls';
 
 type Props = {  };
@@ -9,6 +9,7 @@ type State = {
     title: string
     authorDisplayName: string
     authorId: number | null
+    markdown: boolean
 };
 
 const placeholderContent = {
@@ -24,7 +25,8 @@ class PostForm extends Component<Props, State> {
             category: "",
             title: "",
             authorDisplayName: "",
-            authorId: null 
+            authorId: null,
+            markdown: false
         };
         
         this.handleBody = this.handleBody.bind(this);
@@ -32,6 +34,7 @@ class PostForm extends Component<Props, State> {
         this.handleCategory = this.handleCategory.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.setAuthorDetails = this.setAuthorDetails.bind(this);
+        this.setMarkdown = this.setMarkdown.bind(this);
 
         this.setAuthorDetails();
     }
@@ -64,12 +67,22 @@ class PostForm extends Component<Props, State> {
         });
     }
 
+    setMarkdown() {
+        this.setState({ markdown: !this.state.markdown });
+        console.log("MARKDOWN:", this.state.markdown);
+    }
+
     handleSubmit = (event: Event): void => {
+        var contentType = "text/plain";
+        if (this.state.markdown === true) {
+            var contentType = "text/markdown";
+        }
+
         const postData = {
             "title": this.state.title,
             "content": this.state.body,
             "category": this.state.category,
-            "contentType": "text/plain", //TODO: check for markdown 
+            "contentType": contentType, //TODO: check for markdown 
             "visibility": "PUBLIC",
             "unlisted": false,
         }
@@ -79,6 +92,7 @@ class PostForm extends Component<Props, State> {
         alert('You have successfully posted to your public page!');
         event.preventDefault();
     };
+
 
     render() {
 
@@ -113,9 +127,21 @@ class PostForm extends Component<Props, State> {
                             <input type="text"></input>
                         </div>
 
-                        <Button variant="contained"
-                            type="submit"
-                            className="w-1/3">Share</Button>
+                        {/* TODO: toggle markdown/plaintext */}
+                        {/* TODO: toggle public or private */}
+                        <div className="flex flex-row justify-between mt-3">
+                            <FormControlLabel 
+                                control={<Switch />} 
+                                label="Markdown" 
+                                onChange={this.setMarkdown}
+                            />
+
+                            <Button variant="contained"
+                                type="submit"
+                                className="w-1/3"
+                            >Share
+                            </Button>
+                        </div>
                     </form>
 
             </div>
