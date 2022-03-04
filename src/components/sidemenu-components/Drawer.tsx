@@ -1,5 +1,5 @@
 import { h } from "preact";
-import { AppBar } from "@mui/material";
+import { AppBar, Alert } from "@mui/material";
 import { Box } from "@mui/material";
 import { CssBaseline } from "@mui/material";
 import { Divider } from "@mui/material";
@@ -36,6 +36,7 @@ interface Props {
 
 function DrawerMenu(props: any) {
   const { window } = props;
+  const [ errMsg, setErrMsg] = useState("");
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleDrawerToggle = () => {
@@ -48,12 +49,17 @@ function DrawerMenu(props: any) {
       route('/app/login')
     } catch (err) {
       // TODO: handle error with logging out
+      console.log("There was an error");
+
     }
   }
 
   const drawer = (
     <div id="drawer-component">
       <Toolbar />
+      {errMsg && (
+        <Alert severity="error">{errMsg}</Alert>
+      )}
       <Divider />
       <List>
         {["Home", "Explore", "My Profile", "Notifications", "Settings"].map(

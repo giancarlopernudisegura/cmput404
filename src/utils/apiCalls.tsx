@@ -31,6 +31,9 @@ export const get_author_id = async () => {
   });
   if (res.status === 200) {
     const currentUserId = res.headers.get('X-User-Id') as string;
+    if (currentUserId === null) {
+      throw new Error('Could not get user id');
+    }
     return currentUserId;
   }
   throw new Error('Could not get user id');
@@ -86,9 +89,7 @@ export const getAllAuthors = async (page: number) => {
       return {items: []}
     }
   } catch (err) {
-    if (err instanceof Error) {
-      console.log("ERR", err)
-    }
+    throw Error('There was an error fetching all authors');
   }
 } 
 /**
@@ -111,14 +112,22 @@ export function newPublicPost(authorId: any, postData: any) {
 }
 
 export const logOutCall = async () => {
-  const res = await fetch(`${BACKEND_HOST}/logout`, {
-    mode: 'cors',
-    credentials: 'include',
-    method: 'POST',
-  });
-
-  let json = await res.json();
-  return json;
+  try {
+    const res = await fetch(`${BACKEND_HOST}/logout`, {
+      mode: 'cors',
+      credentials: 'include',
+      method: 'POST',
+    });
+  
+    if (res.status === 200) {
+      let json = await res.json();
+      return { status: res.status, ...json };
+    } else {
+      return { status: res.status };
+    }
+  } catch (err) {
+    throw Error('Unable to log out user');
+  }
 }
 
 export const followerCall = async (currentUserId : number, toFollowId : number, method: string) => {
@@ -140,7 +149,7 @@ export const followerCall = async (currentUserId : number, toFollowId : number, 
     }
     return { status: res.status }
   } catch (err) {
-    console.log("ERROR", err);
+    throw Error('Unable to make follow actions on user');
   }
 }
 
@@ -159,6 +168,6 @@ export const getSpecAuthor = async (author_id : number) => {
 
     return { status: res.status, ...json};
   } catch(err) {
-    console.log("ERROR", err);
+    throw Error('Unable to get the information about this user');
   }
 }

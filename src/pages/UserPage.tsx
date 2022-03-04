@@ -3,7 +3,7 @@ import DrawerMenu from "../components/sidemenu-components/Drawer";
 import { CircularProgress } from '@mui/material';
 import { useEffect, useState } from "preact/hooks";
 import { get_author_id, followerCall, getSpecAuthor } from '../utils/apiCalls';
-import { Button } from "@mui/material";
+import { Alert, Button } from "@mui/material";
 
 
 type UserProps = {
@@ -12,6 +12,7 @@ type UserProps = {
 };
 
 const UserPage = ({ path, followId }: UserProps) => {
+    const [ errMsg, setErrMsg] = useState("");
     const [ doesFollow, setDoesFollow ] = useState(false);
     const [ isLoading, setIsLoading ] = useState(true);
     const [ currentUserId, setCurrentUserId ] = useState(-1);
@@ -33,8 +34,6 @@ const UserPage = ({ path, followId }: UserProps) => {
                 return;
             }
 
-            console.log("REST", res)
-
             let follower = [];
             if (res.status === 200) {
                 follower = res.items;
@@ -53,25 +52,34 @@ const UserPage = ({ path, followId }: UserProps) => {
             setIsLoading(false);
         }
 
-        isFollowerApiCall()
+        try {
+            isFollowerApiCall()
+        } catch (err) {
+            setErrMsg((err as Error).message);
+            setIsLoading(false);
+        }
     }, []);
 
     const handleFollow = async () => {
-        if (followId !== undefined) {
-            let res;
-            if (doesFollow === true) {
-                res = await followerCall(followId, currentUserId, "DELETE");
-                if (res.status === 204) {
-                    setDoesFollow(false)
+        try {
+            if (followId !== undefined) {
+                let res;
+                if (doesFollow === true) {
+                    res = await followerCall(followId, currentUserId, "DELETE");
+                    if (res.status === 204) {
+                        setDoesFollow(false)
+                    }
+                } else {
+                    res = await followerCall(followId, currentUserId, "PUT");
+                    if (res.status === 200) {
+                        setDoesFollow(true);
+                    }
                 }
             } else {
-                res = await followerCall(followId, currentUserId, "PUT");
-                if (res.status === 200) {
-                    setDoesFollow(true);
-                }
+                return;
             }
-        } else {
-            return;
+        } catch(err) {
+            setErrMsg((err as Error).message);
         }
     }
 
@@ -80,6 +88,9 @@ const UserPage = ({ path, followId }: UserProps) => {
             <DrawerMenu
             pageName="User"
             >
+                {errMsg && (
+                    <Alert severity="error">{errMsg}</Alert>
+                )}
                 {isLoading === true ? <CircularProgress /> : (
                     <div>
                         <p>{userInfo && userInfo.github}</p>
