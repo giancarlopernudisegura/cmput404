@@ -155,19 +155,20 @@ def specific_post(author_id: int, post_id: int) -> Response:
     if request.method != "PUT":
         post = Post.query.filter_by(id=post_id).first_or_404()
     if request.method != "DELETE":
+        json_val = request.json
         try:
             author = author_id
-            title = request.form["title"]
-            category = request.form["category"]
-            content = request.form["content"]
-            unlisted = request.form.get("unlisted") or False
-            contentType = ContentType(request.form["contentType"])
+            title = json_val["title"]
+            category = json_val["category"]
+            content = json_val["content"]
+            unlisted = json_val.get("unlisted") or False
+            contentType = ContentType(json_val["contentType"])
         except KeyError:
             return Response(status=httpStatus.BAD_REQUEST)
         except ValueError:
             return Response(status=httpStatus.BAD_REQUEST)
         if request.method == "PUT" and (
-            (visibility := request.form.get("visibility")) is None
+            (visibility := json_val.get("visibility")) is None
             or not visibility.upper() in post_visibility_map
         ):
             return Response(status=httpStatus.BAD_REQUEST)
@@ -234,10 +235,11 @@ def get_comment(author_id: int, post_id: int, comment_id: int) -> Response:
 @bp.route("/authors/<int:author_id>/posts/<int:post_id>/comments", methods=["POST"])
 @login_required
 def post_comment(author_id: int, post_id: int) -> Response:
+    json_val = request.json
     try:
-        title = request.form["title"]
-        content = request.form["content"]
-        contentType = ContentType(request.form.get("contentType"))
+        title = json_val["title"]
+        content = json_val["content"]
+        contentType = ContentType(json_val.get("contentType"))
     except KeyError:
         return Response(status=httpStatus.BAD_REQUEST)
     except ValueError:
