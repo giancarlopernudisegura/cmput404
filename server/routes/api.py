@@ -238,12 +238,14 @@ def get_comment(author_id: int, post_id: int, comment_id: int) -> Response:
 @login_required
 def post_comment(author_id: int, post_id: int) -> Response:
     try:
-        title = request.form["title"]
-        content = request.form["content"]
-        contentType = ContentType(request.form.get("contentType"))
+        title = request.json["title"]
+        content = request.json["content"]
+        contentType = ContentType(request.json.get("contentType"))
     except KeyError:
         return Response(status=httpStatus.BAD_REQUEST)
     except ValueError:
+        return Response(status=httpStatus.BAD_REQUEST)
+    except TypeError:
         return Response(status=httpStatus.BAD_REQUEST)
     comment = Comment(current_user.id, post_id, title, contentType, content)
     db.session.add(comment)
@@ -308,7 +310,7 @@ def add_follower(author_id: int, follower_id: int) -> Response:
         )
     follower = Requests(follower_id, author_id)
     db.session.add(follower)
-    inbox = Inbox(author_id, follow=follower.id)
+    inbox = Inbox(author_id, follow=follower_id)
     db.session.add(inbox)
     db.session.commit()
     return Response(status=httpStatus.OK)

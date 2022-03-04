@@ -315,6 +315,7 @@ class Inbox(db.Model, JSONSerializable):
         if argNoneCount < 2:
             raise Exception("Inbox can't relate multiple objects")
         elif argNoneCount == 3:
+            print(like, post, follow)
             raise Exception("Inbox must relate one object")
         self.post = post
         self.like = like

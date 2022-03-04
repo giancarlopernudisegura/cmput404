@@ -1,7 +1,9 @@
+from cgi import test
 import pytest
 import os
 import sys
 import json
+from flask.testing import FlaskClient
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from server.run import create_app
@@ -31,17 +33,20 @@ def test_client():
     ctx.pop()
 
 
-def test_index(test_client):
+@pytest.mark.order(1)
+def test_index(test_client: FlaskClient):
     r = test_client.get("/")
     assert r.status_code == 302
 
 
-def test_hello_world(test_client):
+@pytest.mark.order(2)
+def test_hello_world(test_client: FlaskClient):
     r = test_client.get("/api/hello_world")
     assert r.status_code == 404
 
 
-def test_login(test_client):
+@pytest.mark.order(3)
+def test_login(test_client: FlaskClient):
     # test login page redirects
     r = test_client.get("/")
     assert r.status_code == 302
@@ -66,16 +71,18 @@ def test_login(test_client):
     assert data["displayName"] == "Giancarlo"
 
 
-def test_get_authors(test_client):
+@pytest.mark.order(4)
+def test_get_authors(test_client: FlaskClient):
     r = test_client.get("/authors")
     assert r.status_code == 200
     r = test_client.get("/authors/1")
     assert r.status_code == 200
-    r = test_client.get("/authors/2")
+    r = test_client.get("/authors/0")
     assert r.status_code == 404
 
 
-def test_posts(test_client):
+@pytest.mark.order(5)
+def test_posts(test_client: FlaskClient):
     r = test_client.get("/authors/1/posts", follow_redirects=True)
     assert r.status_code == 200
     r = test_client.get("/authors/1/posts/1", follow_redirects=True)
@@ -148,3 +155,55 @@ def test_posts(test_client):
     assert r.status_code == 200
     r = test_client.delete("/authors/1/posts/3", follow_redirects=True)
     assert r.status_code == 204
+
+
+@pytest.mark.order(6)
+def test_comments(test_client: FlaskClient):
+    r = test_client.get("/authors/1/posts/1/comments", follow_redirects=True)
+    assert r.status_code == 200
+    data = json.loads(r.data.decode("utf-8"))
+    assert data["type"] == "comments"
+    assert data["size"] == 0
+    r = test_client.post(
+        "/authors/1/posts/1/comments",
+        data=json.dumps(
+            {
+                "title": "test title",
+                "content": "test comment",
+                "contentType": "text/markdown",
+            }
+        ),
+        content_type="application/json",
+        follow_redirects=True,
+    )
+    assert r.status_code == 200
+    r = test_client.get("/authors/1/posts/1/comments", follow_redirects=True)
+    data = json.loads(r.data.decode("utf-8"))
+    assert data["type"] == "comments"
+    assert data["size"] == 1
+
+
+@pytest.mark.order(7)
+def test_followers(test_client: FlaskClient):
+    r = test_client.get("/authors/2/followers", follow_redirects=True)
+    data = json.loads(r.data.decode("utf-8"))
+    assert data["type"] == "followers"
+    assert len(data["items"]) == 0
+    r = test_client.put("/authors/2/followers/1", follow_redirects=True)
+    assert r.status_code == 200
+    r = test_client.put("/authors/2/followers/3", follow_redirects=True)
+    assert r.status_code == 403
+    r = test_client.get("/authors/2/followers", follow_redirects=True)
+    data = json.loads(r.data.decode("utf-8"))
+    assert data["type"] == "followers"
+    assert len(data["items"]) == 1
+    r = test_client.get("/authors/2/followers/1", follow_redirects=True)
+    assert r.status_code == 200
+    data = json.loads(r.data.decode("utf-8"))
+    assert len(data["items"]) == 1
+    r = test_client.delete("/authors/2/followers/1", follow_redirects=True)
+    assert r.status_code == 204
+    r = test_client.get("/authors/2/followers/1", follow_redirects=True)
+    assert r.status_code == 200
+    data = json.loads(r.data.decode("utf-8"))
+    assert len(data["items"]) == 0
