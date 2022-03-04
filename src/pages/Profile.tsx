@@ -3,6 +3,8 @@ import DrawerMenu from '../components/sidemenu-components/Drawer'
 import { useState, useEffect } from "preact/hooks";
 import { getCurrentAuthor, getPosts } from "../utils/apiCalls";
 
+import Post from "../components/Post";
+
 type profileProps = {path: string}
 
 function Profile({path}: profileProps) {
@@ -46,7 +48,17 @@ function Profile({path}: profileProps) {
 
             <div class="posts">
               <h2>My Posts</h2>
-
+              
+                <ul>
+                {myPosts.map(post => (
+                  <li>
+                    <Post
+                      title={post.title}
+                      body={post.description}
+                      author={post.author} />
+                  </li>
+                ))}                  
+                </ul>
             </div>
 
           </div>
