@@ -28,6 +28,9 @@ const Login = (props: Props) => {
   
   return (
     <div class="flex flex-row min-h-screen justify-center items-center">
+      {errMsg && (
+        <Alert severity="error">{errMsg}</Alert>
+      )}
       <div class="px-28 pt-8 absolute max-w-full h-1/2 bg-white border-solid box-border border border-zinc-200 rounded-lg">
         <h1 class="text-center font-medium text-2xl leading-9">Welcome To TikTakToe</h1>
         <h2 class="text-center not-italic font-normal text-base text-zinc-400 py-2">Connect with your friends in a private manner.</h2>

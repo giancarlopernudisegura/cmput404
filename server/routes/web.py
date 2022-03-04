@@ -25,7 +25,10 @@ def index():
 
 @bp.route("/login", methods=["GET"])
 def login():
-    return frontend_page()
+    if current_user.is_authenticated:
+        return redirect('/app')
+    else:
+        return frontend_page()
 
 @bp.route("/homepage", methods=["GET"])
 def homepage():
@@ -37,4 +40,12 @@ def profile():
 
 @bp.route("/notifications", methods=["GET"])
 def notifications():
+    return frontend_page()
+
+@bp.route("/search", methods=["GET"])
+def search():
+    return frontend_page()
+
+@bp.route('/user/<int:user_id>', methods=["GET"])
+def user(user_id):
     return frontend_page()

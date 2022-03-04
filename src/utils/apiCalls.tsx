@@ -30,7 +30,11 @@ export const get_author_id = async () => {
     method: 'GET',
   });
   if (res.status === 200) {
-    return res.headers.get('X-User-Id') as string;
+    const currentUserId = res.headers.get('X-User-Id') as string;
+    if (currentUserId === null) {
+      throw new Error('Could not get user id');
+    }
+    return currentUserId;
   }
   throw new Error('Could not get user id');
 };
@@ -69,25 +73,24 @@ export function getPosts(author_id: string): Promise<any> {
  * with their id and displayName
  * @returns Array<Author>
  */
-export function getAllAuthors() {
-  const listOfAuthors = fetch(`${BACKEND_HOST}/authors/`, {
-    mode: 'cors',
-    method: 'GET',
-  }).then(res => res.json())
-    .then(data => {
-      var authors = Array();
-      for (let i = 0; i < data.items.length; i++) {
-        const author: any = {
-          'id': data.items[i].id,
-          'displayName': data.items[i].displayName,
-        };
-        authors.push(author);
-      }
-      return authors;
-    })
-    .catch(err => {alert(err);});
-  
-    return listOfAuthors;
+export const getAllAuthors = async (page: number) => {
+  try {
+    const res = await fetch(`${BACKEND_HOST}/authors/?size=10&page_number=${page}`, {
+      mode: 'cors',
+      method: 'GET',
+    });
+
+    if (res.status == 200) {
+      const currentUserId = res.headers.get('X-User-Id');
+      console.log("RESPONES", currentUserId);
+      let listOfAuthors = await res.json();
+      return {...listOfAuthors, currentUserId};
+    } else {
+      return {items: []}
+    }
+  } catch (err) {
+    throw Error('There was an error fetching all authors');
+  }
 } 
 /**
  * Sends a post to the backend
@@ -130,12 +133,62 @@ export async function clearInbox(author_id: string): Promise<boolean> {
 }
 
 export const logOutCall = async () => {
-  const res = await fetch(`${BACKEND_HOST}/logout`, {
-    mode: 'cors',
-    credentials: 'include',
-    method: 'POST',
-  });
+  try {
+    const res = await fetch(`${BACKEND_HOST}/logout`, {
+      mode: 'cors',
+      credentials: 'include',
+      method: 'POST',
+    });
+  
+    if (res.status === 200) {
+      let json = await res.json();
+      return { status: res.status, ...json };
+    } else {
+      return { status: res.status };
+    }
+  } catch (err) {
+    throw Error('Unable to log out user');
+  }
+}
 
-  let json = await res.json();
-  return json;
+export const followerCall = async (currentUserId : number, toFollowId : number, method: string) => {
+  try {
+    const res = await fetch(`${BACKEND_HOST}/authors/${currentUserId}/followers/${toFollowId}`, {
+      mode: 'cors',
+      credentials: 'include',
+      method,
+    });
+
+    if (res.status === 200) {
+      let json = [];
+
+      if (method === "GET") {
+        json = await res.json();
+      }
+
+      return { ...json, status: res.status };
+    }
+    return { status: res.status }
+  } catch (err) {
+    throw Error('Unable to make follow actions on user');
+  }
+}
+
+export const getSpecAuthor = async (author_id : number) => {
+  try {
+    const res = await fetch(`${BACKEND_HOST}/authors/${author_id}`, {
+      mode: 'cors',
+      credentials: 'include',
+      method: 'GET',
+    });
+
+    let json = [];
+    if (res.status === 200) {
+      json = await res.json();
+    }
+
+    return { status: res.status, ...json};
+  } catch(err) {
+    throw Error('Unable to get the information about this user');
+  }
 }

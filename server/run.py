@@ -71,6 +71,7 @@ def create_app(config_filename=None):
         )
         response.headers.add("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE")
         response.headers.add("Access-Control-Allow-Credentials", "true")
+        response.headers.add("Access-Control-Expose-Headers", "X-User-Id")
         if current_user.is_authenticated:
             response.headers.add("X-User-Id", f"{current_user.id}")
         return response

@@ -9,8 +9,10 @@ import Homepage from './pages/Homepage';
 import Profile from './pages/Profile'
 import './css/main.css';
 import Notifications from './pages/Notifications';
+import UserPage from './pages/UserPage';
 
 const App = () => {
+
   return (
     <div class="app" className="min-h-screen static bg-stone-50">
       {/* <Header /> */}
@@ -20,6 +22,7 @@ const App = () => {
         <Homepage path="/app/homepage"/>
         <Profile path="/app/profile"/>
         <Notifications path="/app/notifications"/>
+        <UserPage path="/app/user/:followId" />
       </Router>
     </div>
   )
