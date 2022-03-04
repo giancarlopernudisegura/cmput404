@@ -1,7 +1,7 @@
 name: unit tests
 
 on:
-  pull_requests:
+  pull_request:
     branches: [ master ]
   workflow_dispatch:
 
@@ -24,19 +24,21 @@ jobs:
           pip install -r requirements.txt
 
       - name: pytest
-        run: pytest --cov=. tests/
+        run: |
+          DATABASE_URL=sqlite:///test.db flask db upgrade
+          pytest --cov=. tests.py
 
-  javascript:
-    runs-on: ubuntu-latest
+  # javascript:
+  #   runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v2
+  #   steps:
+  #     - uses: actions/checkout@v2
 
-      - uses: actions/setup-node@v2
-        with:
-          node-version: '16'
+  #     - uses: actions/setup-node@v2
+  #       with:
+  #         node-version: '16'
 
-      - run: npm ci
+  #     - run: npm ci
 
-      - name: jest
-        run: npm test
+  #     - name: jest
+  #       run: npm test
