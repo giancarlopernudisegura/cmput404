@@ -45,29 +45,55 @@ export const get_author_id = async () => {
  * @returns Array<Post>
  */
 
-export function getPosts(author_id: string): Promise<any> {
+// export function getPosts(author_id: string): Promise<any> {
 
-  let listOfPosts = fetch(`${BACKEND_HOST}/authors/${author_id}/posts/`, {
-    mode: 'cors',
-    method: 'GET',
-  }).then(res => res.json())
-    .then(data => {
-      var posts = Array();
-      for (let i = 0; i < data.items.length; i++) {
-        const post: any = {
-          'author': data.items[i].author.displayName,
-          'title': data.items[i].title,
-          'description': data.items[i].description,
-        };
-        posts.push(post);
-      }
-      return posts;
-    })
-    .catch(err => { alert(err); });
+//   let listOfPosts = fetch(`${BACKEND_HOST}/authors/${author_id}/posts/`, {
+//     mode: 'cors',
+//     method: 'GET',
+//   }).then(res => res.json())
+//     .then(data => {
+//       var posts = Array();
+//       for (let i = 0; i < data.items.length; i++) {
+//         const post: any = {
+//           'author': data.items[i].author.displayName,
+//           'title': data.items[i].title,
+//           'description': data.items[i].description,
+//         };
+//         posts.push(post);
+//       }
+//       return posts;
+//     })
+//     .catch(err => { alert(err); });
 
-  return listOfPosts;
+//   return listOfPosts;
+// };
 
+export async function getPosts(author_id: string): Promise<any> {
+
+  try {
+    let res = await fetch(`${BACKEND_HOST}/authors/${author_id}/posts/`, {
+      mode: 'cors',
+      method: 'GET',
+    });
+    
+    let data = await res.json();
+    let listOfPosts = Array();
+
+    for (let i = 0; i < data.items.length; i++) {
+      const post: any = {
+        'author': data.items[i].author.displayName,
+        'title': data.items[i].title,
+        'description': data.items[i].description,
+      };
+      listOfPosts.push(post);
+    }
+
+    return listOfPosts;
+  } catch (err) {
+    throw Error("There was an error fetching the posts");
+  }
 };
+
 /**
  * Gets a list of all authenticated authors
  * with their id and displayName

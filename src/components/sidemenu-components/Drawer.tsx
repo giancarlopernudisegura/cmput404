@@ -62,7 +62,7 @@ function DrawerMenu(props: any) {
       )}
       <Divider />
       <List>
-        {["Home", "Explore", "My Profile", "Notifications", "Settings"].map(
+        {["Home", "Explore", "My Profile", "Notifications"].map(
           (text, index) => (
             <ListItem button key={text} onClick={() => {
                 if (text === 'Home') {route('/app/homepage', true)}

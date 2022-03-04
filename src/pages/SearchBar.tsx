@@ -6,9 +6,6 @@ import { route } from 'preact-router';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from "@mui/material/TextField";
 
-
-
-
 const Search = () => {
     const [ currentUserId, setCurrentUserId ] = useState<number | null>(null);
     const [ authors, setAuthors ] = useState(Array());
