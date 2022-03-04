@@ -69,25 +69,24 @@ export function getPosts(author_id: string): Promise<any> {
  * with their id and displayName
  * @returns Array<Author>
  */
-export function getAllAuthors() {
-  const listOfAuthors = fetch(`${BACKEND_HOST}/authors/`, {
-    mode: 'cors',
-    method: 'GET',
-  }).then(res => res.json())
-    .then(data => {
-      var authors = Array();
-      for (let i = 0; i < data.items.length; i++) {
-        const author: any = {
-          'id': data.items[i].id,
-          'displayName': data.items[i].displayName,
-        };
-        authors.push(author);
-      }
-      return authors;
-    })
-    .catch(err => {alert(err);});
-  
-    return listOfAuthors;
+export const getAllAuthors = async (page: number) => {
+  try {
+    const res = await fetch(`${BACKEND_HOST}/authors/?size=10&page_number=${page}`, {
+      mode: 'cors',
+      method: 'GET',
+    });
+
+    if (res.status == 200) {
+      let listOfAuthors = await res.json();
+      return listOfAuthors;
+    } else {
+      return {items: []}
+    }
+  } catch (err) {
+    if (err instanceof Error) {
+      console.log("ERR", err)
+    }
+  }
 } 
 /**
  * Sends a post to the backend

@@ -7,6 +7,7 @@ import Header from './components/Header'
 import Login from './pages/Login';
 import Homepage from './pages/Homepage';
 import Profile from './pages/Profile'
+import SearchPage from './pages/SearchPage';
 import './css/main.css';
 import Notifications from './pages/Notifications';
 
@@ -20,6 +21,7 @@ const App = () => {
         <Homepage path="/app/homepage"/>
         <Profile path="/app/profile"/>
         <Notifications path="/app/notifications"/>
+        <SearchPage path="/app/search" />
       </Router>
     </div>
   )

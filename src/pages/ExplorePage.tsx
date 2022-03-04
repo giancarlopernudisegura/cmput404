@@ -36,7 +36,6 @@ function ExplorePage({ path }: ExplorePageProps) {
 
     return (
         <DrawerMenu pageName="Explore">
-            <SearchField />
             <PostForm />
             
             <div id="post-grid">

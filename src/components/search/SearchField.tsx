@@ -6,7 +6,14 @@ const searchConstants = {
     placeholder: "Search an author"
 };
 
-const SearchField = () => {
+type SearchProps = {
+    searchInfo: string,
+    updateSearchButton: (val: any) => void,
+    searchButton: (val: void) => void
+};
+
+
+const SearchField = ({ searchInfo, updateSearchButton, searchButton }: SearchProps) => {    
     return (
         <Paper
         component="form"
@@ -15,8 +22,10 @@ const SearchField = () => {
         <InputBase
             sx={{ ml: 1, flex: 1 }}
             placeholder={searchConstants.placeholder}
+            onChange={(e) => updateSearchButton(e)}
+            value={searchInfo}
         />
-        <IconButton type="submit" sx={{ p: "10px" }} aria-label="search">
+        <IconButton type="submit" sx={{ p: "10px" }} aria-label="search" onClick={() => searchButton}>
             <SearchIcon />
         </IconButton>
         </Paper>
