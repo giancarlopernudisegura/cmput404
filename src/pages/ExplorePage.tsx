@@ -1,11 +1,13 @@
 import { h } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
+import { getPosts, get_author_id } from '../utils/apiCalls';
+
 import Post from '../components/Post';
+import PostForm from '../components/PostForm';
 import DrawerMenu from '../components/sidemenu-components/Drawer';
-import { getPosts, getAllAuthors, get_author_id } from '../utils/apiCalls';
+import SearchField from '../components/search/SearchField';
 
 type ExplorePageProps = { path: string };
-
 
 function ExplorePage({ path }: ExplorePageProps) {
 
@@ -14,7 +16,6 @@ function ExplorePage({ path }: ExplorePageProps) {
     useEffect(() => {
         function getPostsFromAPI() {
             console.log("Getting posts from API...");
-            //TODO: temp, should display all authors with public posts
             get_author_id()
                 .then(author_id => {
                     const response = getPosts(author_id);
@@ -31,9 +32,14 @@ function ExplorePage({ path }: ExplorePageProps) {
         getPostsFromAPI();
     }, []);
 
+    
+
     return (
         <DrawerMenu pageName="Explore">
-            <div>
+            <SearchField />
+            <PostForm />
+            
+            <div id="post-grid">
             {posts.length > 0 &&
                 <ul>
                     {posts.map(post => (
