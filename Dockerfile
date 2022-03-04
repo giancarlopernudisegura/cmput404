@@ -23,7 +23,9 @@ RUN apt-get install -y nodejs
 
 COPY package*.json ./
 
-RUN npm i
+RUN npm ci
+
+RUN npm run build
 
 COPY . .
 
