@@ -8,6 +8,7 @@ on:
 jobs:
   python:
     runs-on: ubuntu-latest
+    environment: testing
     defaults:
       run:
         working-directory: server
@@ -23,11 +24,11 @@ jobs:
         run: |
           python3 -m venv venv
           . venv/bin/activate
-          pip install -r requirements.txt
+          python3 -m pip install -r requirements.txt
 
       - name: pytest
         run: |
-          DATABASE_URL=sqlite:///test.db flask db upgrade
+          flask db upgrade
           pytest --cov=. tests.py
 
   # javascript:
