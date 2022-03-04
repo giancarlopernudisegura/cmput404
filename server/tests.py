@@ -34,3 +34,9 @@ def test_hello_world(test_client):
 
     r = test_client.get("/api/hello_world")
     assert r.status_code == 404
+
+
+def test_get_authors(test_client):
+
+    r = test_client.get("/authors")
+    assert r.status_code == 200

@@ -50,6 +50,7 @@ flask run
 ### Testing the server
 ```bash
 cd server/
+DATABASE_URL=sqlite:///test.db flask db upgrade
 pytest tests.py
 ```
 
