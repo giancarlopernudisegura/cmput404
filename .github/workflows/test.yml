@@ -8,7 +8,9 @@ on:
 jobs:
   python:
     runs-on: ubuntu-latest
-    working-directory: server
+    defaults:
+      run:
+        working-directory: server
 
     steps:
       - uses: actions/checkout@v2
