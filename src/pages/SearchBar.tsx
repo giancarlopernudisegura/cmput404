@@ -64,7 +64,7 @@ const Search = () => {
                     <ShowAuthor author={option} handleClick={handleClick} />
                 )}
                 getOptionLabel={(option) => option.github}
-                renderInput={params => <TextField {...params} label="freeSolo" />}
+                renderInput={params => <TextField {...params} label="Search for an author" />}
             />
 
         </div>
