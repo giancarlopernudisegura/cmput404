@@ -289,6 +289,7 @@ def remove_follower(author_id: int, follower_id: int) -> Response:
     follower = Requests.query.filter_by(to=author_id, initiated=follower_id).first()
     if not follower:
         return Response(status=httpStatus.NOT_FOUND)
+    Inbox.query.filter_by(follow=follower_id).delete()
     db.session.delete(follower)
     db.session.commit()
     return Response(status=httpStatus.NO_CONTENT)
@@ -349,11 +350,11 @@ def post_inbox(author_id: int) -> Response:
             raise KeyError()
         req_id = request.json["id"]
         if req_type == "post":
-            inbox = Inbox(owner=author_id, post=req_id)
+            inbox = Inbox(author_id, post=req_id)
         elif req_type == "follow":
-            inbox = Inbox(owner=author_id, follow=req_id)
+            inbox = Inbox(author_id, follow=req_id)
         elif req_type == "like":
-            inbox = Inbox(owner=author_id, like=req_id)
+            inbox = Inbox(author_id, like=req_id)
         db.session.add(inbox)
         db.session.commit()
     except KeyError:
@@ -377,8 +378,7 @@ def clear_inbox(author_id: int) -> Response:
             make_response(jsonify(error=res_msg.NO_PERMISSION)),
             httpStatus.UNAUTHORIZED,
         )
-    inbox_items = Inbox.query.filter_by(owner=author_id).all()
-    db.session.delete(inbox_items)
+    Inbox.query.filter_by(owner=author_id).delete()
     db.session.commit()
     return Response(status=httpStatus.OK)
 

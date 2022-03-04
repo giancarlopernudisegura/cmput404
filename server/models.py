@@ -248,7 +248,7 @@ class Like(db.Model, JSONSerializable, InboxItem):
         db.session.commit()
 
 
-class Requests(db.Model):  # follow requests
+class Requests(db.Model, JSONSerializable):  # follow requests
     __tablename__ = "requests"
     id = db.Column(db.Integer, primary_key=True)
     initiated = db.Column(db.ForeignKey("author.id"))  # follower
@@ -267,9 +267,8 @@ class Requests(db.Model):  # follow requests
     def __repr__(self):
         return f"<id {self.id}>"
 
-    def get_follower_json(self) -> Dict[str, Any]:  #
+    def get_follower_json(self) -> Dict[str, Any]:
         follower = Author.query.filter_by(id=self.initiated).first()
-        print(f"follower type {type(follower)}")
         return follower.json()
 
     @staticmethod
@@ -277,6 +276,12 @@ class Requests(db.Model):  # follow requests
         r1 = Requests.query.filter_by(initiated=author_id1, to=author_id2).first()
         r2 = Requests.query.filter_by(initiated=author_id2, to=author_id1).first()
         return r1 and r2
+
+    def json(self) -> Dict[str, Any]:
+        return {
+            "type": "followers",
+            "items": [self.get_follower_json()],
+        }
 
 
 class ViewablePostRelation(db.Model):
@@ -322,7 +327,7 @@ class Inbox(db.Model, JSONSerializable):
         self.follow = follow
 
     def __repr__(self):
-        return f"<id {self.id}>"
+        return f"<id {self.id} {self.post} {self.like} {self.follow}>"
 
     def json(self) -> Dict[str, Any]:
         if self.post:

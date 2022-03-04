@@ -9,13 +9,18 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from server.run import create_app
 
 
-def login(client):
+def login(client: FlaskClient, user_id: int):
     r = client.post(
         "/login/unit_test",
-        data=json.dumps({"author_id": 1}),
+        data=json.dumps({"author_id": user_id}),
         content_type="application/json",
         follow_redirects=True,
     )
+    assert r.status_code == 200
+
+
+def logout(client: FlaskClient):
+    r = client.post("/logout", follow_redirects=True)
     assert r.status_code == 200
 
 
@@ -60,7 +65,7 @@ def test_login(test_client: FlaskClient):
     # test login
     r = test_client.get("/login_test")
     assert r.status_code == 401
-    login(test_client)
+    login(test_client, 1)
     r = test_client.get("/login_test")
     assert r.status_code == 200
     r = test_client.get("/user_me")
@@ -87,7 +92,7 @@ def test_posts(test_client: FlaskClient):
     assert r.status_code == 200
     r = test_client.get("/authors/1/posts/1", follow_redirects=True)
     assert r.status_code == 404
-    login(test_client)
+    login(test_client, 1)
     r = test_client.post(
         "/authors/1/posts/",
         data=json.dumps(
@@ -206,4 +211,25 @@ def test_followers(test_client: FlaskClient):
     r = test_client.get("/authors/2/followers/1", follow_redirects=True)
     assert r.status_code == 200
     data = json.loads(r.data.decode("utf-8"))
+    assert len(data["items"]) == 0
+
+
+@pytest.mark.order(8)
+def test_inbox(test_client: FlaskClient):
+    r = test_client.get("/authors/2/inbox", follow_redirects=True)
+    assert r.status_code == 401
+    # user 1 will follow user 2
+    test_client.put("/authors/2/followers/1", follow_redirects=True)
+    logout(test_client)
+    login(test_client, 2)
+    r = test_client.get("/authors/2/inbox", follow_redirects=True)
+    assert r.status_code == 200
+    data = json.loads(r.data.decode("utf-8"))
+    assert data["type"] == "inbox"
+    assert len(data["items"]) == 1
+    assert data["items"][0]["type"] == "followers"
+    r = test_client.delete("/authors/2/inbox", follow_redirects=True)
+    r = test_client.get("/authors/2/inbox", follow_redirects=True)
+    data = json.loads(r.data.decode("utf-8"))
+    assert data["type"] == "inbox"
     assert len(data["items"]) == 0
