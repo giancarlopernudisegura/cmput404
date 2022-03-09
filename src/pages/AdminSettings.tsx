@@ -14,8 +14,12 @@ import {
     TableContainer,
     FormControlLabel,
     FormGroup,
-    Link
+    Link,
+    Typography,
+    Toolbar,
+    IconButton
 } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { useEffect, useState } from "preact/hooks";
 
 type SettingsProps = {
@@ -38,19 +42,20 @@ const Settings = ({ path }: SettingsProps) => {
     const [errMsg, setErrMsg] = useState("");
     const [isLoading, setIsLoading] = useState(true);
     const [users, setUsers] = useState<User[]>([]);
+    const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+
+    const loadUsers = async (page: number): Promise<User[]> => {
+        const res = await fetch(`/authors?size=5&page=${page}`)
+        if (res.status !== 200) {
+            setIsLoading(false);
+            return [];
+        }
+        const data = await res.json();
+        const u: User[] = data.items;
+        return u.concat(await loadUsers(page + 1));
+    }
 
     useEffect(() => {
-        const pageSize = 5;
-        const loadUsers = async (page: number): Promise<User[]> => {
-            const res = await fetch(`/authors?size=${pageSize}&page=${page}`)
-            if (res.status !== 200) {
-                setIsLoading(false);
-                return [];
-            }
-            const data = await res.json();
-            const u: User[] = data.items;
-            return u.concat(await loadUsers(page + 1));
-        }
         loadUsers(1)
             .then(users => { setUsers(users) });
     }, []);
@@ -82,27 +87,75 @@ const Settings = ({ path }: SettingsProps) => {
                     </Box>
                     <br />
                     <Box>
-                        <h1>Users</h1>
+                        <Toolbar>
+                            <Typography
+                                sx={{ flex: '1 1 100%' }}
+                                variant="h6"
+                                id="tableTitle"
+                                component="div"
+                            >
+                                Users
+                            </Typography>
+                            <IconButton>
+                                <DeleteIcon />
+                            </IconButton>
+                        </Toolbar>
                         <TableContainer>
                             <Table>
                                 <TableHead>
                                     <TableRow>
+                                        <TableCell></TableCell>
                                         {tableColumns.map(column => {
                                             return <TableCell>{column}</TableCell>
                                         })}
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {users.map(({ id, displayName, github, host, url, isAdmin, isVerified }) => {
-                                        const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
+                                    {users.map(({ id, displayName, github, host, url, isAdmin, isVerified }, index) => {
+                                        const label = { inputProps: { 'aria-label': 'Checkbox' } };
                                         return <TableRow>
+                                            <TableCell><Checkbox {...label} /></TableCell>
                                             <TableCell>{id}</TableCell>
                                             <TableCell>{displayName}</TableCell>
                                             <TableCell><Link href={github} target="_blank" rel="noreferrer">{github}</Link></TableCell>
                                             <TableCell><Link href={host} target="_blank" rel="noreferrer">{host}</Link></TableCell>
                                             <TableCell><Link href={url} target="_blank" rel="noreferrer">{url}</Link></TableCell>
-                                            <TableCell><Checkbox {...label} disabled checked={isAdmin} /></TableCell>
-                                            <TableCell><Checkbox {...label} disabled checked={isVerified} /></TableCell>
+                                            <TableCell><Checkbox {...label} checked={isAdmin} onClick={e => {
+                                                fetch(`/admin/author/${id}`, {
+                                                    method: "POST",
+                                                    headers: {
+                                                        "Content-Type": "application/json"
+                                                    },
+                                                    body: JSON.stringify({
+                                                        isAdmin: !isAdmin
+                                                    })
+                                                })
+                                                    .then(res => {
+                                                        if (res.status === 200) {
+                                                            setUsers([]);
+                                                            loadUsers(1)
+                                                                .then(users => { setUsers(users) });
+                                                        }
+                                                    })
+                                            }} /></TableCell>
+                                            <TableCell><Checkbox {...label} checked={isVerified} onClick={e => {
+                                                fetch(`/admin/author/${id}`, {
+                                                    method: "POST",
+                                                    headers: {
+                                                        "Content-Type": "application/json"
+                                                    },
+                                                    body: JSON.stringify({
+                                                        isVerified: !isVerified
+                                                    })
+                                                })
+                                                    .then(res => {
+                                                        if (res.status === 200) {
+                                                            setUsers([]);
+                                                            loadUsers(1)
+                                                                .then(users => { setUsers(users) });
+                                                        }
+                                                    })
+                                            }} /></TableCell>
                                         </TableRow>
                                     })}
                                 </TableBody>

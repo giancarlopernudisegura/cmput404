@@ -524,3 +524,48 @@ def get_user_me() -> Response:
             httpStatus.INTERNAL_SERVER_ERROR,
             {"message": res_msg.GENERAL_ERROR + str(e)},
         )
+
+
+@bp.route("/admin/author/<int:author_id>", methods=["POST"])
+@login_required
+def modify_author(author_id: int) -> Response:
+    if not current_user.isAdmin:
+        return (
+            make_response(jsonify(error=res_msg.NO_PERMISSION)),
+            httpStatus.UNAUTHORIZED,
+        )
+    try:
+        author = Author.query.filter_by(id=author_id).first_or_404()
+        author.isAdmin = request.json.get("isAdmin", author.isAdmin)
+        author.isVerified = request.json.get("isVerified", author.isVerified)
+        db.session.commit()
+        return utils.json_response(
+            httpStatus.OK, {"message": res_msg.SUCCESS_USER_UPDATED}
+        )
+    except Exception as e:
+        return utils.json_response(
+            httpStatus.INTERNAL_SERVER_ERROR,
+            {"message": res_msg.GENERAL_ERROR + str(e)},
+        )
+
+
+@bp.route("/admin/author/<int:author_id>", methods=["DELETE"])
+@login_required
+def delete_author(author_id: int) -> Response:
+    if not current_user.isAdmin:
+        return (
+            make_response(jsonify(error=res_msg.NO_PERMISSION)),
+            httpStatus.UNAUTHORIZED,
+        )
+    try:
+        author = Author.query.filter_by(id=author_id).first_or_404()
+        author.delete()
+        db.session.commit()
+        return utils.json_response(
+            httpStatus.OK, {"message": res_msg.SUCCESS_USER_DELETED}
+        )
+    except Exception as e:
+        return utils.json_response(
+            httpStatus.INTERNAL_SERVER_ERROR,
+            {"message": res_msg.GENERAL_ERROR + str(e)},
+        )
