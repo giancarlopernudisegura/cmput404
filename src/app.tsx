@@ -10,6 +10,7 @@ import Profile from './pages/Profile'
 import './css/main.css';
 import Notifications from './pages/Notifications';
 import UserPage from './pages/UserPage';
+import AdminSettings from './pages/AdminSettings';
 
 const App = () => {
 
@@ -19,10 +20,11 @@ const App = () => {
       <Router>
         <ExplorePage path="/app" />
         <Login path="/app/login" />
-        <Homepage path="/app/homepage"/>
-        <Profile path="/app/profile"/>
-        <Notifications path="/app/notifications"/>
+        <Homepage path="/app/homepage" />
+        <Profile path="/app/profile" />
+        <Notifications path="/app/notifications" />
         <UserPage path="/app/user/:followId" />
+        <AdminSettings path="/app/settings" />
       </Router>
     </div>
   )

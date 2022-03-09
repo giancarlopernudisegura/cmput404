@@ -74,6 +74,8 @@ class Author(db.Model, UserMixin, JSONSerializable):
             "url": f"{HOST}/authors/{self.id}",
             "github": data["html_url"],
             "profileImage": self.profileImageId,
+            "isAdmin": self.isAdmin,
+            "isVerified": self.isVerified,
         }
 
 
