@@ -15,6 +15,7 @@ from flask_login import login_user, login_required, logout_user, current_user
 from server.exts import db
 from server.models import Author, Inbox, Post, Comment, Requests
 from server.enums import ContentType
+from server.config import RUNTIME_SETTINGS
 from http import HTTPStatus as httpStatus
 import os, io, binascii
 from dotenv import load_dotenv
@@ -563,6 +564,51 @@ def delete_author(author_id: int) -> Response:
         db.session.commit()
         return utils.json_response(
             httpStatus.OK, {"message": res_msg.SUCCESS_USER_DELETED}
+        )
+    except Exception as e:
+        return utils.json_response(
+            httpStatus.INTERNAL_SERVER_ERROR,
+            {"message": res_msg.GENERAL_ERROR + str(e)},
+        )
+
+
+@bp.route("/admin/settings", methods=["GET"])
+@login_required
+def get_settings() -> Response:
+    if not current_user.isAdmin:
+        return (
+            make_response(jsonify(error=res_msg.NO_PERMISSION)),
+            httpStatus.UNAUTHORIZED,
+        )
+    try:
+        return utils.json_response(
+            httpStatus.OK,
+            {key: current_app.config[key] for key in RUNTIME_SETTINGS},
+        )
+    except Exception as e:
+        return utils.json_response(
+            httpStatus.INTERNAL_SERVER_ERROR,
+            {"message": res_msg.GENERAL_ERROR + str(e)},
+        )
+
+
+@bp.route("/admin/settings", methods=["POST"])
+@login_required
+def set_settings() -> Response:
+    if not current_user.isAdmin:
+        return (
+            make_response(jsonify(error=res_msg.NO_PERMISSION)),
+            httpStatus.UNAUTHORIZED,
+        )
+    try:
+        settings: Dict[str, str] = request.json
+        for key, val in settings.items():
+            if key in RUNTIME_SETTINGS:
+                current_app.config[key] = val
+                print(f"{key} set to {current_app.config[key]}")
+        return utils.json_response(
+            httpStatus.OK,
+            {"message": res_msg.SUCCESS_SETTINGS},
         )
     except Exception as e:
         return utils.json_response(

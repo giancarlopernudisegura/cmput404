@@ -42,6 +42,7 @@ const Settings = ({ path }: SettingsProps) => {
     const [errMsg, setErrMsg] = useState("");
     const [isLoading, setIsLoading] = useState(true);
     const [users, setUsers] = useState<User[]>([]);
+    const [verifyNewUsers, setVerifyNewUsers] = useState(false);
     const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
 
     const addOrRemoveUserToSelected = (userId: string) => {
@@ -66,6 +67,11 @@ const Settings = ({ path }: SettingsProps) => {
     useEffect(() => {
         loadUsers(1)
             .then(users => { setUsers(users) });
+        fetch("/admin/settings")
+            .then(res => res.json())
+            .then(data => {
+                setVerifyNewUsers(data.AUTOMATIC_VERIFICATION);
+            })
     }, []);
 
     const tableColumns = [
@@ -90,7 +96,18 @@ const Settings = ({ path }: SettingsProps) => {
                     <Box>
                         <h1>Server Settings</h1>
                         <FormGroup>
-                            <FormControlLabel label="Verify new users by default" control={<Checkbox />} />
+                            <FormControlLabel label="Verify new users by default" control={<Checkbox checked={verifyNewUsers} onClick={e => {
+                                fetch('/admin/settings', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({
+                                        AUTOMATIC_VERIFICATION: !verifyNewUsers
+                                    }),
+                                })
+                                setVerifyNewUsers(!verifyNewUsers);
+                            }} />} />
                         </FormGroup>
                     </Box>
                     <br />
