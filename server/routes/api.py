@@ -559,7 +559,7 @@ def delete_author(author_id: int) -> Response:
         )
     try:
         author = Author.query.filter_by(id=author_id).first_or_404()
-        author.delete()
+        db.session.delete(author)
         db.session.commit()
         return utils.json_response(
             httpStatus.OK, {"message": res_msg.SUCCESS_USER_DELETED}

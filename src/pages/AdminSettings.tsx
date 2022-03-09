@@ -44,6 +44,14 @@ const Settings = ({ path }: SettingsProps) => {
     const [users, setUsers] = useState<User[]>([]);
     const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
 
+    const addOrRemoveUserToSelected = (userId: string) => {
+        if (selectedUsers.includes(userId)) {
+            setSelectedUsers(selectedUsers.filter(id => id !== userId));
+        } else {
+            setSelectedUsers([...selectedUsers, userId]);
+        }
+    }
+
     const loadUsers = async (page: number): Promise<User[]> => {
         const res = await fetch(`/authors?size=5&page=${page}`)
         if (res.status !== 200) {
@@ -96,7 +104,19 @@ const Settings = ({ path }: SettingsProps) => {
                             >
                                 Users
                             </Typography>
-                            <IconButton>
+                            <IconButton onClick={() => {
+                                selectedUsers.forEach(id => {
+                                    fetch(`/admin/author/${id}`, {
+                                        method: "DELETE"
+                                    })
+                                        .then(() => {
+                                            setUsers(users.filter(u => u.id !== id));
+                                        })
+                                        .catch(err => {
+                                            setErrMsg(err.message);
+                                        });
+                                })
+                            }}>
                                 <DeleteIcon />
                             </IconButton>
                         </Toolbar>
@@ -114,7 +134,9 @@ const Settings = ({ path }: SettingsProps) => {
                                     {users.map(({ id, displayName, github, host, url, isAdmin, isVerified }, index) => {
                                         const label = { inputProps: { 'aria-label': 'Checkbox' } };
                                         return <TableRow>
-                                            <TableCell><Checkbox {...label} /></TableCell>
+                                            <TableCell><Checkbox {...label} checked={selectedUsers.includes(id)} onClick={e => {
+                                                addOrRemoveUserToSelected(id);
+                                            }} /></TableCell>
                                             <TableCell>{id}</TableCell>
                                             <TableCell>{displayName}</TableCell>
                                             <TableCell><Link href={github} target="_blank" rel="noreferrer">{github}</Link></TableCell>
