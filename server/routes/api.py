@@ -259,14 +259,11 @@ def post_comment(author_id: int, post_id: int) -> Response:
 @bp.route("/authors/<int:author_id>/posts/<int:post_id>/image", methods=["GET"])
 def serve_image(author_id: int, post_id: int):
     image_post = Post.query.filter_by(id=post_id).first()
-    print(f"\n\n contentType: {image_post.contentType}\ntype:{type(image_post.contentType)}\nExact: {image_post.contentType.name}\nExact type: {type(image_post.contentType.name)}\n\n")
-    print(f"\n\nContent equals?: { image_post.contentType == ContentType.jpg}\n")
     if image_post.contentType != (ContentType.jpg or ContentType.png):
         return utils.json_response(
             httpStatus.BAD_REQUEST, {"message": res_msg.NOT_IMAGE}
         )
     image_Bytes = binascii.a2b_base64(image_post.content)
-    print(f"\n\n enum Name: { image_post.contentType.value}\n")
     return send_file(
         io.BytesIO(image_Bytes),
         mimetype=image_post.contentType.value,
