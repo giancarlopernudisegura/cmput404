@@ -1,3 +1,4 @@
+from re import L
 from flask import Blueprint, jsonify, make_response, request, Response, send_file, current_app
 import mimetypes
 from telnetlib import STATUS
@@ -403,12 +404,24 @@ def clear_inbox(author_id: int) -> Response:
 @bp.route("/authors/<int:author_id>/posts/<int:post_id>/likes", methods=["GET"])
 def get_post_like(author_id: int, post_id: int):
     post_likes = Like.query.filter_by(post=post_id).all()
-    return ( make_response(jsonify(
+    return (make_response(jsonify(
         likes=[like.json() for like in post_likes]
     )), httpStatus.OK)
 
+@bp.route("/authors/<int:author_id>/posts/<int:post_id>/comments/<int:comment_id>/likes", methods=["GET"])
+def get_comment_like(author_id: int, post_id: int, comment_id: int):
+    comment_likes = Like.query.filter_by(comment=comment_id).all()
+    return (make_response(jsonify(
+        likes=[like.json() for like in comment_likes]
+    )), httpStatus.OK)
 
-
+@bp.route("/authors/<int:author_id>/liked", methods=["GET"])
+def get_author_liked(author_id: int):
+    author_likes = Like.query.filter_by(author=author_id).all()
+    return (make_response(jsonify(
+        type="liked",
+        items=[like.json() for like in author_likes]
+    )), httpStatus.OK)
 
 @bp.route("/signup", methods=["POST"])
 def signup() -> Response:
