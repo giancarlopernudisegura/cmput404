@@ -237,7 +237,7 @@ class Like(db.Model, JSONSerializable, InboxItem):
             "summary": f"{author.displayName} Liked your {liked_object_type}",
             "type": "Like",
             "author": author.json(),
-            "id": liked_object,
+            "object": liked_object,
         }
 
     def push(self):

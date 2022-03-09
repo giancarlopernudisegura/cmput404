@@ -5,7 +5,7 @@ from urllib import response
 from server.constants import res_msg
 from flask_login import login_user, login_required, logout_user, current_user
 from server.exts import db
-from server.models import Author, Inbox, Post, Comment, Requests
+from server.models import Author, Inbox, Post, Comment, Requests, Like
 from server.enums import ContentType
 from http import HTTPStatus as httpStatus
 import os, io, binascii
@@ -399,6 +399,15 @@ def clear_inbox(author_id: int) -> Response:
     Inbox.query.filter_by(owner=author_id).delete()
     db.session.commit()
     return Response(status=httpStatus.OK)
+
+@bp.route("/authors/<int:author_id>/posts/<int:post_id>/likes", methods=["GET"])
+def get_post_like(author_id: int, post_id: int):
+    post_likes = Like.query.filter_by(post=post_id).all()
+    return ( make_response(jsonify(
+        likes=[like.json() for like in post_likes]
+    )), httpStatus.OK)
+
+
 
 
 @bp.route("/signup", methods=["POST"])
