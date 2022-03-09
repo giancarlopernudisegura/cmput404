@@ -1,4 +1,12 @@
-from flask import Blueprint, jsonify, make_response, request, Response, send_file, current_app
+from flask import (
+    Blueprint,
+    jsonify,
+    make_response,
+    request,
+    Response,
+    send_file,
+    current_app,
+)
 import mimetypes
 from telnetlib import STATUS
 from urllib import response
@@ -36,7 +44,7 @@ def pagination(
     Returns:
         A tuple of (page, size) to use for pagination."""
     size = int(arguments.get("size", str(default_page_size)), base=10)
-    page_number = int(arguments.get("page_number", str(default_page_number)), base=10)
+    page_number = int(arguments.get("page", str(default_page_number)), base=10)
     return page_number, size
 
 
@@ -259,7 +267,9 @@ def post_comment(author_id: int, post_id: int) -> Response:
 @bp.route("/authors/<int:author_id>/posts/<int:post_id>/image", methods=["GET"])
 def serve_image(author_id: int, post_id: int):
     image_post = Post.query.filter_by(id=post_id).first()
-    print(f"\n\n contentType: {image_post.contentType}\ntype:{type(image_post.contentType)}\nExact: {image_post.contentType.name}\nExact type: {type(image_post.contentType.name)}\n\n")
+    print(
+        f"\n\n contentType: {image_post.contentType}\ntype:{type(image_post.contentType)}\nExact: {image_post.contentType.name}\nExact type: {type(image_post.contentType.name)}\n\n"
+    )
     print(f"\n\nContent equals?: { image_post.contentType == ContentType.jpg}\n")
     if image_post.contentType != (ContentType.jpg or ContentType.png):
         return utils.json_response(
@@ -270,9 +280,9 @@ def serve_image(author_id: int, post_id: int):
     return send_file(
         io.BytesIO(image_Bytes),
         mimetype=image_post.contentType.value,
-        attachment_filename=f"{image_post.title}.{image_post.contentType.name}"
-        )
-        
+        attachment_filename=f"{image_post.title}.{image_post.contentType.name}",
+    )
+
 
 @bp.route("/authors/<int:author_id>/followers", methods=["GET"])
 def get_followers(author_id: int) -> Response:
