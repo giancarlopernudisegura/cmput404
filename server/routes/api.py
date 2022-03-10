@@ -444,7 +444,9 @@ def get_comment_like(author_id: int, post_id: int, comment_id: int):
 
 @bp.route("/authors/<int:author_id>/liked", methods=["GET"])
 def get_author_liked(author_id: int):
-    author_likes = Like.query.filter_by(author=author_id).all()
+    if Author.query.filter_by(id=author_id).first() is None:#author doesn't exist
+        return Response(status=httpStatus.NOT_FOUND)
+    author_likes = Like.query.filter_by(author=author_id).join(Post).filter_by(private=False).all()
     return (make_response(jsonify(
         type="liked",
         items=[like.json() for like in author_likes]
