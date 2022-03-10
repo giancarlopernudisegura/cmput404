@@ -30,7 +30,7 @@
     "enzyme": "^3.11.0",
     "enzyme-to-json": "^3.5.0",
     "file-loader": "^6.2.0",
-    "html-webpack-plugin": "^4.3.0",
+    "html-webpack-plugin": "^5.5.0",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^26.0.1",
     "postcss": "^8.4.6",
@@ -41,7 +41,7 @@
     "tailwindcss": "^3.0.18",
     "ts-jest": "^26.0.0",
     "ts-loader": "^9.2.7",
-    "webpack": "^5.68.0",
+    "webpack": "^5.70.0",
     "webpack-cli": "^4.9.2",
     "webpack-dev-server": "^4.7.4"
   },

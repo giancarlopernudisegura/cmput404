@@ -10,7 +10,8 @@ const frontendUrl = new URL(process.env.PREACT_HOST);
 module.exports = {
   mode: 'development',
   devtool: 'source-map',
-  entry: ['./src/app.tsx'],
+  // entry: ['./src/app.tsx'],
+  entry: path.resolve(__dirname, 'src') + '/app.tsx',
   devServer: {
     port: parseInt(frontendUrl.port),
     host: frontendUrl.hostname,

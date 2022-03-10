@@ -1,7 +1,4 @@
 import { h } from 'preact';
-import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
-import ChatBubbleOutlineOutlinedIcon from '@mui/icons-material/ChatBubbleOutlineOutlined';
-import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
 
 type GitHubActivityProps = {
     author: string;
