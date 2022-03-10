@@ -19,6 +19,7 @@ function AuthorInfo({ profileImage, displayName, github}: AuthorProps) {
             </h1>
 
             {github ? <a href={`${github}`}>{github}</a> : null} 
+            {/* TODO: add followers/following */}
         </div>
     );
 }

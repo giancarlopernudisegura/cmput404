@@ -5,7 +5,6 @@ import { useEffect, useState } from "preact/hooks";
 import { get_author_id, followerCall, getSpecAuthor, getPosts } from '../utils/apiCalls';
 import { Alert, Button } from "@mui/material";
 
-import Post from '../components/Post';
 import PostList from '../components/PostList';
 import AuthorInfo from '../components/profile/AuthorInfo';
 
