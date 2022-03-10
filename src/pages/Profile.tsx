@@ -45,19 +45,20 @@ function Profile({path}: profileProps) {
       >
         {errMsg && <Alert severity="error">{errMsg}</Alert>}
 
-        {isLoading === true ? <CircularProgress className="grid place-items-center h-screen"/> : (
-          <div>
-            <AuthorInfo
-              profileImage={author.profileImage}
-              displayName={author.displayName}
-              github={author.github}
-            />
+        {isLoading === true ? 
+          <CircularProgress 
+            className="grid place-items-center h-screen"/> : (
+            <div className="flex flex-col m-auto">
+              <AuthorInfo
+                profileImage={author.profileImage}
+                displayName={author.displayName}
+                github={author.github}
+              />
 
-            <PostList posts={myPosts} />
-          </div>
+              <PostList posts={myPosts} />
+            </div>
         )
       }
-
 
       </DrawerMenu>
     </div>

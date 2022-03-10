@@ -113,13 +113,16 @@ const UserPage = ({ path, followId }: UserProps) => {
                 )}
 
                 {isLoading === true ? <CircularProgress /> : (
-                    <div>
+                    <div className="flex flex-col m-auto items-center">
                         <AuthorInfo 
                             profileImage={authorInfo.profileImage}
                             displayName={authorInfo.displayName}
                             github={authorInfo.github}
                         />
-                        <Button onClick={() => handleFollow()}>
+                        <Button 
+                            className="w-fit"
+                            onClick={() => handleFollow()}
+                        >
                             {doesFollow === true ? "Following": "Follow"}
                         </Button>
                     </div>
