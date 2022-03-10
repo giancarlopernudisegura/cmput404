@@ -54,7 +54,7 @@ function ExplorePage({ path }: ExplorePageProps) {
             <PostForm />
             
             {posts.length > 0 &&
-                <PostList posts={posts} />
+                <PostList posts={posts} currentAuthor={''} /> //FIXME: currentAuthor is undefined
             }
 
             {githubActivity.length > 0 &&

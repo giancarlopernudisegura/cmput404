@@ -55,7 +55,10 @@ function Profile({path}: profileProps) {
                 github={author.github}
               />
 
-              <PostList posts={myPosts} />
+              <PostList 
+                posts={myPosts} 
+                currentAuthor={author.displayName} 
+              />
             </div>
         )
       }

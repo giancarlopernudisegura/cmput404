@@ -3,9 +3,14 @@ import Post from './Post';
 
 type PostListProps = {
     posts: any[],
+    currentAuthor: string
 }
 
-function PostList({ posts }: PostListProps) {
+function PostList({ posts, currentAuthor }: PostListProps) {
+    if (currentAuthor === undefined) {
+        currentAuthor = 'Anonymous';
+    }
+
     return(
         <div id="post-list" class="container">
             {posts.length === 0 && <h2>No posts found!</h2>}
@@ -15,7 +20,8 @@ function PostList({ posts }: PostListProps) {
                         <Post
                             title={post.title}
                             body={post.description}
-                            author={post.author} />
+                            author={post.author} 
+                            currentAuthor={currentAuthor}/>
                     </li>
                 ))}
             </ul>
@@ -23,6 +29,7 @@ function PostList({ posts }: PostListProps) {
         </div>
 
     );
+    
 }
 
 export default PostList;
