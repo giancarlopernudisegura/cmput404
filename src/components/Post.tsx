@@ -22,6 +22,7 @@ function Post({ title, body, author }: PostProps) {
                 <div class='displayname' className='font-semibold tracking-wide text-lg'>{author}</div>
                 <div className='px-3 my-2'>
                     <h3 className='font-semibold text-lg mb-2'>{title}</h3>
+                    <p className='text-lg'>{body}</p>
                 </div>
             </div>
 
