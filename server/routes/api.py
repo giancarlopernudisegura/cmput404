@@ -403,17 +403,44 @@ def clear_inbox(author_id: int) -> Response:
 
 @bp.route("/authors/<int:author_id>/posts/<int:post_id>/likes", methods=["GET"])
 def get_post_like(author_id: int, post_id: int):
-    post_likes = Like.query.filter_by(post=post_id).all()
-    return (make_response(jsonify(
-        likes=[like.json() for like in post_likes]
-    )), httpStatus.OK)
+    post = Post.query.filter_by(id=post_id).first()
+    if post is None:#post does not exist
+        return Response(status=httpStatus.NOT_FOUND)
+    if post.author != author_id:#post not made by given author
+        return (
+            make_response(jsonify(error=res_msg.AUTHOR_URI_NOT_MATCH)),
+            httpStatus.BAD_REQUEST)
+    if (current_user.id == author_id) or (post.private == False):
+        post_likes = Like.query.filter_by(post=post_id).all()
+        return (make_response(jsonify(
+            likes=[like.json() for like in post_likes]
+        )), httpStatus.OK)
+    else:
+        return (
+            make_response(jsonify(error=res_msg.NO_PERMISSION)),
+            httpStatus.UNAUTHORIZED)
+
 
 @bp.route("/authors/<int:author_id>/posts/<int:post_id>/comments/<int:comment_id>/likes", methods=["GET"])
 def get_comment_like(author_id: int, post_id: int, comment_id: int):
-    comment_likes = Like.query.filter_by(comment=comment_id).all()
-    return (make_response(jsonify(
-        likes=[like.json() for like in comment_likes]
-    )), httpStatus.OK)
+    comment = Comment.query.filter_by(id=comment_id).first()
+    post = Post.query.filter_by(id=post_id).first()
+    #keep the cases split incase we have to debug why something is erroring out
+    if post is None:#post does not exist
+        return Response(status=httpStatus.NOT_FOUND)
+    if comment is None:#comment doesn't exist
+        return Response(status=httpStatus.NOT_FOUND)
+    if (post.author != author_id) or (post.id != comment.post):#post author or comment post do not match
+        return Response(status=httpStatus.NOT_FOUND)
+    if (current_user.id == author_id) or (post.private == False):
+        comment_likes = Like.query.filter_by(comment=comment_id).all()
+        return (make_response(jsonify(
+            likes=[like.json() for like in comment_likes]
+        )), httpStatus.OK)
+    else:
+        return (
+            make_response(jsonify(error=res_msg.NO_PERMISSION)),
+            httpStatus.UNAUTHORIZED)
 
 @bp.route("/authors/<int:author_id>/liked", methods=["GET"])
 def get_author_liked(author_id: int):
