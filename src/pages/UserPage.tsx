@@ -4,7 +4,10 @@ import { CircularProgress } from '@mui/material';
 import { useEffect, useState } from "preact/hooks";
 import { get_author_id, followerCall, getSpecAuthor, getPosts } from '../utils/apiCalls';
 import { Alert, Button } from "@mui/material";
+
 import Post from '../components/Post';
+import PostList from '../components/PostList';
+import AuthorInfo from '../components/profile/AuthorInfo';
 
 type UserProps = {
     path: string,
@@ -22,7 +25,6 @@ const UserPage = ({ path, followId }: UserProps) => {
 
 
     useEffect(() => {
-        // TODO CHANGE THIS!!! to a single call in the running time
         
         // Get the user's post 
         const getPostsApiCall = async (userId: number) => {
@@ -110,37 +112,22 @@ const UserPage = ({ path, followId }: UserProps) => {
                 {errMsg && (
                     <Alert severity="error">{errMsg}</Alert>
                 )}
+
                 {isLoading === true ? <CircularProgress /> : (
                     <div>
-                        <div className="text-xl">
-                            <img src={authorInfo.profileImage}
-                                className="rounded-full w-1/5"></img>
-                            <h1>{authorInfo.displayName ? `${authorInfo.displayName}` :  "No name for user"}</h1>
-                        </div>
-                        <p>{authorInfo && authorInfo.github}</p>
+                        <AuthorInfo 
+                            profileImage={authorInfo.profileImage}
+                            displayName={authorInfo.displayName}
+                            github={authorInfo.github}
+                        />
                         <Button onClick={() => handleFollow()}>
                             {doesFollow === true ? "Following": "Follow"}
                         </Button>
                     </div>
                 )}
 
-                {/* <h2>{userInfo.displayName} posts</h2> */}
-
                 {isPostLoading === true ? <CircularProgress /> : (
-                    <div class="container">
-                        {posts.length === 0 && <h2>User has no posts</h2>}
-                        <ul>
-                            {posts.map(post => (
-                            <li>
-                                <Post
-                                title={post.title}
-                                body={post.description}
-                                author={post.author} />
-                            </li>
-                            ))}                  
-                        </ul>
-
-                    </div>
+                    <PostList posts={posts} />
                 )}
 
             </DrawerMenu>

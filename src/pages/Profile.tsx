@@ -4,6 +4,9 @@ import { useState, useEffect } from "preact/hooks";
 import { getCurrentAuthor, getPosts } from "../utils/apiCalls";
 
 import Post from "../components/Post";
+import PostList from "../components/PostList";
+
+import AuthorInfo from "../components/profile/AuthorInfo";
 
 type profileProps = {path: string}
 
@@ -15,7 +18,7 @@ function Profile({path}: profileProps) {
 
   useEffect(() => {
     function getAuthorAndPosts() {
-      getCurrentAuthor() // TODO: can be added as a prop to view other author's profile 
+      getCurrentAuthor() 
         .then(data => { setAuthor(data); 
           return data.id;
         })
@@ -35,38 +38,17 @@ function Profile({path}: profileProps) {
   return (
     <div id="profile">
       <DrawerMenu
-      pageName="My Profile"
+        pageName="My Profile"
       >
         {author && 
-          <div class="container"
-            className="">
-            <div className="text-xl">
-              <img src={author.profileImage}
-                className="rounded-full w-1/5"></img>
-              <h1>{author.displayName}</h1>
-            </div>
-
-            <div class="posts">
-              <h2>My Posts</h2>
-              
-                <ul>
-                {myPosts.map(post => (
-                  <li>
-                    <Post
-                      title={post.title}
-                      body={post.description}
-                      author={post.author} />
-                  </li>
-                ))}                  
-                </ul>
-            </div>
-
-          </div>
-
-
-
-
+          <AuthorInfo 
+            profileImage={author.profileImage}
+            displayName={author.displayName}
+            github={author.github} 
+          />
         }
+        <PostList posts={myPosts} />
+
       </DrawerMenu>
     </div>
   );
