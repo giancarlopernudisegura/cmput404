@@ -15,17 +15,19 @@ const UserPage = ({ path, followId }: UserProps) => {
     const [ errMsg, setErrMsg] = useState("");
     const [ doesFollow, setDoesFollow ] = useState(false);
     const [ isLoading, setIsLoading ] = useState(true);
-    const [isPostLoading, setIsPostLoading ] = useState(true);
+    const [ isPostLoading, setIsPostLoading ] = useState(true);
     const [ currentUserId, setCurrentUserId ] = useState(-1);
-    const [ userInfo, setUserInfo ] = useState<null | any>(null);
-    const [posts, setPosts] = useState(Array());
+    const [ authorInfo, setAuthorInfo ] = useState<null | any>(null);
+    const [ posts, setPosts ] = useState(Array());
 
 
     useEffect(() => {
         // TODO CHANGE THIS!!! to a single call in the running time
-        const getPostsApiCall = async (myUserId: number) => {
+        
+        // Get the user's post 
+        const getPostsApiCall = async (userId: number) => {
             try {
-                const fetchedPosts = await getPosts(myUserId.toString());
+                const fetchedPosts = await getPosts(userId.toString());
                 setPosts(fetchedPosts);
                 setIsPostLoading(false);
             } catch (err) {
@@ -34,8 +36,9 @@ const UserPage = ({ path, followId }: UserProps) => {
             }
         }
 
+        // Check if the user is following the author
         const isFollowerApiCall = async () => {
-            const myUserId = parseInt(await get_author_id());
+            const myUserId = parseInt(await get_author_id()); // Currently returns the loggedin used
             setCurrentUserId(myUserId);
 
             let res;
@@ -60,17 +63,16 @@ const UserPage = ({ path, followId }: UserProps) => {
             }
             
             if (userRes.status === 200) {
-                setUserInfo(userRes);
+                setAuthorInfo(userRes);
             }
             setIsLoading(false);
             
-            getPostsApiCall(myUserId)
+            getPostsApiCall(followId)
 
-            return myUserId;
         }
 
         try {
-            let myUserId = isFollowerApiCall();
+            isFollowerApiCall();
         } catch (err) {
             setErrMsg((err as Error).message);
             setIsLoading(false);
@@ -111,11 +113,11 @@ const UserPage = ({ path, followId }: UserProps) => {
                 {isLoading === true ? <CircularProgress /> : (
                     <div>
                         <div className="text-xl">
-                            <img src={userInfo.profileImage}
+                            <img src={authorInfo.profileImage}
                                 className="rounded-full w-1/5"></img>
-                            <h1>{userInfo.displayName ? `${userInfo.displayName}` :  "No name for user"}</h1>
+                            <h1>{authorInfo.displayName ? `${authorInfo.displayName}` :  "No name for user"}</h1>
                         </div>
-                        <p>{userInfo && userInfo.github}</p>
+                        <p>{authorInfo && authorInfo.github}</p>
                         <Button onClick={() => handleFollow()}>
                             {doesFollow === true ? "Following": "Follow"}
                         </Button>
