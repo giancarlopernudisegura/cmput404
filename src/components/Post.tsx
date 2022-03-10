@@ -2,6 +2,7 @@ import { h } from 'preact';
 import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
 import ChatBubbleOutlineOutlinedIcon from '@mui/icons-material/ChatBubbleOutlineOutlined';
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
+import ReactMarkdown from 'react-markdown'
 
 /*
     Post component
@@ -21,7 +22,6 @@ function Post({ title, body, author }: PostProps) {
                 <div class='displayname' className='font-semibold tracking-wide text-lg'>{author}</div>
                 <div className='px-3 my-2'>
                     <h3 className='font-semibold text-lg mb-2'>{title}</h3>
-                    <p className='text-lg'>{body}</p>
                 </div>
             </div>
 
