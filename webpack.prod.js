@@ -7,7 +7,7 @@ dotenv.config({ path: './.env' });
 
 module.exports = {
   mode: 'production',
-  entry: ['./src/app.tsx'],
+  entry: path.resolve(__dirname, 'src') + '/app.tsx',
   output: {
     path: path.resolve(__dirname, 'public'),
     filename: 'bundle.js'
