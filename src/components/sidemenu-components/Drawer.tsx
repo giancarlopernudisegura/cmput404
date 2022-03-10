@@ -16,7 +16,6 @@ import { Toolbar } from "@mui/material";
 import { Typography } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import Person from "@mui/icons-material/Person";
-import { Settings } from "@mui/icons-material";
 import { route } from 'preact-router';
 import { useState } from "preact/hooks";
 import { logOutCall } from '../../utils/apiCalls';

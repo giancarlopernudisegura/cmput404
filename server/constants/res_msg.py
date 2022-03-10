@@ -26,3 +26,7 @@ NO_PERMISSION = "You do not have permission to perform this action."
 CREATE_CONFLICT = "The resource you are trying to create is already exists."
 
 NOT_IMAGE = "The given post is not an image."
+
+# likes
+POST_DOES_NOT_EXIST = "Given Post does not exist."
+AUTHOR_URI_NOT_MATCH = "The given author does not match the given post."
