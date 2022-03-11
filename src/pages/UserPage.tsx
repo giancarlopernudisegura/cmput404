@@ -4,7 +4,9 @@ import { CircularProgress } from '@mui/material';
 import { useEffect, useState } from "preact/hooks";
 import { get_author_id, followerCall, getSpecAuthor, getPosts } from '../utils/apiCalls';
 import { Alert, Button } from "@mui/material";
-import Post from '../components/Post';
+
+import PostList from '../components/PostList';
+import AuthorInfo from '../components/profile/AuthorInfo';
 
 type UserProps = {
     path: string,
@@ -15,17 +17,18 @@ const UserPage = ({ path, followId }: UserProps) => {
     const [ errMsg, setErrMsg] = useState("");
     const [ doesFollow, setDoesFollow ] = useState(false);
     const [ isLoading, setIsLoading ] = useState(true);
-    const [isPostLoading, setIsPostLoading ] = useState(true);
+    const [ isPostLoading, setIsPostLoading ] = useState(true);
     const [ currentUserId, setCurrentUserId ] = useState(-1);
-    const [ userInfo, setUserInfo ] = useState<null | any>(null);
-    const [posts, setPosts] = useState(Array());
+    const [ authorInfo, setAuthorInfo ] = useState<null | any>(null);
+    const [ posts, setPosts ] = useState(Array());
 
 
     useEffect(() => {
-        // TODO CHANGE THIS!!! to a single call in the running time
-        const getPostsApiCall = async (myUserId: number) => {
+        
+        // Get the user's post 
+        const getPostsApiCall = async (userId: number) => {
             try {
-                const fetchedPosts = await getPosts(myUserId.toString());
+                const fetchedPosts = await getPosts(userId.toString());
                 setPosts(fetchedPosts);
                 setIsPostLoading(false);
             } catch (err) {
@@ -34,8 +37,9 @@ const UserPage = ({ path, followId }: UserProps) => {
             }
         }
 
+        // Check if the user is following the author
         const isFollowerApiCall = async () => {
-            const myUserId = parseInt(await get_author_id());
+            const myUserId = parseInt(await get_author_id()); // Currently returns the loggedin used
             setCurrentUserId(myUserId);
 
             let res;
@@ -60,17 +64,16 @@ const UserPage = ({ path, followId }: UserProps) => {
             }
             
             if (userRes.status === 200) {
-                setUserInfo(userRes);
+                setAuthorInfo(userRes);
             }
             setIsLoading(false);
             
-            getPostsApiCall(myUserId)
+            getPostsApiCall(followId)
 
-            return myUserId;
         }
 
         try {
-            let myUserId = isFollowerApiCall();
+            isFollowerApiCall();
         } catch (err) {
             setErrMsg((err as Error).message);
             setIsLoading(false);
@@ -108,37 +111,25 @@ const UserPage = ({ path, followId }: UserProps) => {
                 {errMsg && (
                     <Alert severity="error">{errMsg}</Alert>
                 )}
+
                 {isLoading === true ? <CircularProgress /> : (
-                    <div>
-                        <div className="text-xl">
-                            <img src={userInfo.profileImage}
-                                className="rounded-full w-1/5"></img>
-                            <h1>{userInfo.displayName ? `${userInfo.displayName}` :  "No name for user"}</h1>
-                        </div>
-                        <p>{userInfo && userInfo.github}</p>
-                        <Button onClick={() => handleFollow()}>
+                    <div className="flex flex-col m-auto items-center">
+                        <AuthorInfo 
+                            profileImage={authorInfo.profileImage}
+                            displayName={authorInfo.displayName}
+                            github={authorInfo.github}
+                        />
+                        <Button 
+                            className="w-fit"
+                            onClick={() => handleFollow()}
+                        >
                             {doesFollow === true ? "Following": "Follow"}
                         </Button>
                     </div>
                 )}
 
-                {/* <h2>{userInfo.displayName} posts</h2> */}
-
                 {isPostLoading === true ? <CircularProgress /> : (
-                    <div class="container">
-                        {posts.length === 0 && <h2>User has no posts</h2>}
-                        <ul>
-                            {posts.map(post => (
-                            <li>
-                                <Post
-                                title={post.title}
-                                body={post.description}
-                                author={post.author} />
-                            </li>
-                            ))}                  
-                        </ul>
-
-                    </div>
+                    <PostList posts={posts} />
                 )}
 
             </DrawerMenu>
