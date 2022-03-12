@@ -373,6 +373,16 @@ def post_inbox(author_id: int) -> Response:
         elif req_type == "follow":
             inbox = Inbox(author_id, follow=req_id)
         elif req_type == "like":
+            like = Like.query.filter_by(id=req_id).first()
+            if like is None:#create a like if none exists for ID
+                json_val = request.json
+                like_author = json_val["author"]
+                like_post = json_val["post"]
+                like_comment = json_val["comment"]
+                like = Like(like_author, post = like_post, comment = like_comment)
+                db.session.add(like)
+                db.session.commit()
+
             inbox = Inbox(author_id, like=req_id)
         db.session.add(inbox)
         db.session.commit()
