@@ -84,7 +84,6 @@ export const getAllAuthors = async (page: number) => {
 
     if (res.status == 200) {
       const currentUserId = res.headers.get('X-User-Id');
-      console.log("RESPONES", currentUserId);
       let listOfAuthors = await res.json();
       return {...listOfAuthors, currentUserId};
     } else {
@@ -100,38 +99,59 @@ export const getAllAuthors = async (page: number) => {
  * @param postData  form data of the post 
  */
 export function newPublicPost(authorId: any, postData: any) {
-  // postData contains data from the forms 
-  fetch(`${BACKEND_HOST}/authors/${authorId}/posts/`, {
-    mode: 'cors',
-    method: 'POST',
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json; charset=utf-8',
-    },
-    body: postData
-  }).catch(err => {console.log(err)});
+  try {
+    // postData contains data from the forms 
+    fetch(`${BACKEND_HOST}/authors/${authorId}/posts/`, {
+      mode: 'cors',
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8',
+      },
+      body: postData
+    })
+  } catch (err) {
+    throw Error("There was an error publishing a new post");
+  }
+  
 
 }
 
 export async function getInbox(author_id: string) {
-  const res = await fetch(`${BACKEND_HOST}/authors/${author_id}/inbox/`)
-  return await res.json();
+  try {
+    const res = await fetch(`${BACKEND_HOST}/authors/${author_id}/inbox/`)
+    // TODO change return value
+    return await res.json();
+  } catch (err) {
+    throw Error("There was an error getting the inbox");
+  }
 }
 
 export async function getGithubStream(author_id: string, per_page = 30, page = 1): Promise<any> {
-  const res = await fetch(`${BACKEND_HOST}/authors/${author_id}`)
-  const { github } = await res.json();
-  const regexPattern = /^https:\/\/github.com\/(\w+)\/?/;
-  const githubID = regexPattern.exec(github)![1];
-  const stream = await fetch(`https://api.github.com/users/${githubID}/events?per_page=${per_page}&page=${page}`);
-  return await stream.json();
+  try {
+    // TODO: change return value
+    const res = await fetch(`${BACKEND_HOST}/authors/${author_id}`)
+    const { github } = await res.json();
+    const regexPattern = /^https:\/\/github.com\/(\w+)\/?/;
+    const githubID = regexPattern.exec(github)![1];
+    const stream = await fetch(`https://api.github.com/users/${githubID}/events?per_page=${per_page}&page=${page}`);
+    return await stream.json();
+  } catch (err) {
+    throw Error("There was an error getting the Github Stream");
+  }
 }
 
 export async function clearInbox(author_id: string): Promise<boolean> {
-  const res = await fetch(`${BACKEND_HOST}/authors/${author_id}/inbox/`, {
-    method: 'DELETE'
-  })
-  return res.status === 200;
+  try {
+    const res = await fetch(`${BACKEND_HOST}/authors/${author_id}/inbox/`, {
+      method: 'DELETE'
+    })
+
+    // TODO: change return value
+    return res.status === 200;
+  } catch (err) {
+    throw Error('Unable to clear inbox');
+  }
 }
 
 export const logOutCall = async () => {

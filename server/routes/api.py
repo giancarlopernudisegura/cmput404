@@ -80,7 +80,7 @@ def single_author(author_id: int) -> Response:
         author = Author.query.filter_by(id=author_id).first_or_404()
         return make_response(jsonify(author.json())), httpStatus.OK
     elif request.method == "POST":
-        # request.form.get('displayName')
+        # request.json.get('displayName')
         pass
 
 
@@ -457,7 +457,7 @@ def get_author_liked(author_id: int):
 @bp.route("/signup", methods=["POST"])
 def signup() -> Response:
     # get token from authorization header
-    token = request.form.get("token")
+    token = request.json.get("token")
 
     if not token:
         return utils.json_response(
@@ -477,7 +477,7 @@ def signup() -> Response:
         else:
             return utils.json_response(
                 httpStatus.BAD_REQUEST,
-                {"message": res_msg.USER_ALREADY_EXISTS, "data": author.json()},
+                {"message": res_msg.USER_ALREADY_EXISTS },
             )
     except Exception as e:
         return utils.json_response(
@@ -489,7 +489,7 @@ def signup() -> Response:
 @bp.route("/login", methods=["POST"])
 def login() -> Response:
     # get token from authorization header
-    token = request.form.get("token")
+    token = request.json.get("token")
 
     if not token:
         return utils.json_response(

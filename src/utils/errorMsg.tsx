@@ -1,0 +1,1 @@
+export const FAILED_GITHUB_AUTH = "Unable to authenticate with Github.";
