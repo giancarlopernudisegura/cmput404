@@ -14,7 +14,8 @@ type State = {
     authorId: number | null
     markdown: boolean,
     showMarkdown: boolean,
-    tabValue: number
+    tabValue: number,
+    image: string
 };
 
 const placeholderContent = {
@@ -33,7 +34,8 @@ class PostForm extends Component<Props, State> {
             authorId: null,
             markdown: false,
             showMarkdown: false,
-            tabValue: 0
+            tabValue: 0,
+            image: ""
         };
         
         this.handleBody = this.handleBody.bind(this);
@@ -42,7 +44,10 @@ class PostForm extends Component<Props, State> {
         this.handleSubmit = this.handleSubmit.bind(this);
         this.setAuthorDetails = this.setAuthorDetails.bind(this);
         this.setMarkdown = this.setMarkdown.bind(this);
-
+        this.handleTabChange = this.handleTabChange.bind(this);
+        this.handleUploadPhoto = this.handleUploadPhoto.bind(this);
+        this.handleUploadPhoto = this.handleUploadPhoto.bind(this);
+        
         this.setAuthorDetails();
     }
 
@@ -104,6 +109,33 @@ class PostForm extends Component<Props, State> {
         this.setState({ ...this.state, tabValue: newValue });
     }
 
+    createImgMkd = (imagesUrl : Array<String>) => {
+        let mkd = "";
+
+        for (let img of imagesUrl) {
+            mkd += `![](${img})`;
+        }
+
+        return mkd;
+    }
+
+    handleUploadPhoto = (event:any) => {
+        const files = event.target.files;
+        let imagesUrls : Array<String> = [];
+
+        let values = Object.values(files);
+        for (let val of values) {
+            if (val instanceof File) {
+                let x : string = URL.createObjectURL(val);
+                imagesUrls.push(x);
+            }
+        }
+
+        // call to uploadPhotos
+        // const imagesURL : Array<String> = uploadPhotosToFbs(valid_files);
+        const markdown = this.createImgMkd(imagesUrls);
+        this.setState({image: markdown});
+    }
 
     render() {
 
@@ -145,13 +177,24 @@ class PostForm extends Component<Props, State> {
                             <input type="text"></input>
                         </div>
 
+                        {this.state.image && <ReactMarkdown>{this.state.image}</ReactMarkdown>}
+
                         <div className="flex flex-row justify-between mt-3">
                             <FormControlLabel 
                                 control={<Switch />} 
                                 label="Markdown" 
                                 onChange={this.setMarkdown}
                             />
-
+                        </div>
+                        <div>
+                            <input 
+                                accept="image/*" 
+                                multiple 
+                                type="file" 
+                                id="upload-file2" 
+                                // style="display:none"
+                                onChange={this.handleUploadPhoto}
+                            />
                             <Button variant="contained"
                                 type="submit"
                                 className="w-1/3"
