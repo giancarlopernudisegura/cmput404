@@ -38,8 +38,8 @@ def homepage():
 def profile():
     return frontend_page()
 
-@bp.route("/notifications", methods=["GET"])
-def notifications():
+@bp.route("/inbox", methods=["GET"])
+def inbox():
     return frontend_page()
 
 @bp.route('/user/<int:user_id>', methods=["GET"])
