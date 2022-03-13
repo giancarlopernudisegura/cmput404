@@ -55,8 +55,7 @@ const authenticateWithGithub = async (signup: Boolean) => {
 
 export const signInWithGithub = async () => {
     try {
-        const test = await authenticateWithGithub(false);
-        return test;
+        return await authenticateWithGithub(false);
     } catch (err) {
         throw Error((err as Error).message);
     }
@@ -64,8 +63,7 @@ export const signInWithGithub = async () => {
 
 export const signUpWithGithub = async () => {
     try {
-        const test =  await authenticateWithGithub(true);
-        return test;
+        return await authenticateWithGithub(true);
     } catch (err) {
         throw Error((err as Error).message);
     }

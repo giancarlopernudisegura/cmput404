@@ -116,17 +116,43 @@ export function newPublicPost(authorId: any, postData: any) {
   } catch (err) {
     throw Error("There was an error publishing a new post");
   }
-  
-
 }
 
-export async function getInbox(author_id: string) {
+export async function inboxCall(author_id: string, method: string, data?: any) {
   try {
-    const res = await fetch(`${BACKEND_HOST}/authors/${author_id}/inbox/`)
+    let metadata = {};
+
+    if (data !== undefined) {
+      metadata = {
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+        },
+        body: JSON.stringify(data)
+      }
+    }
+
+    const res = await fetch(`${BACKEND_HOST}/authors/${author_id}/inbox/`, {
+      method: 'POST',
+      credentials: 'include',
+      ...metadata
+    })
     // TODO change return value
     return await res.json();
   } catch (err) {
     throw Error("There was an error getting the inbox");
+  }
+}
+
+export async function clearInbox(author_id: string): Promise<boolean> {
+  try {
+    const res = await fetch(`${BACKEND_HOST}/authors/${author_id}/inbox/`, {
+      method: 'DELETE'
+    })
+
+    // TODO: change return value
+    return res.status === 200;
+  } catch (err) {
+    throw Error('Unable to clear inbox');
   }
 }
 
@@ -141,19 +167,6 @@ export async function getGithubStream(author_id: string, per_page = 30, page = 1
     return await stream.json();
   } catch (err) {
     throw Error(FAILED_GITHUB_STREAM);
-  }
-}
-
-export async function clearInbox(author_id: string): Promise<boolean> {
-  try {
-    const res = await fetch(`${BACKEND_HOST}/authors/${author_id}/inbox/`, {
-      method: 'DELETE'
-    })
-
-    // TODO: change return value
-    return res.status === 200;
-  } catch (err) {
-    throw Error('Unable to clear inbox');
   }
 }
 

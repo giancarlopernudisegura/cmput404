@@ -61,13 +61,13 @@ function DrawerMenu(props: any) {
       )}
       <Divider />
       <List>
-        {["Home", "Explore", "My Profile", "Notifications"].map(
+        {["Home", "Explore", "My Profile", "Inbox"].map(
           (text, index) => (
             <ListItem button key={text} onClick={() => {
                 if (text === 'Home') {route('/app/homepage', true)}
                 if (text === 'Explore') {route('/app', true)}
                 if (text === 'My Profile') {route('/app/profile', true)}
-                if (text === 'Notifications') {route('/app/notifications', true)}
+                if (text === 'Inbox') {route('/app/inbox', true)}
             }}>
               <ListItemIcon>
                   {index * 3 === 0 ? <Home /> : ''}

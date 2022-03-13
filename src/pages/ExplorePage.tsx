@@ -1,7 +1,7 @@
 import { h } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import GitHubActivity from '../components/GitHubActivity';
-import { getPosts, get_author_id, getInbox, getGithubStream } from '../utils/apiCalls';
+import { getPosts, get_author_id, inboxCall, getGithubStream } from '../utils/apiCalls';
 
 import PostForm from '../components/PostForm';
 import DrawerMenu from '../components/sidemenu-components/Drawer';
@@ -24,7 +24,7 @@ function ExplorePage({ path }: ExplorePageProps) {
             console.log("Getting posts from API...");
             get_author_id()
                 .then(author_id => {
-                    const response = getInbox(author_id);
+                    const response = inboxCall(author_id, "GET");
                     response
                         .then(data => {
                             // TODO: temp, only use posts from inbox for now

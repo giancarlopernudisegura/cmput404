@@ -8,7 +8,7 @@ import Login from './pages/Login';
 import Homepage from './pages/Homepage';
 import Profile from './pages/Profile'
 import './css/main.css';
-import Notifications from './pages/Notifications';
+import Inbox from './pages/Inbox';
 import UserPage from './pages/UserPage';
 
 const App = () => {
@@ -21,7 +21,7 @@ const App = () => {
         <Login path="/app/login" />
         <Homepage path="/app/homepage"/>
         <Profile path="/app/profile"/>
-        <Notifications path="/app/notifications"/>
+        <Inbox path="/app/inbox"/>
         <UserPage path="/app/user/:followId" />
       </Router>
     </div>
