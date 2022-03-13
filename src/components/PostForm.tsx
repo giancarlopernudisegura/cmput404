@@ -1,6 +1,9 @@
 import { h, Component } from 'preact';
 import { Button, Switch, FormControlLabel } from '@mui/material';
 import { newPublicPost, getCurrentAuthor } from '../utils/apiCalls';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import ReactMarkdown from 'react-markdown';
 
 type Props = {  };
 type State = { 
@@ -9,7 +12,9 @@ type State = {
     title: string
     authorDisplayName: string
     authorId: number | null
-    markdown: boolean
+    markdown: boolean,
+    showMarkdown: boolean,
+    tabValue: number
 };
 
 const placeholderContent = {
@@ -26,7 +31,9 @@ class PostForm extends Component<Props, State> {
             title: "",
             authorDisplayName: "",
             authorId: null,
-            markdown: false
+            markdown: false,
+            showMarkdown: false,
+            tabValue: 0
         };
         
         this.handleBody = this.handleBody.bind(this);
@@ -93,6 +100,10 @@ class PostForm extends Component<Props, State> {
         event.preventDefault();
     };
 
+    handleTabChange = (event: any, newValue: number): void => {
+        this.setState({ ...this.state, tabValue: newValue });
+    }
+
 
     render() {
 
@@ -113,14 +124,21 @@ class PostForm extends Component<Props, State> {
                                 placeholder={placeholderContent.tempTitle}
                                 onChange={this.handleTitle}></input>
                         </div>
+                        
+                        <Tabs value={this.state.tabValue} onChange={this.handleTabChange}>
+                            <Tab label="Text"></Tab>
+                            {(this.state.markdown === true) && <Tab label="Preview"></Tab>}
+                        </Tabs>
 
-                        <textarea type="text"
+                        {(this.state.tabValue === 0) && <textarea type="text"
                             placeholder={placeholderContent.tempBody}
                             value={this.state.body}
                             onChange={this.handleBody}
                             className="w-full" 
                         >    
-                        </textarea>
+                        </textarea>}
+
+                        {(this.state.tabValue === 1) && <ReactMarkdown>{this.state.body}</ReactMarkdown>}
 
                         <div className='grid grid-cols-1 gap-y-2'>
                             <label>Category</label>
@@ -144,7 +162,6 @@ class PostForm extends Component<Props, State> {
                     </form>
 
             </div>
-           
         );
     }
 

@@ -13,6 +13,7 @@ function PostList({ posts }: PostListProps) {
                 {posts.map(post => (
                     <li>
                         <Post
+                            contentType={post.contentType}
                             title={post.title}
                             body={post.description}
                             author={post.author} />

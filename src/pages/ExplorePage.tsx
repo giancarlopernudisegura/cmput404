@@ -7,6 +7,7 @@ import PostForm from '../components/PostForm';
 import DrawerMenu from '../components/sidemenu-components/Drawer';
 import SearchBar from './SearchBar';
 import PostList from '../components/PostList';
+import { Alert } from '@mui/material';
 
 
 type ExplorePageProps = { path: string };
@@ -15,6 +16,8 @@ function ExplorePage({ path }: ExplorePageProps) {
 
     const [posts, setPosts] = useState(Array());
     const [githubActivity, setGithubActivity] = useState(Array());
+    const [ errMsg, setErrMsg] = useState("");
+
 
     useEffect(() => {
         function getPostsFromAPI() {
@@ -28,7 +31,7 @@ function ExplorePage({ path }: ExplorePageProps) {
                             setPosts(data.items.filter((item: any) => item.type == "post"));
                         })
                         .catch(err => {
-                            alert(err);
+                            setErrMsg(err.message);
                         });
                 })
                 .catch(console.error);
@@ -40,7 +43,9 @@ function ExplorePage({ path }: ExplorePageProps) {
                 .then(author_id => {
                     getGithubStream(author_id)
                         .then(setGithubActivity)
-                        .catch(console.error);
+                        .catch(err => {
+                            setErrMsg(err.message);
+                        });
                 })
                 .catch(console.error);
         })();
@@ -51,23 +56,30 @@ function ExplorePage({ path }: ExplorePageProps) {
     return (
         <DrawerMenu pageName="Explore">
             <SearchBar />
+            {errMsg && (
+                <Alert severity="error">{errMsg}</Alert>
+            )}
             <PostForm />
             
             {posts.length > 0 &&
                 <PostList posts={posts} />
             }
 
-            {githubActivity.length > 0 &&
-                <ul>
-                    {githubActivity.map(event => (
-                        <li>
-                            <GitHubActivity
-                                eventType={event.type}
-                                repo={event.repo}
-                                author={event.actor.login} />
-                        </li>
-                    ))}
-                </ul>
+
+            {githubActivity.length > 0 && 
+                <div>
+                    <h2>My Github Activity</h2>
+                    <ul>
+                        {githubActivity.map(event => (
+                            <li>
+                                <GitHubActivity
+                                    eventType={event.type}
+                                    repo={event.repo}
+                                    author={event.actor.login} />
+                            </li>
+                        ))}
+                    </ul>
+                </div>
             }
 
         </DrawerMenu>

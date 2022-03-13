@@ -3,6 +3,7 @@ import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlin
 import ChatBubbleOutlineOutlinedIcon from '@mui/icons-material/ChatBubbleOutlineOutlined';
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
 import ReactMarkdown from 'react-markdown'
+import { MARKDOWN, PLAIN } from '../utils/constants'
 
 /*
     Post component
@@ -12,9 +13,21 @@ type PostProps = {
     title: string;
     body: string;
     author: string;
+    contentType: string;
 }
 
-function Post({ title, body, author }: PostProps) {
+function Post({ title, body, author, contentType }: PostProps) {
+    const renderBody = () => {
+        switch (contentType) {
+            case MARKDOWN:
+                return <ReactMarkdown>{body}</ReactMarkdown>
+            case PLAIN:
+                return <p className='text-lg'>{body}</p>
+
+            // TODO show images
+        }
+    }
+
 
     return (
         <div className='bg-zinc-100 border-solid border-1 border-slate-600 w-2/3 m-auto rounded-lg py-4 px-5  my-5'>
@@ -22,7 +35,7 @@ function Post({ title, body, author }: PostProps) {
                 <div class='displayname' className='font-semibold tracking-wide text-lg'>{author}</div>
                 <div className='px-3 my-2'>
                     <h3 className='font-semibold text-lg mb-2'>{title}</h3>
-                    <p className='text-lg'>{body}</p>
+                    {renderBody()}
                 </div>
             </div>
 

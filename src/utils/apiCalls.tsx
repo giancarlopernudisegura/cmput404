@@ -1,3 +1,6 @@
+import { FAILED_GITHUB_STREAM } from '../utils/errorMsg';
+
+
 const BACKEND_HOST = process.env.FLASK_HOST;
 /**
  * Returns the current user's information.
@@ -137,7 +140,7 @@ export async function getGithubStream(author_id: string, per_page = 30, page = 1
     const stream = await fetch(`https://api.github.com/users/${githubID}/events?per_page=${per_page}&page=${page}`);
     return await stream.json();
   } catch (err) {
-    throw Error("There was an error getting the Github Stream");
+    throw Error(FAILED_GITHUB_STREAM);
   }
 }
 
