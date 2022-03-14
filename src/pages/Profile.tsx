@@ -50,9 +50,7 @@ function Profile({path}: profileProps) {
             className="grid place-items-center h-screen"/> : (
             <div className="flex flex-col m-auto">
               <AuthorInfo
-                profileImage={author.profileImage}
-                displayName={author.displayName}
-                github={author.github}
+                author={author}
               />
 
               <PostList 

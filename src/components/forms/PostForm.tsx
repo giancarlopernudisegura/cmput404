@@ -1,6 +1,6 @@
 import { h, Component } from 'preact';
 import { Button, Switch, FormControlLabel } from '@mui/material';
-import { newPublicPost, getCurrentAuthor } from '../utils/apiCalls';
+import { newPublicPost, getCurrentAuthor } from '../../utils/apiCalls';
 
 type Props = {  };
 type State = { 
