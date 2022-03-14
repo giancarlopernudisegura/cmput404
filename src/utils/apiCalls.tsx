@@ -194,3 +194,49 @@ export const getSpecAuthor = async (author_id : number) => {
     throw Error('Unable to get the information about this user');
   }
 }
+
+/**
+ * Get all the raw posts for a specific user
+ */
+export async function getRawPosts(author_id: string) {
+
+  const res = await fetch(`${BACKEND_HOST}/authors/${author_id}/posts`, {
+    mode: 'cors',
+    method: 'GET',
+  });
+
+  let data = await res.json()
+
+  return data
+}
+
+/**
+ * Get all comments for a specific post
+ */
+export async function getAllComments(author_id: string, post_id: number) {
+
+  try {
+    const res = await fetch(`${BACKEND_HOST}/authors/${author_id}/posts/${post_id}/comments`, {
+    mode: 'cors',
+    method: 'GET',
+  });
+
+  let data = await res.json()
+  let listOfComments = Array();
+
+  for (let i = 0; i < data.comments.length; i++){
+    var t = data.comments[i].published
+    var publishTime = t.substring(0, t.lastIndexOf("T"))
+    const comment: any = {
+      'author': data.comments[i].author.displayName,
+      'comment': data.comments[i].comment,
+      'published': publishTime,
+    };
+      listOfComments.push(comment);
+    }
+    return listOfComments;
+  } catch(err) {
+    throw Error("Unable to retrieve comments for this post");
+  }
+  
+}

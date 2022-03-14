@@ -2,6 +2,12 @@ import { h } from 'preact';
 import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
 import ChatBubbleOutlineOutlinedIcon from '@mui/icons-material/ChatBubbleOutlineOutlined';
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
+import { IconButton } from '@mui/material';
+import { blueGrey } from '@mui/material/colors'
+import { route } from 'preact-router';
+import Button from '@mui/material/Button'
+import { useState } from 'preact/hooks';
+import Favorite from '@mui/icons-material/Favorite'
 
 /*
     Post component
@@ -13,7 +19,23 @@ type PostProps = {
     author: string;
 }
 
+
 function Post({ title, body, author }: PostProps) {
+
+    const primary = blueGrey[900];
+
+    const [likeToggle, setLikeToggle] = useState(true)
+    const [isLiked, setIsLiked] = useState(0)
+    const toggleFunction = () => {
+        setLikeToggle(!likeToggle)
+        if (likeToggle){
+            setIsLiked(isLiked + 1);
+        }
+        if (!likeToggle) {
+            setIsLiked(isLiked - 1);
+        }
+       
+    }
 
     return (
         <div className='bg-zinc-100 border-solid border-1 border-slate-600 w-2/3 m-auto rounded-lg py-4 px-5  my-5'>
@@ -26,10 +48,20 @@ function Post({ title, body, author }: PostProps) {
             </div>
 
             <div className="grid grid-cols-1 divide-y py-4">
-                <div className='flex flex-row gap-x-4'>
-                    <FavoriteBorderOutlinedIcon fontSize='large'/>
+                <div className='flex flex-row gap-x-4 justify-evenly'>
+                    <div id='like' className='flex flex-row '>
+                    <p>{isLiked}</p>
+                    <IconButton color='primary' onClick={() => toggleFunction()}>
+                    {likeToggle ? <FavoriteBorderOutlinedIcon fontSize='large'/> : <Favorite fontSize='large' />}
+                    </IconButton>
+                    </div>
+                    
+                    
+                    <IconButton color='primary'>
                     <ChatBubbleOutlineOutlinedIcon fontSize='large'/>
+                    </IconButton>
                     <ShareOutlinedIcon fontSize='large'/>
+                    <Button id="view-comments" color="primary" variant='outlined' onClick={() => route('/app/comment')}>View Comments</Button>
                 </div>
             </div>
 
