@@ -127,8 +127,9 @@ const UserPage = ({ path, followId }: UserProps) => {
                 )}
 
                 {isPostLoading === true ? <CircularProgress /> : (
-                    <PostList posts={posts} 
-                        currentAuthor={''}/> //FIXME: currentAuthor is undefined
+                    <PostList 
+                        initialPosts={posts} 
+                    />
                 )}
 
             </DrawerMenu>

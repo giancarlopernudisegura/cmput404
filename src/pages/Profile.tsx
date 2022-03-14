@@ -37,6 +37,10 @@ function Profile({path}: profileProps) {
 
   }, []);
 
+  function handleRemove() {
+    // delete the post to be deleted 
+  }
+
 
   return (
     <div id="profile">
@@ -54,7 +58,7 @@ function Profile({path}: profileProps) {
               />
 
               <PostList 
-                posts={myPosts} 
+                initialPosts={myPosts} 
                 currentAuthor={author.displayName} 
               />
             </div>

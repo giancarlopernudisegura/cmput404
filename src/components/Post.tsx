@@ -11,22 +11,25 @@ import ReactMarkdown from 'react-markdown'
 */
 
 type PostProps = {
-    title: string,
-    body: string,
-    author: string,
-    currentAuthor : string,
+    title: string, 
+    body: string, 
+    author: string, 
+    currentAuthor?: string
+
 }
+
 
 function Post({ title, body, author, currentAuthor }: PostProps) {
 
+    var currentUser: string = currentAuthor as string;
 
     return (
-        <div className='bg-zinc-100 border-solid border-1 border-slate-600 w-2/3 m-auto rounded-lg py-4 px-5  my-5'>
+        <li className='bg-zinc-100 border-solid border-1 border-slate-600 w-2/3 m-auto rounded-lg py-4 px-5  my-5'>
             <div className='grid grid-cols-1 gap-y-2'>
                 <div className="flex flex-row justify-between">
                     <span className='font-semibold tracking-wide text-lg'>{author}</span>
 
-                    {author === currentAuthor && 
+                    {author === currentUser && 
                         <span className="flex space-x-4">
                             <EditIcon />
                             <DeleteIcon />
@@ -51,7 +54,7 @@ function Post({ title, body, author, currentAuthor }: PostProps) {
                 </div>
             </div>
 
-        </div>
+        </li>
     );
 
 }
