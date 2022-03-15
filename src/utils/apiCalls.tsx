@@ -196,6 +196,18 @@ export const getSpecAuthor = async (author_id : number) => {
   }
 }
 
-export function deletePost() {
-  
+export function deletePost(author_id: number, post_id: number) {
+  const response = fetch(`${BACKEND_HOST}/authors/${author_id}/posts/${post_id}`, {
+    mode: 'cors',
+    credentials: 'include',
+    method: 'DELETE',
+  })
+  .then(res => {
+    return res.status;
+  })
+  .catch(err => {
+    throw Error('Unable to delete post');
+  });
+
+  return response;
 }

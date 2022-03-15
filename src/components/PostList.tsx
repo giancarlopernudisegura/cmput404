@@ -13,7 +13,6 @@ function PostList({ initialPosts, currentAuthor, onRemove } : PostListProps){
         currentAuthor = 'Anonymous';
     }
 
-
     return(
         <div id="post-list" class="container">
             {initialPosts.length === 0 && <h2>No posts found!</h2>}

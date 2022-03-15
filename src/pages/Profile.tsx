@@ -3,10 +3,10 @@ import { useState, useEffect } from "preact/hooks";
 import DrawerMenu from '../components/sidemenu-components/Drawer'
 import { Alert, CircularProgress } from "@mui/material";
 
-import { getCurrentAuthor, getPosts } from "../utils/apiCalls";
+import { getCurrentAuthor, getPosts, deletePost } from "../utils/apiCalls";
+
 import PostList from "../components/PostList";
 import AuthorInfo from "../components/profile/AuthorInfo";
-import Modal from "../components/Modal";
 import SimpleModal from "../components/Modal";
 
 type profileProps = {path: string}
@@ -18,9 +18,6 @@ function Profile({path}: profileProps) {
   // get author data 
   const [author, setAuthor] = useState(Object());
   const [myPosts, setMyPosts] = useState(Array());
-
-  // control modal state 
-
 
   useEffect(() => {
     function getAuthorAndPosts() {
@@ -42,22 +39,27 @@ function Profile({path}: profileProps) {
 
   }, []);
 
-  function handleRemove(id: number) {
-    // TODO: delete the post to be deleted 
+  function handleRemove(postId: number) {
+
     // open the modal to make sure
     // var message = "Are you sure you want to delete this post?";
     // <SimpleModal message={message} onOpen={true} />
 
-    console.log("Old length:", myPosts.length);
-    console.log(myPosts);
-    const newList = myPosts.filter(post => post.id !== id);
+    const newList = myPosts.filter(post => post.id !== postId);
     setMyPosts(newList);
-    console.log("New length:", newList.length);
-    alert("Post deleted");
+
+    function removePost(postId: number, authorId: number) {
+      // call api to delete post
+      deletePost(postId, authorId)
+      .catch(err => {setErrMsg(err.message);});
+    }
+
+    removePost(author.id, postId);
   }
 
-  function handleEdit() {
 
+  function handleEdit() {
+    // TODO
   }
 
 
