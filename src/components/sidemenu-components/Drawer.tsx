@@ -21,7 +21,6 @@ import Home from "@mui/icons-material/Home";
 import Notification from "@mui/icons-material/Notifications";
 import MenuIcon from "@mui/icons-material/Menu";
 import Person from "@mui/icons-material/Person";
-import { Settings } from "@mui/icons-material";
 import { route } from 'preact-router';
 import { useEffect, useState } from "preact/hooks";
 import { getCurrentAuthor, logOutCall } from '../../utils/apiCalls';

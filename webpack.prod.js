@@ -7,7 +7,7 @@ dotenv.config({ path: './.env' });
 
 module.exports = {
   mode: 'production',
-  entry: ['./src/app.tsx'],
+  entry: path.resolve(__dirname, 'src') + '/app.tsx',
   output: {
     path: path.resolve(__dirname, 'public'),
     filename: 'bundle.js'
@@ -25,7 +25,7 @@ module.exports = {
       {
         test: /\.ts(x?)$/,
         exclude: /node_modules/,
-        use: 'awesome-typescript-loader'
+        use: 'ts-loader'
       },
       {
         test: /\.scss$/,

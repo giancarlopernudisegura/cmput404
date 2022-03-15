@@ -9,13 +9,14 @@ from flask import (
     send_file,
     current_app,
 )
+from re import L
 import mimetypes
 from telnetlib import STATUS
 from urllib import response
 from server.constants import res_msg
 from flask_login import login_user, login_required, logout_user, current_user
 from server.exts import db
-from server.models import Author, Inbox, Post, Comment, Requests
+from server.models import Author, Inbox, Post, Comment, Requests, Like
 from server.enums import ContentType
 from server.config import RUNTIME_SETTINGS
 from http import HTTPStatus as httpStatus
@@ -270,16 +271,11 @@ def post_comment(author_id: int, post_id: int) -> Response:
 @bp.route("/authors/<int:author_id>/posts/<int:post_id>/image", methods=["GET"])
 def serve_image(author_id: int, post_id: int):
     image_post = Post.query.filter_by(id=post_id).first()
-    print(
-        f"\n\n contentType: {image_post.contentType}\ntype:{type(image_post.contentType)}\nExact: {image_post.contentType.name}\nExact type: {type(image_post.contentType.name)}\n\n"
-    )
-    print(f"\n\nContent equals?: { image_post.contentType == ContentType.jpg}\n")
     if image_post.contentType != (ContentType.jpg or ContentType.png):
         return utils.json_response(
             httpStatus.BAD_REQUEST, {"message": res_msg.NOT_IMAGE}
         )
     image_Bytes = binascii.a2b_base64(image_post.content)
-    print(f"\n\n enum Name: { image_post.contentType.value}\n")
     return send_file(
         io.BytesIO(image_Bytes),
         mimetype=image_post.contentType.value,
@@ -416,6 +412,58 @@ def clear_inbox(author_id: int) -> Response:
     db.session.commit()
     return Response(status=httpStatus.OK)
 
+@bp.route("/authors/<int:author_id>/posts/<int:post_id>/likes", methods=["GET"])
+def get_post_like(author_id: int, post_id: int):
+    post = Post.query.filter_by(id=post_id).first()
+    if post is None:#post does not exist
+        return Response(status=httpStatus.NOT_FOUND)
+    if post.author != author_id:#post not made by given author
+        return (
+            make_response(jsonify(error=res_msg.AUTHOR_URI_NOT_MATCH)),
+            httpStatus.BAD_REQUEST)
+    if (current_user.id == author_id) or (post.private == False):
+        post_likes = Like.query.filter_by(post=post_id).all()
+        return (make_response(jsonify(
+            likes=[like.json() for like in post_likes]
+        )), httpStatus.OK)
+    else:
+        return (
+            make_response(jsonify(error=res_msg.NO_PERMISSION)),
+            httpStatus.UNAUTHORIZED)
+
+
+@bp.route("/authors/<int:author_id>/posts/<int:post_id>/comments/<int:comment_id>/likes", methods=["GET"])
+def get_comment_like(author_id: int, post_id: int, comment_id: int):
+    comment = Comment.query.filter_by(id=comment_id).first()
+    post = Post.query.filter_by(id=post_id).first()
+    #keep the cases split incase we have to debug why something is erroring out
+    if post is None:#post does not exist
+        return Response(status=httpStatus.NOT_FOUND)
+    if comment is None:#comment doesn't exist
+        return Response(status=httpStatus.NOT_FOUND)
+    if (post.author != author_id) or (post.id != comment.post):#post author or comment post do not match
+        return Response(status=httpStatus.NOT_FOUND)
+    if (current_user.id == author_id) or (post.private == False):
+        comment_likes = Like.query.filter_by(comment=comment_id).all()
+        return (make_response(jsonify(
+            likes=[like.json() for like in comment_likes]
+        )), httpStatus.OK)
+    else:
+        return (
+            make_response(jsonify(error=res_msg.NO_PERMISSION)),
+            httpStatus.UNAUTHORIZED)
+
+@bp.route("/authors/<int:author_id>/liked", methods=["GET"])
+def get_author_liked(author_id: int):
+    if Author.query.filter_by(id=author_id).first() is None:#author doesn't exist
+        return Response(status=httpStatus.NOT_FOUND)
+    author_post_likes = Like.query.filter_by(author=author_id).join(Post).filter_by(private=False).all()
+    author_comment_likes = Like.query.filter_by(author=author_id).join(Comment).join(Post).filter_by(private=False).all()
+    author_likes = author_comment_likes + author_post_likes
+    return (make_response(jsonify(
+        type="liked",
+        items=[like.json() for like in author_likes]
+    )), httpStatus.OK)
 
 @bp.route("/signup", methods=["POST"])
 def signup() -> Response:

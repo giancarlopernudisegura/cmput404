@@ -2,10 +2,11 @@ import { h } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import GitHubActivity from '../components/GitHubActivity';
 import { getPosts, get_author_id, getInbox, getGithubStream } from '../utils/apiCalls';
-import Post from '../components/Post';
+
 import PostForm from '../components/PostForm';
 import DrawerMenu from '../components/sidemenu-components/Drawer';
 import SearchBar from './SearchBar';
+import PostList from '../components/PostList';
 
 
 type ExplorePageProps = { path: string };
@@ -52,25 +53,8 @@ function ExplorePage({ path }: ExplorePageProps) {
             <SearchBar />
             <PostForm />
             
-            <div id="post-grid">
             {posts.length > 0 &&
-                <ul>
-                    {posts.map(post => (
-                        <li>
-                            <Post
-                                title={post.title}
-                                body={post.description}
-                                author={post.author} />
-                        </li>
-                    ))}
-
-                </ul>
-            }
-
-            {posts === undefined &&
-                <div>
-                    <h1>No posts yet!</h1>
-                </div>
+                <PostList posts={posts} />
             }
 
             {githubActivity.length > 0 &&
@@ -85,7 +69,7 @@ function ExplorePage({ path }: ExplorePageProps) {
                     ))}
                 </ul>
             }
-        </div>
+
         </DrawerMenu>
     );
 }
