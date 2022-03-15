@@ -37,8 +37,14 @@ function Profile({path}: profileProps) {
 
   }, []);
 
-  function handleRemove() {
-    // delete the post to be deleted 
+  function handleRemove(id: number) {
+    // TODO: delete the post to be deleted 
+    const newList = myPosts.filter(post => post.id !== id);
+    setMyPosts(newList);
+  }
+
+  function handleEdit() {
+
   }
 
 
@@ -60,6 +66,7 @@ function Profile({path}: profileProps) {
               <PostList 
                 initialPosts={myPosts} 
                 currentAuthor={author.displayName} 
+                onRemove={handleRemove}
               />
             </div>
         )

@@ -11,15 +11,16 @@ import ReactMarkdown from 'react-markdown'
 */
 
 type PostProps = {
+    id: number,
     title: string, 
     body: string, 
     author: string, 
     currentAuthor?: string
-
+    onRemove?: Function,
 }
 
 
-function Post({ title, body, author, currentAuthor }: PostProps) {
+function Post({ id, title, body, author, currentAuthor, onRemove }: PostProps) {
 
     var currentUser: string = currentAuthor as string;
 
@@ -29,10 +30,14 @@ function Post({ title, body, author, currentAuthor }: PostProps) {
                 <div className="flex flex-row justify-between">
                     <span className='font-semibold tracking-wide text-lg'>{author}</span>
 
+                {/* Display these buttons if the author of the  post is the current author */}
                     {author === currentUser && 
                         <span className="flex space-x-4">
                             <EditIcon />
-                            <DeleteIcon />
+                            <DeleteIcon onClick={ () => { 
+                                if (onRemove) { onRemove(id) } 
+                                } }
+                            />
                         </span>
                     }
 

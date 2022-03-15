@@ -4,9 +4,10 @@ import Post from './Post';
 type PostListProps = {
     initialPosts: Array<any>,
     currentAuthor?: string,
+    onRemove?: Function,
 }
 
-function PostList({ initialPosts, currentAuthor} : PostListProps){
+function PostList({ initialPosts, currentAuthor, onRemove } : PostListProps){
 
     if (currentAuthor === undefined) {
         currentAuthor = 'Anonymous';
@@ -19,10 +20,12 @@ function PostList({ initialPosts, currentAuthor} : PostListProps){
             <ul>
                 {initialPosts.map(post => (
                     <Post
+                        id={post.id}
                         title={post.title}
                         body={post.description}
                         author={post.author} 
                         currentAuthor={currentAuthor}
+                        onRemove={onRemove}
                     />
                 ))}
             </ul>
