@@ -57,6 +57,7 @@ export async function getPosts(author_id: string): Promise<any> {
 
     for (let i = 0; i < data.items.length; i++) {
       const post: any = {
+        'id': data.items[i].id,
         'author': data.items[i].author.displayName,
         'title': data.items[i].title,
         'description': data.items[i].description,
@@ -193,4 +194,8 @@ export const getSpecAuthor = async (author_id : number) => {
   } catch(err) {
     throw Error('Unable to get the information about this user');
   }
+}
+
+export function deletePost() {
+  
 }
