@@ -1,3 +1,5 @@
+import json
+from urllib.request import urlopen
 from flask import (
     Blueprint,
     jsonify,
@@ -542,6 +544,47 @@ def modify_author(author_id: int) -> Response:
         db.session.commit()
         return utils.json_response(
             httpStatus.OK, {"message": res_msg.SUCCESS_USER_UPDATED}
+        )
+    except Exception as e:
+        return utils.json_response(
+            httpStatus.INTERNAL_SERVER_ERROR,
+            {"message": res_msg.GENERAL_ERROR + str(e)},
+        )
+
+
+@bp.route("/admin/author", methods=["PUT"])
+@login_required
+def create_author() -> Response:
+    if not current_user.isAdmin:
+        return (
+            make_response(jsonify(error=res_msg.NO_PERMISSION)),
+            httpStatus.UNAUTHORIZED,
+        )
+    try:
+        displayName = request.json["displayName"]
+        github_username = request.json["github"]
+        resp = urlopen(f"https://api.github.com/users/{github_username}")
+        github_info = json.loads(resp.read().decode("utf-8"))
+        githubId = github_info["id"]
+        profileImageId = github_info["avatar_url"]
+        isAdmin = False
+        isVerified = current_app.config["AUTOMATIC_VERIFICATION"]
+
+        if Author.query.filter_by(githubId=githubId).first():
+            raise ValueError("User already exists.")
+        author = Author(githubId, profileImageId, displayName, isAdmin, isVerified)
+
+        # create author in database
+        db.session.add(author)
+        db.session.commit()
+        return utils.json_response(
+            httpStatus.OK,
+            {"message": res_msg.SUCCESS_USER_CREATED, "data": author.json()},
+        )
+    except ValueError as e:
+        return utils.json_response(
+            httpStatus.BAD_REQUEST,
+            {"message": res_msg.GENERAL_ERROR + str(e)},
         )
     except Exception as e:
         return utils.json_response(

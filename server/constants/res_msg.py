@@ -10,7 +10,7 @@ USER_ALREADY_EXISTS = "User already exists. Please sign in."
 SUCCESS_VERIFY_USER = "User credentials are valid"
 
 # Error message
-GENERAL_ERROR = "There was an error "
+GENERAL_ERROR = "There was an error: "
 
 
 # /logout endpoint

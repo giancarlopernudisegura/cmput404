@@ -17,9 +17,17 @@ import {
     Link,
     Typography,
     Toolbar,
-    IconButton
+    IconButton,
+    Button,
+    Dialog,
+    DialogTitle,
+    TextField,
+    DialogActions,
+    DialogContentText,
+    DialogContent
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
 import { useEffect, useState } from "preact/hooks";
 
 type SettingsProps = {
@@ -44,6 +52,17 @@ const Settings = ({ path }: SettingsProps) => {
     const [users, setUsers] = useState<User[]>([]);
     const [verifyNewUsers, setVerifyNewUsers] = useState(false);
     const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+    const [open, setOpen] = useState(false);
+    const [newUserName, setNewUserName] = useState("");
+    const [newUserGithub, setNewUserGithub] = useState("");
+
+    const openDialogue = () => {
+        setOpen(true);
+    };
+
+    const closeDialogue = () => {
+        setOpen(false);
+    };
 
     const addOrRemoveUserToSelected = (userId: string) => {
         if (selectedUsers.includes(userId)) {
@@ -207,6 +226,64 @@ const Settings = ({ path }: SettingsProps) => {
                             page={0}
                             onPageChange={() => { }}
                         />
+                    </Box>
+                    <Box>
+                        <Button variant="contained" startIcon={<AddIcon />} onClick={openDialogue}>Create User</Button>
+                        <Dialog open={open} onClose={closeDialogue}>
+                            <DialogTitle>Subscribe</DialogTitle>
+                            <DialogContent>
+                                <DialogContentText>
+                                    To subscribe a user, add they're public github username. We'll take care of the rest.
+                                </DialogContentText>
+                                <TextField
+                                    autoFocus
+                                    margin="dense"
+                                    id="name"
+                                    value={newUserName}
+                                    onChange={e => { setNewUserName(e.target.value) }}
+                                    label="Name"
+                                    type="text"
+                                    fullWidth
+                                    variant="standard"
+                                />
+                                <TextField
+                                    margin="dense"
+                                    id="github"
+                                    value={newUserGithub}
+                                    onChange={e => { setNewUserGithub(e.target.value) }}
+                                    label="GitHub"
+                                    type="text"
+                                    fullWidth
+                                    variant="standard"
+                                />
+                            </DialogContent>
+                            <DialogActions>
+                                <Button onClick={closeDialogue}>Cancel</Button>
+                                <Button onClick={(event) => {
+                                    fetch('/admin/author', {
+                                        method: 'PUT',
+                                        headers: {
+                                            'Content-Type': 'application/json'
+                                        },
+                                        body: JSON.stringify({
+                                            displayName: newUserName,
+                                            github: newUserGithub
+                                        })
+                                    })
+                                        .then(res => {
+                                            closeDialogue();
+                                            if (res.status === 200) {
+                                                setNewUserName('');
+                                                setNewUserGithub('');
+                                                loadUsers(1)
+                                                    .then(users => { setUsers(users) });
+                                            } else {
+                                                setErrMsg("User already exists. Set a different GitHub username.");
+                                            }
+                                        })
+                                }}>Subscribe</Button>
+                            </DialogActions>
+                        </Dialog>
                     </Box>
                 </Box>}
             </DrawerMenu>

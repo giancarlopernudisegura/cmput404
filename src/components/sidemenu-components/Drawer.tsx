@@ -70,7 +70,7 @@ function DrawerMenu(props: any) {
     getCurrentAuthor()
       .then(({ isAdmin }) => {
         if (isAdmin)
-          setLinks(links.concat([["Admin Settings", "/app/settings", Settings]]))
+          setLinks(links.concat([["Admin Settings", "/app/admin", Settings]]))
       })
   }, [])
 

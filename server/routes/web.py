@@ -35,7 +35,7 @@ def login():
         return frontend_page(True)
 
 
-@bp.route("/settings", methods=["GET"])
+@bp.route("/admin", methods=["GET"])
 @login_required
 def admin():
     if current_user.isAdmin:

@@ -24,7 +24,7 @@ const App = () => {
         <Profile path="/app/profile" />
         <Notifications path="/app/notifications" />
         <UserPage path="/app/user/:followId" />
-        <AdminSettings path="/app/settings" />
+        <AdminSettings path="/app/admin" />
       </Router>
     </div>
   )
