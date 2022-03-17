@@ -250,6 +250,17 @@ class Like(db.Model, JSONSerializable, InboxItem):
         db.session.add(inbox)
         db.session.commit()
 
+    def delete(self):#remove all like refs from inbox before deleting
+        inboxRefs = Inbox.query.filter_by(like=self.id)
+        for inbox in inboxRefs:
+            db.session.delete(inbox)
+        db.session.commit()
+        db.session.delete(self)#can we do this before the last commit without issues?
+        db.session.commit()
+
+
+            
+
 
 class Requests(db.Model, JSONSerializable):  # follow requests
     __tablename__ = "requests"
