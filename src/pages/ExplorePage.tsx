@@ -3,7 +3,7 @@ import { useEffect, useState } from 'preact/hooks';
 import GitHubActivity from '../components/GitHubActivity';
 import { getPosts, get_author_id, getInbox, getGithubStream } from '../utils/apiCalls';
 
-import PostForm from '../components/PostForm';
+import PostForm from '../components/forms/PostForm';
 import DrawerMenu from '../components/sidemenu-components/Drawer';
 import SearchBar from './SearchBar';
 import PostList from '../components/PostList';
@@ -54,7 +54,9 @@ function ExplorePage({ path }: ExplorePageProps) {
             <PostForm />
             
             {posts.length > 0 &&
-                <PostList posts={posts} />
+                <PostList 
+                    initialPosts={posts} 
+                /> 
             }
 
             {githubActivity.length > 0 &&
