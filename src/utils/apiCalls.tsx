@@ -10,15 +10,15 @@ export function getCurrentAuthor() {
     credentials: 'include',
     method: 'GET',
   })
-  .then(res => res.json())
-  .then(user_data => { return user_data.data })
-  .catch(err => { console.log("ERROR:", err) });
+    .then(res => res.json())
+    .then(user_data => { return user_data.data })
+    .catch(err => { console.log("ERROR:", err) });
 
   const getAuthor = async () => {
     const author = await currentAuthor;
     return author;
   }
-  
+
   return getAuthor();
 
 };
@@ -51,7 +51,7 @@ export async function getPosts(author_id: string): Promise<any> {
       mode: 'cors',
       method: 'GET',
     });
-    
+
     let data = await res.json();
     let listOfPosts = Array();
 
@@ -78,7 +78,7 @@ export async function getPosts(author_id: string): Promise<any> {
  */
 export const getAllAuthors = async (page: number) => {
   try {
-    const res = await fetch(`${BACKEND_HOST}/authors/?size=10&page_number=${page}`, {
+    const res = await fetch(`${BACKEND_HOST}/authors/?size=10&page=${page}`, {
       mode: 'cors',
       method: 'GET',
     });
@@ -87,14 +87,15 @@ export const getAllAuthors = async (page: number) => {
       const currentUserId = res.headers.get('X-User-Id');
       console.log("RESPONES", currentUserId);
       let listOfAuthors = await res.json();
-      return {...listOfAuthors, currentUserId};
+      return { ...listOfAuthors, currentUserId };
     } else {
-      return {items: []}
+      return { items: [] }
     }
   } catch (err) {
     throw Error('There was an error fetching all authors');
   }
-} 
+}
+
 /**
  * Sends a post to the backend
  * @param authorId  the id of the author
@@ -110,7 +111,7 @@ export function newPublicPost(authorId: any, postData: any) {
       'Content-Type': 'application/json; charset=utf-8',
     },
     body: postData
-  }).catch(err => {console.log(err)});
+  }).catch(err => { console.log(err) });
 
 }
 
@@ -142,7 +143,7 @@ export const logOutCall = async () => {
       credentials: 'include',
       method: 'POST',
     });
-  
+
     if (res.status === 200) {
       let json = await res.json();
       return { status: res.status, ...json };
@@ -154,7 +155,7 @@ export const logOutCall = async () => {
   }
 }
 
-export const followerCall = async (currentUserId : number, toFollowId : number, method: string) => {
+export const followerCall = async (currentUserId: number, toFollowId: number, method: string) => {
   try {
     const res = await fetch(`${BACKEND_HOST}/authors/${currentUserId}/followers/${toFollowId}`, {
       mode: 'cors',
@@ -177,7 +178,7 @@ export const followerCall = async (currentUserId : number, toFollowId : number, 
   }
 }
 
-export const getSpecAuthor = async (author_id : number) => {
+export const getSpecAuthor = async (author_id: number) => {
   try {
     const res = await fetch(`${BACKEND_HOST}/authors/${author_id}`, {
       mode: 'cors',
@@ -190,8 +191,8 @@ export const getSpecAuthor = async (author_id : number) => {
       json = await res.json();
     }
 
-    return { status: res.status, ...json};
-  } catch(err) {
+    return { status: res.status, ...json };
+  } catch (err) {
     throw Error('Unable to get the information about this user');
   }
 }

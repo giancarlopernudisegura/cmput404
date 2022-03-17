@@ -1,24 +1,31 @@
 import { h } from "preact";
-import { AppBar, Alert } from "@mui/material";
-import { Box } from "@mui/material";
-import { CssBaseline } from "@mui/material";
-import { Divider } from "@mui/material";
-import { Drawer } from "@mui/material";
-import { IconButton } from "@mui/material";
+import {
+  AppBar,
+  Alert,
+  Box,
+  CssBaseline,
+  Divider,
+  Drawer,
+  IconButton,
+  List,
+  ListItem,
+  Button,
+  ListItemIcon,
+  ListItemText,
+  Toolbar,
+  Typography,
+  SvgIconTypeMap
+} from "@mui/material";
 import ExploreIcon from "@mui/icons-material/Explore";
-import { List } from "@mui/material";
-import { ListItem } from "@mui/material";
-import { Button, ListItemIcon } from "@mui/material";
-import { ListItemText } from "@mui/material";
 import Home from "@mui/icons-material/Home";
 import Notification from "@mui/icons-material/Notifications";
-import { Toolbar } from "@mui/material";
-import { Typography } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import Person from "@mui/icons-material/Person";
+import Settings from "@mui/icons-material/Settings";
 import { route } from 'preact-router';
-import { useState } from "preact/hooks";
-import { logOutCall } from '../../utils/apiCalls';
+import { useEffect, useState } from "preact/hooks";
+import { getCurrentAuthor, logOutCall } from '../../utils/apiCalls';
+import { OverridableComponent } from "@mui/material/OverridableComponent";
 
 // Drawer Implementation retrieved from MUI Official Documentation. (n.d.). React drawer component. MUI. Retrieved March 3, 2022, from https://mui.com/components/drawers/#responsive-drawer
 
@@ -32,11 +39,18 @@ interface Props {
   navLink: string;
 }
 
+type LinkProps = [string, string, OverridableComponent<SvgIconTypeMap<{}, "svg">>]
 
 function DrawerMenu(props: any) {
   const { window } = props;
-  const [ errMsg, setErrMsg] = useState("");
+  const [errMsg, setErrMsg] = useState("");
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [links, setLinks] = useState<LinkProps[]>([
+    ["Home", "/app/homepage", Home],
+    ["Explore", "/app", ExploreIcon],
+    ["My Profile", "/app/profile", Person],
+    ["Notifications", "/app/notifications", Notification]
+  ]);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -48,10 +62,18 @@ function DrawerMenu(props: any) {
       route('/app/login')
     } catch (err) {
       // TODO: handle error with logging out
-      console.log("There was an error");
-
+      console.error("There was an error");
     }
   }
+
+  useEffect(() => {
+    getCurrentAuthor()
+      .then(({ isAdmin }) => {
+        if (isAdmin)
+          setLinks(links.concat([["Admin Settings", "/app/admin", Settings]]))
+      })
+  }, [])
+
 
   const drawer = (
     <div id="drawer-component">
@@ -61,20 +83,13 @@ function DrawerMenu(props: any) {
       )}
       <Divider />
       <List>
-        {["Home", "Explore", "My Profile", "Notifications"].map(
-          (text, index) => (
+        {links.map(
+          ([text, link, Icon]) => (
             <ListItem button key={text} onClick={() => {
-                if (text === 'Home') {route('/app/homepage', true)}
-                if (text === 'Explore') {route('/app', true)}
-                if (text === 'My Profile') {route('/app/profile', true)}
-                if (text === 'Notifications') {route('/app/notifications', true)}
+              route(link, true)
             }}>
               <ListItemIcon>
-                  {index * 3 === 0 ? <Home /> : ''}
-                  {index * 3 === 3 ? <ExploreIcon /> : ''}
-                  {index * 3 === 6 ? <Person /> : ''}
-                  {index * 3 === 9 ? <Notification /> : ''}
-                {/* <MyProfile /> */}
+                <Icon />
               </ListItemIcon>
               <ListItemText primary={text} />
             </ListItem>
@@ -99,7 +114,7 @@ function DrawerMenu(props: any) {
         elevation={0}
         color="default"
       >
-        <Toolbar style={{display:'flex', justifyContent:"space-between", width:'100%'}}>
+        <Toolbar style={{ display: 'flex', justifyContent: "space-between", width: '100%' }}>
           <IconButton
             color="inherit"
             aria-label="open drawer"
