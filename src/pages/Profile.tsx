@@ -1,13 +1,17 @@
 import { h } from "preact";
 import { useState, useEffect } from "preact/hooks";
 import DrawerMenu from '../components/sidemenu-components/Drawer'
-import { Alert, CircularProgress } from "@mui/material";
+import { Alert, CircularProgress, Dialog } from "@mui/material";
 
-import { getCurrentAuthor, getPosts, deletePost } from "../utils/apiCalls";
+import { 
+  getCurrentAuthor, 
+  getPosts, 
+  deletePost,
+  getFollowers
+} from "../utils/apiCalls";
 
 import PostList from "../components/PostList";
 import AuthorInfo from "../components/profile/AuthorInfo";
-import SimpleModal from "../components/Modal";
 
 type profileProps = {path: string}
 
@@ -17,33 +21,45 @@ function Profile({path}: profileProps) {
 
   // get author data 
   const [author, setAuthor] = useState(Object());
+
   const [myPosts, setMyPosts] = useState(Array());
 
+  // TODO: get author's followers and friends 
+  const [followers, setFollowers] = useState(Array());
+  const [friends, setFriends] = useState(Array());
+
+
   useEffect(() => {
-    function getAuthorAndPosts() {
-      getCurrentAuthor() 
-        .then(data => { setAuthor(data); 
-          return data.id;
-        })
-        .then(authorId => {
-          return getPosts(authorId);
-        })
-        .then(posts => {
-          setMyPosts(posts);
-        })
-        .catch(err => { setErrMsg(err.message); });
-      
-    }
-    setIsLoading(false);
-    getAuthorAndPosts();
+
+    // Get the author data
+    var authorPromise = getCurrentAuthor()
+      .then(data => { 
+        setAuthor(data)
+        return data.id;
+      });
+
+    // Set the author's posts
+    var postsPromise = authorPromise.then(authorId => { return getPosts(authorId.toString()); });
+    postsPromise.then(posts => {
+      setMyPosts(posts);
+      setIsLoading(false);
+    })
+
+    // Get the author's followers and friends
+    var followersPromise = authorPromise.then(authorId => {   
+      return getFollowers(authorId); 
+    });
+
+    followersPromise.then(followers => {
+      setFollowers(followers.items);
+    });
 
   }, []);
 
   function handleRemove(postId: number) {
-
     // open the modal to make sure
-    // var message = "Are you sure you want to delete this post?";
-    // <SimpleModal message={message} onOpen={true} />
+    var message = "Delete this post?";
+    // <Dialog />
 
     const newList = myPosts.filter(post => post.id !== postId);
     setMyPosts(newList);
@@ -76,6 +92,8 @@ function Profile({path}: profileProps) {
             <div className="flex flex-col m-auto">
               <AuthorInfo
                 author={author}
+                followers={followers}
+                friends={friends}
               />
 
               <PostList 

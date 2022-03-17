@@ -4,30 +4,18 @@ import { getFollowers, get_author_id } from '../../utils/apiCalls';
 
 type AuthorProps = {
     author: any,
+    followers: Array<any>,
+    friends: Array<any>,
 };
 
-function AuthorInfo({ author }: AuthorProps) {
+function AuthorInfo({ author, followers, friends }: AuthorProps) {
     const [errMsg, setErrMsg] = useState("");
-    const [followers, setFollowers] = useState(Array());
-    const [friends, setFriends] = useState(Array());
+
 
     if (author === undefined) {
         return <h1>Error loading information about this author.</h1>;
     }
 
-    useEffect(() => {
-        get_author_id()
-            .then(id => {
-                getFollowers(parseInt(id))
-                    .then(data => { 
-                        setFollowers(data.items);
-                    });
-            })
-            .catch(err => {
-                setErrMsg(err.message);
-            });
-
-    } , []);
 
     return(
         <div className="flex justify-evenly w-full py-5">

@@ -39,7 +39,7 @@ const UserPage = ({ path, followId }: UserProps) => {
 
         // Check if the user is following the author
         const isFollowerApiCall = async () => {
-            const myUserId = parseInt(await get_author_id()); // Currently returns the loggedin used
+            const myUserId = parseInt(await get_author_id()); 
             setCurrentUserId(myUserId);
 
             let res;
@@ -116,6 +116,8 @@ const UserPage = ({ path, followId }: UserProps) => {
                     <div className="flex flex-col m-auto items-center">
                         <AuthorInfo 
                             author={authorInfo}
+                            followers={[]} //FIXME
+                            friends={[]}
                         />
                         <Button 
                             className="w-fit"
