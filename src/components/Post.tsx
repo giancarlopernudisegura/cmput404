@@ -8,6 +8,7 @@ import { route } from 'preact-router';
 import Button from '@mui/material/Button'
 import { useState } from 'preact/hooks';
 import Favorite from '@mui/icons-material/Favorite'
+import ReactMarkdown from 'react-markdown'
 
 /*
     Post component

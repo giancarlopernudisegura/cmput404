@@ -1,13 +1,17 @@
 import { h } from "preact";
-import DrawerMenu from '../components/sidemenu-components/Drawer'
 import { useState, useEffect } from "preact/hooks";
-import { getCurrentAuthor, getPosts } from "../utils/apiCalls";
+import DrawerMenu from '../components/sidemenu-components/Drawer'
+import { Alert, CircularProgress } from "@mui/material";
 
-import Post from "../components/Post";
+import { getCurrentAuthor, getPosts } from "../utils/apiCalls";
+import PostList from "../components/PostList";
+import AuthorInfo from "../components/profile/AuthorInfo";
 
 type profileProps = {path: string}
 
 function Profile({path}: profileProps) {
+  const [errMsg, setErrMsg] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
   // get author data 
   const [author, setAuthor] = useState(Object());
@@ -15,7 +19,7 @@ function Profile({path}: profileProps) {
 
   useEffect(() => {
     function getAuthorAndPosts() {
-      getCurrentAuthor() // TODO: can be added as a prop to view other author's profile 
+      getCurrentAuthor() 
         .then(data => { setAuthor(data); 
           return data.id;
         })
@@ -24,9 +28,11 @@ function Profile({path}: profileProps) {
         })
         .then(posts => {
           setMyPosts(posts);
-        });
+        })
+        .catch(err => { setErrMsg(err.message); });
       
     }
+    setIsLoading(false);
     getAuthorAndPosts();
 
   }, []);
@@ -35,38 +41,25 @@ function Profile({path}: profileProps) {
   return (
     <div id="profile">
       <DrawerMenu
-      pageName="My Profile"
+        pageName="My Profile"
       >
-        {author && 
-          <div class="container"
-            className="">
-            <div className="text-xl">
-              <img src={author.profileImage}
-                className="rounded-full w-1/5"></img>
-              <h1>{author.displayName}</h1>
+        {errMsg && <Alert severity="error">{errMsg}</Alert>}
+
+        {isLoading === true ? 
+          <CircularProgress 
+            className="grid place-items-center h-screen"/> : (
+            <div className="flex flex-col m-auto">
+              <AuthorInfo
+                profileImage={author.profileImage}
+                displayName={author.displayName}
+                github={author.github}
+              />
+
+              <PostList posts={myPosts} />
             </div>
+        )
+      }
 
-            <div class="posts">
-              <h2>My Posts</h2>
-              
-                <ul>
-                {myPosts.map(post => (
-                  <li>
-                    <Post
-                      title={post.title}
-                      body={post.description}
-                      author={post.author} />
-                  </li>
-                ))}                  
-                </ul>
-            </div>
-
-          </div>
-
-
-
-
-        }
       </DrawerMenu>
     </div>
   );

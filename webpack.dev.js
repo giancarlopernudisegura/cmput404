@@ -10,7 +10,7 @@ const frontendUrl = new URL(process.env.PREACT_HOST);
 module.exports = {
   mode: 'development',
   devtool: 'source-map',
-  entry: ['./src/app.tsx'],
+  entry: path.resolve(__dirname, 'src') + '/app.tsx',
   devServer: {
     port: parseInt(frontendUrl.port),
     host: frontendUrl.hostname,
@@ -40,7 +40,7 @@ module.exports = {
       {
         test: /\.ts(x?)$/,
         exclude: /node_modules/,
-        use: 'awesome-typescript-loader'
+        use: 'ts-loader'
       },
       {
         test: /\.scss$/,
