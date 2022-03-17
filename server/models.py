@@ -242,7 +242,10 @@ class Like(db.Model, JSONSerializable, InboxItem):
 
     def push(self):
         DbObject = Post if self.post else Comment
-        recepient = DbObject.query.filter_by(id=self.comment).first().author
+        if self.comment:#assume that the constructor is doing a good job
+            recepient = DbObject.query.filter_by(id=self.comment).first().author
+        elif self.post:
+            recepient = DbObject.query.filter_by(id=self.post).first().author
         inbox = Inbox(recepient, like=self.id)
         db.session.add(inbox)
         db.session.commit()

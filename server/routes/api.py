@@ -1,3 +1,4 @@
+import json
 from re import L
 from flask import Blueprint, jsonify, make_response, request, Response, send_file, current_app
 import mimetypes
@@ -401,6 +402,27 @@ def clear_inbox(author_id: int) -> Response:
     db.session.commit()
     return Response(status=httpStatus.OK)
 
+@bp.route("/authors/<int:author_id>/posts/<int:post_id>/likes", methods=["PUT"])
+def create_post_like(author_id: int, post_id: int):
+    post = Post.query.filter_by(id=post_id).first()
+    if post is None:#post does not exist
+        return Response(status=httpStatus.NOT_FOUND)
+    if post.author != author_id:#post not made by given author
+        return (
+            make_response(jsonify(error=res_msg.AUTHOR_URI_NOT_MATCH)),
+            httpStatus.BAD_REQUEST)
+    if (current_user.id == author_id) or (post.private == False):
+        author = current_user.id
+        like = Like(author, post=post_id)
+        db.session.add(like)
+        db.session.commit()
+        like.push()
+        return Response(status=httpStatus.CREATED)
+    else:
+        return (
+            make_response(jsonify(error=res_msg.NO_PERMISSION)),
+            httpStatus.UNAUTHORIZED)
+
 @bp.route("/authors/<int:author_id>/posts/<int:post_id>/likes", methods=["GET"])
 def get_post_like(author_id: int, post_id: int):
     post = Post.query.filter_by(id=post_id).first()
@@ -419,6 +441,30 @@ def get_post_like(author_id: int, post_id: int):
         return (
             make_response(jsonify(error=res_msg.NO_PERMISSION)),
             httpStatus.UNAUTHORIZED)
+
+@bp.route("/authors/<int:author_id>/posts/<int:post_id>/comments/<int:comment_id>/likes", methods=["PUT"])
+def create_comment_like(author_id: int, post_id: int, comment_id: int):
+    comment = Comment.query.filter_by(id=comment_id).first()
+    post = Post.query.filter_by(id=post_id).first()
+    if post is None:#post does not exist
+        return Response(status=httpStatus.NOT_FOUND)
+    if comment is None:#comment doesn't exist
+        return Response(status=httpStatus.NOT_FOUND)
+    if (post.author != author_id) or (post.id != comment.post):#post author or comment post do not match
+        return Response(status=httpStatus.NOT_FOUND)
+    if (current_user.id == author_id) or (post.private == False):
+        author = current_user
+        comment = comment_id
+        like = Like(author, comment=comment)
+        db.session.add(like)
+        db.session.commit()
+        like.push()
+        return Response(status=httpStatus.CREATED)
+    else:
+        return (
+            make_response(jsonify(error=res_msg.NO_PERMISSION)),
+            httpStatus.UNAUTHORIZED)
+
 
 
 @bp.route("/authors/<int:author_id>/posts/<int:post_id>/comments/<int:comment_id>/likes", methods=["GET"])
