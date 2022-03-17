@@ -28,5 +28,8 @@ CREATE_CONFLICT = "The resource you are trying to create is already exists."
 NOT_IMAGE = "The given post is not an image."
 
 # likes
+AUTHOR_LIKE_CONFLICT = "The current user has already liked the requested resource."
+AUTHOR_LIKE_NOT_EXIST = "Current user has not liked the requested resource."
+AUTHOR_NOT_EXISTS = "The given author does not exist."
 POST_DOES_NOT_EXIST = "Given Post does not exist."
-AUTHOR_URI_NOT_MATCH = "The given author does not match the given post."
+AUTHOR_URI_NOT_MATCH = "The given author does not match the given resource."

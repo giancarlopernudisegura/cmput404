@@ -308,7 +308,11 @@ def remove_follower(author_id: int, follower_id: int) -> Response:
         )
     follower = Requests.query.filter_by(to=author_id, initiated=follower_id).first()
     if not follower:
-        return Response(status=httpStatus.NOT_FOUND)
+        #return Response(status=httpStatus.NOT_FOUND)
+        return utils.json_response(
+            httpStatus.NOT_FOUND,
+            {"message": f"Follower {follower_id} is not following {author_id}."}
+        )
     Inbox.query.filter_by(follow=follower_id).delete()
     db.session.delete(follower)
     db.session.commit()
@@ -406,7 +410,10 @@ def clear_inbox(author_id: int) -> Response:
 def post_like_methods(author_id: int, post_id: int) -> Response:
     post = Post.query.filter_by(id=post_id).first()
     if post is None:#post does not exist
-        return Response(status=httpStatus.NOT_FOUND)
+        return utils.json_response(
+            httpStatus.NOT_FOUND,
+            {"message": f"post {post_id} does not exist."}
+        )
     if post.author != author_id:#post not made by given author
         return (
             make_response(jsonify(error=res_msg.AUTHOR_URI_NOT_MATCH)),
@@ -419,7 +426,10 @@ def post_like_methods(author_id: int, post_id: int) -> Response:
         )), httpStatus.OK)
         elif request.method == "PUT":#create a new like for a given post as a user
             if Like.query.filter_by(post=post_id, author=current_user.id).first() is not None:#user has already liked post
-                return Response(status=httpStatus.CONFLICT)
+                return utils.json_response(
+                    httpStatus.CONFLICT,
+                    {"message": res_msg.AUTHOR_LIKE_CONFLICT}
+                )
             author = current_user.id
             like = Like(author, post=post_id)
             db.session.add(like)
@@ -442,11 +452,21 @@ def comment_like_methods(author_id: int, post_id: int, comment_id: int):
     comment = Comment.query.filter_by(id=comment_id).first()
     post = Post.query.filter_by(id=post_id).first()
     if post is None:#post does not exist
-        return Response(status=httpStatus.NOT_FOUND)
+        return utils.json_response(
+            httpStatus.NOT_FOUND,
+            {"message": f"post {post_id} does not exist."}
+        )
     if comment is None:#comment doesn't exist
-        return Response(status=httpStatus.NOT_FOUND)
+        return utils.json_response(
+            httpStatus.NOT_FOUND,
+            {"message": f"comment {comment_id} does not exist."}
+        )
     if (post.author != author_id) or (post.id != comment.post):#post author or comment post do not match
-        return Response(status=httpStatus.NOT_FOUND)
+        return utils.json_response(
+            httpStatus.NOT_FOUND,
+            {"message": "Post author or comment post do not match"}
+        )
+    
     if (current_user.id == author_id) or (post.private == False):
         if request.method == "GET":#Get all likes for a given comment
             comment_likes = Like.query.filter_by(comment=comment_id).all()
@@ -455,7 +475,10 @@ def comment_like_methods(author_id: int, post_id: int, comment_id: int):
                 )), httpStatus.OK)        
         elif request.method == "PUT":#Get all likes for a given comment
             if Like.query.filter_by(comment=comment_id,author=current_user.id).first() is not None:#user has already liked comment
-                return Response(status=httpStatus.CONFLICT)
+                return utils.json_response(
+                    httpStatus.CONFLICT,
+                    {"message": res_msg.AUTHOR_LIKE_CONFLICT}
+                )
             author = current_user.id
             comment = comment_id
             like = Like(author, comment=comment)
@@ -466,7 +489,10 @@ def comment_like_methods(author_id: int, post_id: int, comment_id: int):
         elif request.method == "DELETE":#Get all likes for a given comment
             like = Like.query.filter_by(comment=comment_id, author=current_user.id).first()
             if like is None:#user has not liked comment
-                return Response(status=httpStatus.NOT_FOUND)
+                return utils.json_response(
+                    httpStatus.NOT_FOUND,
+                    {"message": res_msg.AUTHOR_LIKE_NOT_EXIST}
+                )
             like.delete()
             return Response(status=httpStatus.NO_CONTENT)
     else:
@@ -479,7 +505,9 @@ def comment_like_methods(author_id: int, post_id: int, comment_id: int):
 @bp.route("/authors/<int:author_id>/liked", methods=["GET"])
 def get_author_liked(author_id: int):
     if Author.query.filter_by(id=author_id).first() is None:#author doesn't exist
-        return Response(status=httpStatus.NOT_FOUND)
+        return utils.json_response(
+            httpStatus.NOT_FOUND, {"message": res_msg.AUTHOR_NOT_EXISTS}
+        )
     author_post_likes = Like.query.filter_by(author=author_id).join(Post).filter_by(private=False).all()
     author_comment_likes = Like.query.filter_by(author=author_id).join(Comment).join(Post).filter_by(private=False).all()
     author_likes = author_comment_likes + author_post_likes
