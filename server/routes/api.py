@@ -411,6 +411,8 @@ def create_post_like(author_id: int, post_id: int):
         return (
             make_response(jsonify(error=res_msg.AUTHOR_URI_NOT_MATCH)),
             httpStatus.BAD_REQUEST)
+    if Like.query.filter_by(post=post_id,author=current_user.id) is not None:#user has already liked post
+        return Response(status=httpStatus.CONFLICT)
     if (current_user.id == author_id) or (post.private == False):
         author = current_user.id
         like = Like(author, post=post_id)
@@ -452,6 +454,8 @@ def create_comment_like(author_id: int, post_id: int, comment_id: int):
         return Response(status=httpStatus.NOT_FOUND)
     if (post.author != author_id) or (post.id != comment.post):#post author or comment post do not match
         return Response(status=httpStatus.NOT_FOUND)
+    if Like.query.filter_by(comment=comment_id,author=current_user.id) is not None:#user has already liked comment
+        return Response(status=httpStatus.CONFLICT)
     if (current_user.id == author_id) or (post.private == False):
         author = current_user
         comment = comment_id
