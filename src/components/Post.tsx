@@ -73,24 +73,41 @@ function Post({ id, title, body, author, currentAuthor, onRemove, viewComment }:
 
             </div>
 
-            <div className="grid grid-cols-1 divide-y py-4">
+            <div id='buttons' className="grid grid-cols-1 divide-y py-4">
                 <div className='flex flex-row gap-x-4 justify-evenly'>
                     <div id='like' className='flex flex-row '>
-                    <p>{isLiked}</p>
-                    <IconButton color='primary' onClick={() => toggleFunction()}>
-                    {likeToggle ? <FavoriteBorderOutlinedIcon fontSize='large'/> : <Favorite fontSize='large' />}
-                    </IconButton>
+                        <p>{isLiked}</p>
+                        <IconButton 
+                            color='primary' 
+                            onClick={() => toggleFunction()}
+                        >
+                            {likeToggle ? <FavoriteBorderOutlinedIcon fontSize='large'/> :  <Favorite fontSize='large' />}
+                        </IconButton>
                     </div>
                     
-                    
-                    <IconButton color='primary'>
-                    <ChatBubbleOutlineOutlinedIcon fontSize='large'/>
-                    </IconButton>
-                    <ShareOutlinedIcon fontSize='large'/>
-                    <Button id="view-comments" color="primary" variant='outlined' 
-                    onClick={() => {if (viewComment) {viewComment(id), route('/app/comment')}
-                    
-                    }}>View Comments</Button>
+                    <div>
+                        <IconButton color='primary'>
+                            <ChatBubbleOutlineOutlinedIcon fontSize='large' />
+                        </IconButton>
+                    </div>
+
+                    <div>
+                        <ShareOutlinedIcon fontSize='large' />
+                    </div>
+
+                    <div>
+                        <Button 
+                            id="view-comments" 
+                            color="primary" 
+                            variant='outlined'
+                            onClick={() => {
+                                if (viewComment) { 
+                                    viewComment(id), route('/app/comment') 
+                                }
+                            }}>
+                            View Comments
+                        </Button>
+                    </div>
                 </div>
             </div>
 
