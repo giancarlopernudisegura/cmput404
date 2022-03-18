@@ -213,7 +213,6 @@ export function deletePost(author_id: number, post_id: number) {
 }
 
 export function getFollowers(author_id: number) {
-  console.log('authorId', author_id);
   const response = fetch(`${BACKEND_HOST}/authors/${author_id}/followers/`, {
     mode: 'cors',
     method: 'GET',
