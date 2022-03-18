@@ -115,9 +115,7 @@ const UserPage = ({ path, followId }: UserProps) => {
                 {isLoading === true ? <CircularProgress /> : (
                     <div className="flex flex-col m-auto items-center">
                         <AuthorInfo 
-                            profileImage={authorInfo.profileImage}
-                            displayName={authorInfo.displayName}
-                            github={authorInfo.github}
+                            author={authorInfo}
                         />
                         <Button 
                             className="w-fit"
@@ -129,7 +127,9 @@ const UserPage = ({ path, followId }: UserProps) => {
                 )}
 
                 {isPostLoading === true ? <CircularProgress /> : (
-                    <PostList posts={posts} />
+                    <PostList 
+                        initialPosts={posts} 
+                    />
                 )}
 
             </DrawerMenu>

@@ -1,28 +1,30 @@
 import { h } from 'preact';
 
 type AuthorProps = {
-    profileImage: string,
-    displayName: string,
-    github?: string,
+    author: any,
 };
 
-function AuthorInfo({ profileImage, displayName, github }: AuthorProps) {
+function AuthorInfo({ author }: AuthorProps) {
+    
+    if (author === undefined) {
+        return <h1>Error loading information about this author.</h1>;
+    }
 
     return(
         <div className="flex justify-evenly w-full py-5">
-            <img src={profileImage}
+            <img src={author.profileImage}
                 className="rounded-full w-1/5">
             </img>
             <div className="flex flex-col justify-center items-center text-left">
 
                 <h1 className="text-xl font-semibold">
-                    {displayName ? `${displayName}` : "No Name Found"}
+                    {author.displayName ? `${author.displayName}` : "No Name Found"}
                 </h1>
 
-                {github ? 
-                    <a href={`${github}`}
+                {author.github ? 
+                    <a href={`${author.github}`}
                         className="text-lg font-thin text-gray-600">
-                        {github}
+                        {author.github}
                     </a> 
                 : null}
 
