@@ -20,13 +20,12 @@ function PostList({ initialPosts, currentAuthor, onRemove, viewComment } : PostL
             <ul>
                 {initialPosts.map(post => (
                     <Post
-                        id={post.id}
+                        id={post.postId}
                         title={post.title}
                         body={post.description}
                         author={post.author} 
                         currentAuthor={currentAuthor}
                         onRemove={onRemove}
-                        viewComment={viewComment}
                     />
                 ))}
             </ul>

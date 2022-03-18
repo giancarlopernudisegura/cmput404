@@ -11,6 +11,7 @@ import Favorite from '@mui/icons-material/Favorite'
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ReactMarkdown from 'react-markdown'
+import {getAllComments} from '../utils/apiCalls'
 
 /*
     Post component
@@ -23,11 +24,10 @@ type PostProps = {
     author: string, 
     currentAuthor?: string,
     onRemove?: Function,
-    viewComment?: Function
 }
 
 
-function Post({ id, title, body, author, currentAuthor, onRemove, viewComment }: PostProps) {
+function Post({ id, title, body, author, currentAuthor, onRemove}: PostProps) {
 
     var currentUser: string = currentAuthor as string;
 
@@ -35,6 +35,9 @@ function Post({ id, title, body, author, currentAuthor, onRemove, viewComment }:
 
     const [likeToggle, setLikeToggle] = useState(true)
     const [isLiked, setIsLiked] = useState(0)
+    const [comments, setComments] = useState(Array());
+    const [errMsg, setErrMsg] = useState("");
+    
     const toggleFunction = () => {
         setLikeToggle(!likeToggle)
         if (likeToggle){
@@ -50,6 +53,18 @@ function Post({ id, title, body, author, currentAuthor, onRemove, viewComment }:
     const toggleShowComments = () => {
         setShowComments(!showComments)
     }
+
+
+    function viewComment(postId: number){
+    
+        //Do a get request to get all the comments for this specific post
+    
+        function getComments(authorId: string, postId: number){
+          getAllComments(authorId, postId).then(data => setComments(data)).catch(err => {setErrMsg(err.message);});
+        }
+    
+        getComments(String(author.id), postId)
+      }
 
     return (
         <li className='bg-zinc-100 border-solid border-1 border-slate-600 w-2/3 m-auto rounded-lg py-4 px-5  my-5'>

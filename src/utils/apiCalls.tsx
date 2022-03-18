@@ -57,8 +57,9 @@ export async function getPosts(author_id: string): Promise<any> {
 
     for (let i = 0; i < data.items.length; i++) {
       const post: any = {
-        'id': data.items[i].id,
+        'postId': data.items[i].id,
         'author': data.items[i].author.displayName,
+        'authorId': data.items[i].author.id,
         'title': data.items[i].title,
         'description': data.items[i].description,
       };
@@ -255,4 +256,15 @@ export function deletePost(author_id: number, post_id: number) {
   });
 
   return response;
+}
+
+/**
+ * Get likes for a specific post
+ */
+export function getPostLikes(author_id: number, post_id: number){
+  const res = fetch(`${BACKEND_HOST}/authors/${author_id}/posts/${post_id}/likes`, {
+    mode: 'cors',
+    credentials: 'include',
+    method: 'GET',
+  })
 }
