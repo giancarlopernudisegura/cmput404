@@ -6,6 +6,12 @@ import Tab from '@mui/material/Tab';
 import ReactMarkdown from 'react-markdown';
 
 type Props = {  };
+type Image = {
+    file: File,
+    base64: string,
+    imgUrl: string
+};
+
 type State = { 
     body: string
     category: string
@@ -15,7 +21,8 @@ type State = {
     markdown: boolean,
     showMarkdown: boolean,
     tabValue: number,
-    image: string
+    imageMkd: string,
+    images: Array<Image>
 };
 
 const placeholderContent = {
@@ -35,7 +42,8 @@ class PostForm extends Component<Props, State> {
             markdown: false,
             showMarkdown: false,
             tabValue: 0,
-            image: ""
+            imageMkd: "",
+            images: []
         };
         
         this.handleBody = this.handleBody.bind(this);
@@ -46,8 +54,9 @@ class PostForm extends Component<Props, State> {
         this.setMarkdown = this.setMarkdown.bind(this);
         this.handleTabChange = this.handleTabChange.bind(this);
         this.handleUploadPhoto = this.handleUploadPhoto.bind(this);
-        this.handleUploadPhoto = this.handleUploadPhoto.bind(this);
-        
+        this.convertImgBase64 = this.convertImgBase64.bind(this);
+        this.getImageUrl = this.getImageUrl.bind(this);
+
         this.setAuthorDetails();
     }
 
@@ -81,13 +90,55 @@ class PostForm extends Component<Props, State> {
 
     setMarkdown() {
         this.setState({ markdown: !this.state.markdown });
-        console.log("MARKDOWN:", this.state.markdown);
     }
 
-    handleSubmit = (event: Event): void => {
+    convertImgBase64 = (file : File) => new Promise<string>((resolve, reject) => {
+        let reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => {
+            return resolve(reader.result as string);
+        };
+
+        reader.onerror = (error) => {
+            return reject(error);
+        }
+    });
+
+    getImageUrl = () => {
+
+    }
+
+    handleSubmit = async (event: any) => {
         var contentType = "text/plain";
+        let imgsBase64 : Array<Image>;
+
         if (this.state.markdown === true) {
-            var contentType = "text/markdown";
+            contentType = "text/markdown";
+            const imagesList = [...this.state.images];
+            // send images if there are images to send
+            if (imagesList !== null && imagesList.length != 0) {
+                // convert images to base64 and create public Post for them
+                for (let img of imagesList) {
+                    let imageData = {
+                        "title": img.file.name,
+                        "unlisted": true,
+                        "content": img.base64,
+                        "category": "image",
+                        "visibility": "PUBLIC",
+                        "contentType": `${img.file.type}`
+                    };
+                    // TODO get post i
+                    try {
+                        const res = await newPublicPost(this.state.authorId, imageData);
+                        console.log("POST INFO", res);
+                        // get url
+
+                    } catch (err) {
+                        console.log("ERROR", (err as Error).message);
+                    }
+
+                }
+            }
         }
 
         const postData = {
@@ -98,8 +149,8 @@ class PostForm extends Component<Props, State> {
             "visibility": "PUBLIC",
             "unlisted": false,
         }
-        const encodedPostData = JSON.stringify(postData);
-        newPublicPost(this.state.authorId, encodedPostData);
+        await newPublicPost(this.state.authorId, postData);
+
         
         alert('You have successfully posted to your public page!');
         event.preventDefault();
@@ -109,36 +160,46 @@ class PostForm extends Component<Props, State> {
         this.setState({ ...this.state, tabValue: newValue });
     }
 
-    createImgMkd = (imagesUrl : Array<String>) => {
+    createImgMkd = (allImg : Array<Image>) => {
         let mkd = "";
 
-        for (let img of imagesUrl) {
-            mkd += `![](${img})`;
+        for (let img in Object.keys(allImg)) {
+            mkd += `![](${allImg[img].imgUrl})`;
         }
 
         return mkd;
     }
 
-    handleUploadPhoto = (event:any) => {
+    handleUploadPhoto = async (event:any) => {
         const files = event.target.files;
         let imagesUrls : Array<String> = [];
+        let imagesFiles : Array<File> = [];
+        let allImgs : Array<Image> = [];
+        let base64: string;
 
         let values = Object.values(files);
         for (let val of values) {
             if (val instanceof File) {
-                let x : string = URL.createObjectURL(val);
-                imagesUrls.push(x);
+                console.log("VAL", val);
+                let tempUrl : string = URL.createObjectURL(val);
+                try {
+                    base64 = await this.convertImgBase64(val);
+                } catch (err) {
+                    base64 = '';
+                }
+                allImgs.push({file: val, imgUrl: tempUrl, base64: base64});
+                imagesUrls.push(tempUrl);
+                imagesFiles.push(val);
             }
         }
 
         // call to uploadPhotos
         // const imagesURL : Array<String> = uploadPhotosToFbs(valid_files);
-        const markdown = this.createImgMkd(imagesUrls);
-        this.setState({image: markdown});
+        const markdown = this.createImgMkd(allImgs);
+        this.setState({ imageMkd: markdown, images: allImgs });
     }
 
     render() {
-
         return (
             <div class="create-post"
                 className="bg-zinc-100 border-solid border-1 border-slate-600 w-2/3 m-auto rounded-lg py-4 px-5  my-5">
@@ -148,7 +209,6 @@ class PostForm extends Component<Props, State> {
                         {this.state.authorDisplayName}
                     </div>
 
-                    <form onSubmit={this.handleSubmit} className="grid grid-cols-1 gap-y-3">
                         <div className='grid grid-cols-1 gap-y-2'>
                             <label className=''>Title</label>
                             <input 
@@ -177,7 +237,20 @@ class PostForm extends Component<Props, State> {
                             <input type="text"></input>
                         </div>
 
-                        {this.state.image && <ReactMarkdown>{this.state.image}</ReactMarkdown>}
+                        {this.state.markdown && (
+                            <div>
+                                {this.state.imageMkd && <ReactMarkdown>{this.state.imageMkd}</ReactMarkdown>}
+                                <input 
+                                    accept="image/*" 
+                                    multiple 
+                                    type="file" 
+                                    id="upload-file2" 
+                                    // style="display:none"
+                                    onChange={this.handleUploadPhoto}
+                                />
+                            </div>
+                        )}
+                        
 
                         <div className="flex flex-row justify-between mt-3">
                             <FormControlLabel 
@@ -187,22 +260,13 @@ class PostForm extends Component<Props, State> {
                             />
                         </div>
                         <div>
-                            <input 
-                                accept="image/*" 
-                                multiple 
-                                type="file" 
-                                id="upload-file2" 
-                                // style="display:none"
-                                onChange={this.handleUploadPhoto}
-                            />
                             <Button variant="contained"
-                                type="submit"
+                                onClick={this.handleSubmit}
                                 className="w-1/3"
                             >Share
                             </Button>
                         {/* TODO: toggle public or private */}
                         </div>
-                    </form>
 
             </div>
         );

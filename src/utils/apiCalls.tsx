@@ -1,4 +1,4 @@
-import { FAILED_GITHUB_STREAM } from '../utils/errorMsg';
+import { FAILED_GITHUB_STREAM, FAILED_CREATE_POSTS, FETCH_IMG_ERROR } from '../utils/errorMsg';
 
 
 const BACKEND_HOST = process.env.FLASK_HOST;
@@ -101,21 +101,36 @@ export const getAllAuthors = async (page: number) => {
  * @param authorId  the id of the author
  * @param postData  form data of the post 
  */
-export function newPublicPost(authorId: any, postData: any) {
+export async function newPublicPost(authorId: any, postData: any) {
+  const encodedPostData = JSON.stringify(postData);
+
+  let res;
+  let json;
   try {
     // postData contains data from the forms 
-    fetch(`${BACKEND_HOST}/authors/${authorId}/posts/`, {
+    res = await fetch(`${BACKEND_HOST}/authors/${authorId}/posts/`, {
       mode: 'cors',
       method: 'POST',
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
       },
-      body: postData
+      body: encodedPostData
     })
+
+    json = await res.json();
+
+    if (res.status === 200) {
+      return { status: res.status, ...json };
+    } else {
+      throw Error();
+    }
+    // TODO: return post id
   } catch (err) {
-    throw Error("There was an error publishing a new post");
+    throw Error(FAILED_CREATE_POSTS);
   }
+
+
 }
 
 export async function inboxCall(author_id: string, method: string, data?: any) {
@@ -228,5 +243,22 @@ export const getSpecAuthor = async (author_id : number) => {
     return { status: res.status, ...json};
   } catch(err) {
     throw Error('Unable to get the information about this user');
+  }
+}
+
+// TODO: figure this out
+export const serveImage = async (authorId: string, postId: string) => {
+  try {
+    const res = await fetch(`${BACKEND_HOST}/authors/${authorId}/posts/${postId}/image`, {
+      method: 'GET'
+    });
+
+    let json = res.json();
+
+    if (res.status === 200) {
+      return { status: res.status, ...json};
+    }
+  } catch(err) {
+    throw Error(FETCH_IMG_ERROR);
   }
 }

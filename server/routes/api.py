@@ -118,6 +118,8 @@ def post(author_id: int) -> Response:
             )
         author = author_id
 
+        print("DO I GET HERE?")
+
         json_val = request.json
         try:
             title = json_val["title"]
@@ -130,20 +132,24 @@ def post(author_id: int) -> Response:
                 in post_visibility_map
             ):
                 # bad visibility type or no visibility given
-                return Response(status=httpStatus.BAD_REQUEST)
-        except KeyError:
-            return Response(status=httpStatus.BAD_REQUEST)
-        except ValueError:
-            return Response(status=httpStatus.BAD_REQUEST)
-        except TypeError:
-            return Response(status=httpStatus.BAD_REQUEST)
+                # return Response(status=httpStatus.BAD_REQUEST, message="THIS IS AN ISSUE")
+                return utils.json_response(httpStatus.BAD_REQUEST, { "message": "NO visibility given" })
+        # except KeyError:
+        #     return Response(status=httpStatus.BAD_REQUEST)
+        # except ValueError:
+        #     return Response(status=httpStatus.BAD_REQUEST)
+        # except TypeError:
+        #     return Response(status=httpStatus.BAD_REQUEST)
+        except Exception as e:
+            return utils.json_response(httpStatus.BAD_REQUEST, { "message": str(e) })
         private = post_visibility_map[visibility.upper()]
 
+        print("DID I GET HERE?")
         post = Post(author, title, category, content, contentType, private, unlisted)
         db.session.add(post)
         db.session.commit()
         post.push()
-        return Response(status=httpStatus.OK)
+        return utils.json_response(httpStatus.OK, {"message": "Post was created", **post.json()} )
 
 
 @bp.route(
@@ -269,8 +275,7 @@ def serve_image(author_id: int, post_id: int):
         io.BytesIO(image_Bytes),
         mimetype=image_post.contentType.value,
         attachment_filename=f"{image_post.title}.{image_post.contentType.name}"
-        )
-        
+    )
 
 @bp.route("/authors/<int:author_id>/followers", methods=["GET"])
 def get_followers(author_id: int) -> Response:

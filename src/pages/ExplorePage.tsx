@@ -14,9 +14,9 @@ type ExplorePageProps = { path: string };
 
 function ExplorePage({ path }: ExplorePageProps) {
 
-    const [posts, setPosts] = useState(Array());
-    const [githubActivity, setGithubActivity] = useState(Array());
-    const [ errMsg, setErrMsg] = useState("");
+    const [ posts, setPosts ] = useState(Array());
+    const [ githubActivity, setGithubActivity ] = useState(Array());
+    const [ errMsg, setErrMsg ] = useState("");
 
 
     useEffect(() => {
