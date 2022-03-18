@@ -18,7 +18,6 @@ function Profile({path}: profileProps) {
   // get author data 
   const [author, setAuthor] = useState(Object());
   const [myPosts, setMyPosts] = useState(Array());
-  const [comments, setComments] = useState(Array());
 
   useEffect(() => {
     function getAuthorAndPosts() {
@@ -58,17 +57,6 @@ function Profile({path}: profileProps) {
     removePost(author.id, postId);
   }
 
-  function viewComment(postId: number){
-    
-    //Do a get request to get all the comments for this specific post
-
-    function getComments(authorId: string, postId: number){
-      getAllComments(authorId, postId).then(data => setComments(data)).catch(err => {setErrMsg(err.message);});
-    }
-
-    getComments(String(author.id), postId)
-  }
-
   function handleEdit() {
     // TODO
   }
@@ -93,7 +81,6 @@ function Profile({path}: profileProps) {
                 initialPosts={myPosts} 
                 currentAuthor={author.displayName} 
                 onRemove={handleRemove}
-                viewComment={viewComment}
               />
             </div>
         )
