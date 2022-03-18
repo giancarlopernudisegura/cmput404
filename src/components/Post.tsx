@@ -46,6 +46,11 @@ function Post({ id, title, body, author, currentAuthor, onRemove, viewComment }:
        
     }
 
+    const [showComments, setShowComments] = useState(false)
+    const toggleShowComments = () => {
+        setShowComments(!showComments)
+    }
+
     return (
         <li className='bg-zinc-100 border-solid border-1 border-slate-600 w-2/3 m-auto rounded-lg py-4 px-5  my-5'>
             <div className='grid grid-cols-1 gap-y-2'>
@@ -100,15 +105,15 @@ function Post({ id, title, body, author, currentAuthor, onRemove, viewComment }:
                             id="view-comments" 
                             color="primary" 
                             variant='outlined'
-                            onClick={() => {
-                                if (viewComment) { 
-                                    viewComment(id), route('/app/comment') 
-                                }
-                            }}>
+                            onClick={() => toggleShowComments()}
+                            >
                             View Comments
                         </Button>
                     </div>
                 </div>
+            </div>
+            <div id='comment-section' className={`bg-blue-200 ${ showComments === false ? 'hidden' : 'visible' }`}>
+                <p>Hello</p>
             </div>
 
         </li>
