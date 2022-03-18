@@ -19,20 +19,36 @@ type CommentPageProps = {
 
 function CommentPage({ path, post_id }: CommentPageProps) {
   const [comments, setComments] = useState(Array());
+  const [author, setAuthor] = useState(Object());
+  const [errMsg, setErrMsg] = useState("");
+
+  function viewComment(postId: number){
+    
+    //Do a get request to get all the comments for this specific post
+
+    function getComments(authorId: string, postId: number){
+      getAllComments(authorId, postId).then(data => setComments(data)).catch(err => {setErrMsg(err.message);});
+    }
+
+    getComments(String(author), postId)
+
+  }
 
   useEffect(() => {
 
-    function getCommentsFromPost() {
+    
+
+    // function getCommentsFromPost() {
       
-      console.log("Start searching for comments");
-      get_author_id().then(authorID => getRawPosts(authorID))
-      .then(data => getAllComments(data.items[0].author.id, data.items[0].id)) //TODO: Need a way to get the postId
-      .then(data => setComments(data))
-      .catch(err => {
-        alert(err);
-      });      
-    }
-    getCommentsFromPost();
+    //   console.log("Start searching for comments");
+    //   get_author_id().then(authorID => getRawPosts(authorID))
+    //   .then(data => getAllComments(data.items[0].author.id, data.items[0].id)) //TODO: Need a way to get the postId
+    //   .then(data => setComments(data))
+    //   .catch(err => {
+    //     alert(err);
+    //   });      
+    // }
+    // getCommentsFromPost();
   }, []);
 
   return (

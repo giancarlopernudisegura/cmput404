@@ -5,9 +5,10 @@ type PostListProps = {
     initialPosts: Array<any>,
     currentAuthor?: string,
     onRemove?: Function,
+    viewComment?: Function,
 }
 
-function PostList({ initialPosts, currentAuthor, onRemove } : PostListProps){
+function PostList({ initialPosts, currentAuthor, onRemove, viewComment } : PostListProps){
 
     if (currentAuthor === undefined) {
         currentAuthor = 'Anonymous';
@@ -25,6 +26,7 @@ function PostList({ initialPosts, currentAuthor, onRemove } : PostListProps){
                         author={post.author} 
                         currentAuthor={currentAuthor}
                         onRemove={onRemove}
+                        viewComment={viewComment}
                     />
                 ))}
             </ul>
