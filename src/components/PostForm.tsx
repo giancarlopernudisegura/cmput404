@@ -4,6 +4,7 @@ import { newPublicPost, getCurrentAuthor } from '../utils/apiCalls';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import ReactMarkdown from 'react-markdown';
+import { MARKDOWN, PLAIN } from '../utils/constants'
 
 type Props = {  };
 type Image = {
@@ -96,7 +97,10 @@ class PostForm extends Component<Props, State> {
         let reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = () => {
-            return resolve(reader.result as string);
+            // remove base64 header
+            let imgData: string = reader.result as string;
+            imgData = imgData.replace(/^data:image\/(?:jpeg|png);base64,/, "");
+            return resolve(imgData);
         };
 
         reader.onerror = (error) => {
@@ -104,16 +108,16 @@ class PostForm extends Component<Props, State> {
         }
     });
 
-    getImageUrl = () => {
-
+    getImageUrl = (postId : string) => {
+        const imageUrl = `${process.env.FLASK_HOST}/authors/${this.state.authorId}/posts/${postId}/image`;
+        return imageUrl;
     }
 
     handleSubmit = async (event: any) => {
-        var contentType = "text/plain";
-        let imgsBase64 : Array<Image>;
-
+        var contentType = PLAIN;
+        let imgMkd = '';
         if (this.state.markdown === true) {
-            contentType = "text/markdown";
+            contentType = MARKDOWN;
             const imagesList = [...this.state.images];
             // send images if there are images to send
             if (imagesList !== null && imagesList.length != 0) {
@@ -127,12 +131,11 @@ class PostForm extends Component<Props, State> {
                         "visibility": "PUBLIC",
                         "contentType": `${img.file.type}`
                     };
-                    // TODO get post i
                     try {
                         const res = await newPublicPost(this.state.authorId, imageData);
-                        console.log("POST INFO", res);
                         // get url
-
+                        const imageUrl = this.getImageUrl(res.id);
+                        imgMkd += `![](${imageUrl})\n`;
                     } catch (err) {
                         console.log("ERROR", (err as Error).message);
                     }
@@ -143,7 +146,7 @@ class PostForm extends Component<Props, State> {
 
         const postData = {
             "title": this.state.title,
-            "content": this.state.body,
+            "content": this.state.body + imgMkd,
             "category": this.state.category,
             "contentType": contentType, 
             "visibility": "PUBLIC",
@@ -164,7 +167,7 @@ class PostForm extends Component<Props, State> {
         let mkd = "";
 
         for (let img in Object.keys(allImg)) {
-            mkd += `![](${allImg[img].imgUrl})`;
+            mkd += `![](${allImg[img].imgUrl})\n`;
         }
 
         return mkd;
@@ -180,7 +183,6 @@ class PostForm extends Component<Props, State> {
         let values = Object.values(files);
         for (let val of values) {
             if (val instanceof File) {
-                console.log("VAL", val);
                 let tempUrl : string = URL.createObjectURL(val);
                 try {
                     base64 = await this.convertImgBase64(val);
@@ -193,8 +195,6 @@ class PostForm extends Component<Props, State> {
             }
         }
 
-        // call to uploadPhotos
-        // const imagesURL : Array<String> = uploadPhotosToFbs(valid_files);
         const markdown = this.createImgMkd(allImgs);
         this.setState({ imageMkd: markdown, images: allImgs });
     }
@@ -203,7 +203,6 @@ class PostForm extends Component<Props, State> {
         return (
             <div class="create-post"
                 className="bg-zinc-100 border-solid border-1 border-slate-600 w-2/3 m-auto rounded-lg py-4 px-5  my-5">
-                    {/* TODO: Create a markdown editor  */}
                     <div class="displayname"
                         className="mb-4 font-semibold">
                         {this.state.authorDisplayName}
@@ -245,7 +244,6 @@ class PostForm extends Component<Props, State> {
                                     multiple 
                                     type="file" 
                                     id="upload-file2" 
-                                    // style="display:none"
                                     onChange={this.handleUploadPhoto}
                                 />
                             </div>

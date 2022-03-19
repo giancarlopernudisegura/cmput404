@@ -63,6 +63,7 @@ export async function getPosts(author_id: string): Promise<any> {
         'author': data.items[i].author.displayName,
         'title': data.items[i].title,
         'description': data.items[i].description,
+        'contentType': data.items[i].contentType,
       };
       listOfPosts.push(post);
     }
