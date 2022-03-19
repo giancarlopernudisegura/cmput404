@@ -198,21 +198,6 @@ export const getSpecAuthor = async (author_id : number) => {
 }
 
 /**
- * Get all the raw posts for a specific user
- */
-export async function getRawPosts(author_id: string) {
-
-  const res = await fetch(`${BACKEND_HOST}/authors/${author_id}/posts`, {
-    mode: 'cors',
-    method: 'GET',
-  });
-
-  let data = await res.json()
-
-  return data
-}
-
-/**
  * Get all comments for a specific post
  */
 export async function getAllComments(author_id: string, post_id: number) {
@@ -259,7 +244,7 @@ export function deletePost(author_id: number, post_id: number) {
 }
 
 /**
- * Get likes for a specific post
+ * Get likes for a specific post TODO
  */
 export function getPostLikes(author_id: number, post_id: number){
   const res = fetch(`${BACKEND_HOST}/authors/${author_id}/posts/${post_id}/likes`, {

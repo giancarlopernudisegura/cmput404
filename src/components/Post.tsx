@@ -3,8 +3,6 @@ import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlin
 import ChatBubbleOutlineOutlinedIcon from '@mui/icons-material/ChatBubbleOutlineOutlined';
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
 import { IconButton } from '@mui/material';
-import { blueGrey } from '@mui/material/colors'
-import { route } from 'preact-router';
 import Button from '@mui/material/Button'
 import { useState, useEffect } from 'preact/hooks';
 import Favorite from '@mui/icons-material/Favorite'
@@ -12,6 +10,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ReactMarkdown from 'react-markdown'
 import { getAllComments } from '../utils/apiCalls'
+import CommentList from '../components/comment-components/CommentList'
 
 /*
     Post component
@@ -40,8 +39,7 @@ function Post({
 
     var currentUser: string = currentAuthor as string;
 
-    const primary = blueGrey[900];
-
+    //Toggle for like button
     const [likeToggle, setLikeToggle] = useState(true)
     const [isLiked, setIsLiked] = useState(0)
 
@@ -59,10 +57,15 @@ function Post({
 
     }
 
+    //TOGGLE FOR SHOWING COMMENTS
     const [showComments, setShowComments] = useState(false)
     const toggleShowComments = () => {
         setShowComments(!showComments)
     }
+
+    //Conditionals for the View Comments Button
+    const commentButtonText = showComments === false ? 'View Comments' : 'Hide Comments'
+    const commentButtonType = showComments === false ? 'outlined' : 'contained'
 
     useEffect(() => {
         // Fetch all the comments of the post from the API
@@ -84,11 +87,17 @@ function Post({
                     {/* Display these buttons if the author of the  post is the current author */}
                     {authorName === currentUser &&
                         <span className="flex space-x-4">
-                            <EditIcon />
-                            <DeleteIcon onClick={() => {
+                            <IconButton>
+                            <EditIcon style={{fill: "black"}} />
+                            </IconButton>
+                           
+                            <IconButton>
+                            <DeleteIcon style={{fill: "black"}} onClick={() => {
                                 if (onRemove) { onRemove(postId) }
                             }}
                             />
+                            </IconButton>
+                            
                         </span>
                     }
 
@@ -128,16 +137,17 @@ function Post({
                         <Button
                             id="view-comments"
                             color="primary"
-                            variant='outlined'
+                            variant={commentButtonType}
                             onClick={() => toggleShowComments() }
                         >
-                            View Comments
+                            {commentButtonText}
                         </Button>
                     </div>
                 </div>
             </div>
-            <div id='comment-section' className={`bg-blue-200 ${showComments === false ? 'hidden' : 'visible'}`}>
-                <p>Hello</p>
+            <div id='comment-section' className={`${showComments === false ? 'hidden' : 'visible'}`}>
+                <div id='comment-section-subheader' className='items-center content-center pt-4 py-8 font-semibold'>Total Comments for this post: {comments.length}</div>
+                <CommentList allComments={comments}/>
             </div>
 
         </li>

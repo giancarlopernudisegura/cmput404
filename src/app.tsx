@@ -10,7 +10,6 @@ import Profile from './pages/Profile'
 import './css/main.css';
 import Notifications from './pages/Notifications';
 import UserPage from './pages/UserPage';
-import CommentPage from './pages/CommentPage';
 
 const App = () => {
 
@@ -24,7 +23,6 @@ const App = () => {
         <Profile path="/app/profile"/>
         <Notifications path="/app/notifications"/>
         <UserPage path="/app/user/:followId" />
-        <CommentPage path="/app/comment/"/>
       </Router>
     </div>
   )
