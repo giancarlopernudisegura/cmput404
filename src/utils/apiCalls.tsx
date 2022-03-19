@@ -58,7 +58,7 @@ export async function getPosts(author_id: string): Promise<any> {
     for (let i = 0; i < data.items.length; i++) {
       const post: any = {
         'postId': data.items[i].id,
-        'author': data.items[i].author.displayName,
+        'authorName': data.items[i].author.displayName,
         'authorId': data.items[i].author.id,
         'title': data.items[i].title,
         'description': data.items[i].description,
