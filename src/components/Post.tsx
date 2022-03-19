@@ -6,7 +6,7 @@ import { IconButton } from '@mui/material';
 import { blueGrey } from '@mui/material/colors'
 import { route } from 'preact-router';
 import Button from '@mui/material/Button'
-import { useState } from 'preact/hooks';
+import { useState, useEffect } from 'preact/hooks';
 import Favorite from '@mui/icons-material/Favorite'
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -28,7 +28,15 @@ type PostProps = {
 }
 
 
-function Post({ postId, title, body, authorName, currentAuthor, onRemove }: PostProps) {
+function Post({ 
+    postId, 
+    title, 
+    body, 
+    authorName, 
+    authorId,
+    currentAuthor, 
+    onRemove 
+    }: PostProps) {
 
     var currentUser: string = currentAuthor as string;
 
@@ -56,13 +64,16 @@ function Post({ postId, title, body, authorName, currentAuthor, onRemove }: Post
         setShowComments(!showComments)
     }
 
-    // Fetch all the comments of the post from the API
-    function fetchComments(authorId: number, postId: number) {
-        getAllComments(authorId.toString(), postId)
-            .then(data => setComments(data))
-            .catch(err => { setErrMsg(err.message); });
-
-    }
+    useEffect(() => {
+        // Fetch all the comments of the post from the API
+        function fetchComments(authorId: number, postId: number) {
+            getAllComments(authorId.toString(), postId)
+                .then(data => setComments(data))
+                .catch(err => { setErrMsg(err.message); });
+        }
+        fetchComments(authorId, postId);
+    } , [])
+;
 
     return (
         <li className='bg-zinc-100 border-solid border-1 border-slate-600 w-2/3 m-auto rounded-lg py-4 px-5  my-5'>
@@ -118,7 +129,7 @@ function Post({ postId, title, body, authorName, currentAuthor, onRemove }: Post
                             id="view-comments"
                             color="primary"
                             variant='outlined'
-                            onClick={() => toggleShowComments()}
+                            onClick={() => toggleShowComments() }
                         >
                             View Comments
                         </Button>
