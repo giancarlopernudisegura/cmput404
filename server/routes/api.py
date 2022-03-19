@@ -266,7 +266,8 @@ def post_comment(author_id: int, post_id: int) -> Response:
 @bp.route("/authors/<int:author_id>/posts/<int:post_id>/image", methods=["GET"])
 def serve_image(author_id: int, post_id: int):
     image_post = Post.query.filter_by(id=post_id).first()
-    if image_post.contentType != (ContentType.jpg or ContentType.png):
+
+    if image_post.contentType != ContentType.jpg and image_post.contentType != ContentType.png:
         return utils.json_response(
             httpStatus.BAD_REQUEST, {"message": res_msg.NOT_IMAGE}
         )
