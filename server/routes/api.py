@@ -118,8 +118,6 @@ def post(author_id: int) -> Response:
             )
         author = author_id
 
-        print("DO I GET HERE?")
-
         json_val = request.json
         try:
             title = json_val["title"]
@@ -132,19 +130,17 @@ def post(author_id: int) -> Response:
                 in post_visibility_map
             ):
                 # bad visibility type or no visibility given
-                # return Response(status=httpStatus.BAD_REQUEST, message="THIS IS AN ISSUE")
-                return utils.json_response(httpStatus.BAD_REQUEST, { "message": "NO visibility given" })
-        # except KeyError:
-        #     return Response(status=httpStatus.BAD_REQUEST)
-        # except ValueError:
-        #     return Response(status=httpStatus.BAD_REQUEST)
-        # except TypeError:
-        #     return Response(status=httpStatus.BAD_REQUEST)
+                return utils.json_response(httpStatus.BAD_REQUEST, { "message": "No visibility given for this post" })
+        except KeyError:
+            return Response(status=httpStatus.BAD_REQUEST)
+        except ValueError:
+            return Response(status=httpStatus.BAD_REQUEST)
+        except TypeError:
+            return Response(status=httpStatus.BAD_REQUEST)
         except Exception as e:
             return utils.json_response(httpStatus.BAD_REQUEST, { "message": str(e) })
         private = post_visibility_map[visibility.upper()]
 
-        print("DID I GET HERE?")
         post = Post(author, title, category, content, contentType, private, unlisted)
         db.session.add(post)
         db.session.commit()

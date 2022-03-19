@@ -23,8 +23,6 @@ function Post({ title, body, author, contentType }: PostProps) {
                 return <ReactMarkdown>{body}</ReactMarkdown>
             case PLAIN:
                 return <p className='text-lg'>{body}</p>
-
-            // TODO show images
         }
     }
 
