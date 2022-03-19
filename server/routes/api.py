@@ -1,5 +1,15 @@
+import json
+from urllib.request import urlopen
+from flask import (
+    Blueprint,
+    jsonify,
+    make_response,
+    request,
+    Response,
+    send_file,
+    current_app,
+)
 from re import L
-from flask import Blueprint, jsonify, make_response, request, Response, send_file, current_app
 import mimetypes
 from telnetlib import STATUS
 from urllib import response
@@ -8,6 +18,7 @@ from flask_login import login_user, login_required, logout_user, current_user
 from server.exts import db
 from server.models import Author, Inbox, Post, Comment, Requests, Like
 from server.enums import ContentType
+from server.config import RUNTIME_SETTINGS
 from http import HTTPStatus as httpStatus
 import os, io, binascii
 from dotenv import load_dotenv
@@ -37,7 +48,7 @@ def pagination(
     Returns:
         A tuple of (page, size) to use for pagination."""
     size = int(arguments.get("size", str(default_page_size)), base=10)
-    page_number = int(arguments.get("page_number", str(default_page_number)), base=10)
+    page_number = int(arguments.get("page", str(default_page_number)), base=10)
     return page_number, size
 
 
@@ -271,8 +282,9 @@ def serve_image(author_id: int, post_id: int):
     return send_file(
         io.BytesIO(image_Bytes),
         mimetype=image_post.contentType.value,
-        attachment_filename=f"{image_post.title}.{image_post.contentType.name}"
+        attachment_filename=f"{image_post.title}.{image_post.contentType.name}",
     )
+
 
 @bp.route("/authors/<int:author_id>/followers", methods=["GET"])
 def get_followers(author_id: int) -> Response:
@@ -309,7 +321,11 @@ def remove_follower(author_id: int, follower_id: int) -> Response:
         )
     follower = Requests.query.filter_by(to=author_id, initiated=follower_id).first()
     if not follower:
-        return Response(status=httpStatus.NOT_FOUND)
+        #return Response(status=httpStatus.NOT_FOUND)
+        return utils.json_response(
+            httpStatus.NOT_FOUND,
+            {"message": f"Follower {follower_id} is not following {author_id}."}
+        )
     Inbox.query.filter_by(follow=follower_id).delete()
     db.session.delete(follower)
     db.session.commit()
@@ -403,51 +419,108 @@ def clear_inbox(author_id: int) -> Response:
     db.session.commit()
     return Response(status=httpStatus.OK)
 
-@bp.route("/authors/<int:author_id>/posts/<int:post_id>/likes", methods=["GET"])
-def get_post_like(author_id: int, post_id: int):
+@bp.route("/authors/<int:author_id>/posts/<int:post_id>/likes", methods=["PUT", "GET", "DELETE"])
+def post_like_methods(author_id: int, post_id: int) -> Response:
     post = Post.query.filter_by(id=post_id).first()
     if post is None:#post does not exist
-        return Response(status=httpStatus.NOT_FOUND)
+        return utils.json_response(
+            httpStatus.NOT_FOUND,
+            {"message": f"post {post_id} does not exist."}
+        )
     if post.author != author_id:#post not made by given author
         return (
             make_response(jsonify(error=res_msg.AUTHOR_URI_NOT_MATCH)),
             httpStatus.BAD_REQUEST)
     if (current_user.id == author_id) or (post.private == False):
-        post_likes = Like.query.filter_by(post=post_id).all()
-        return (make_response(jsonify(
-            likes=[like.json() for like in post_likes]
+        if request.method == "GET":#Get all likes for a given post
+            post_likes = Like.query.filter_by(post=post_id).all()
+            return (make_response(jsonify(
+                likes=[like.json() for like in post_likes]
         )), httpStatus.OK)
+        elif request.method == "PUT":#create a new like for a given post as a user
+            if Like.query.filter_by(post=post_id, author=current_user.id).first() is not None:#user has already liked post
+                return utils.json_response(
+                    httpStatus.CONFLICT,
+                    {"message": res_msg.AUTHOR_LIKE_CONFLICT}
+                )
+            author = current_user.id
+            like = Like(author, post=post_id)
+            db.session.add(like)
+            db.session.commit()
+            like.push()
+            return Response(status=httpStatus.CREATED)
+        elif request.method == "DELETE":#remove a like for a given post as a user
+            like = Like.query.filter_by(post=post_id, author=current_user.id).first()
+            if like is None:#user has not liked post
+                return Response(status=httpStatus.NOT_FOUND)
+            like.delete()
+            return Response(status=httpStatus.NO_CONTENT)
     else:
         return (
             make_response(jsonify(error=res_msg.NO_PERMISSION)),
             httpStatus.UNAUTHORIZED)
 
-
-@bp.route("/authors/<int:author_id>/posts/<int:post_id>/comments/<int:comment_id>/likes", methods=["GET"])
-def get_comment_like(author_id: int, post_id: int, comment_id: int):
+@bp.route("/authors/<int:author_id>/posts/<int:post_id>/comments/<int:comment_id>/likes", methods=["PUT", "GET", "DELETE"])
+def comment_like_methods(author_id: int, post_id: int, comment_id: int):
     comment = Comment.query.filter_by(id=comment_id).first()
     post = Post.query.filter_by(id=post_id).first()
-    #keep the cases split incase we have to debug why something is erroring out
     if post is None:#post does not exist
-        return Response(status=httpStatus.NOT_FOUND)
+        return utils.json_response(
+            httpStatus.NOT_FOUND,
+            {"message": f"post {post_id} does not exist."}
+        )
     if comment is None:#comment doesn't exist
-        return Response(status=httpStatus.NOT_FOUND)
+        return utils.json_response(
+            httpStatus.NOT_FOUND,
+            {"message": f"comment {comment_id} does not exist."}
+        )
     if (post.author != author_id) or (post.id != comment.post):#post author or comment post do not match
-        return Response(status=httpStatus.NOT_FOUND)
+        return utils.json_response(
+            httpStatus.NOT_FOUND,
+            {"message": "Post author or comment post do not match"}
+        )
+    
     if (current_user.id == author_id) or (post.private == False):
-        comment_likes = Like.query.filter_by(comment=comment_id).all()
-        return (make_response(jsonify(
-            likes=[like.json() for like in comment_likes]
-        )), httpStatus.OK)
+        if request.method == "GET":#Get all likes for a given comment
+            comment_likes = Like.query.filter_by(comment=comment_id).all()
+            return (make_response(jsonify(
+                likes=[like.json() for like in comment_likes]
+                )), httpStatus.OK)        
+        elif request.method == "PUT":#Get all likes for a given comment
+            if Like.query.filter_by(comment=comment_id,author=current_user.id).first() is not None:#user has already liked comment
+                return utils.json_response(
+                    httpStatus.CONFLICT,
+                    {"message": res_msg.AUTHOR_LIKE_CONFLICT}
+                )
+            author = current_user.id
+            comment = comment_id
+            like = Like(author, comment=comment)
+            db.session.add(like)
+            db.session.commit()
+            like.push()
+            return Response(status=httpStatus.CREATED)
+        elif request.method == "DELETE":#Get all likes for a given comment
+            like = Like.query.filter_by(comment=comment_id, author=current_user.id).first()
+            if like is None:#user has not liked comment
+                return utils.json_response(
+                    httpStatus.NOT_FOUND,
+                    {"message": res_msg.AUTHOR_LIKE_NOT_EXIST}
+                )
+            like.delete()
+            return Response(status=httpStatus.NO_CONTENT)
     else:
         return (
             make_response(jsonify(error=res_msg.NO_PERMISSION)),
             httpStatus.UNAUTHORIZED)
+
+
 
 @bp.route("/authors/<int:author_id>/liked", methods=["GET"])
 def get_author_liked(author_id: int):
     if Author.query.filter_by(id=author_id).first() is None:#author doesn't exist
-        return Response(status=httpStatus.NOT_FOUND)
+        return utils.json_response(
+            httpStatus.NOT_FOUND, {"message": res_msg.AUTHOR_NOT_EXISTS}
+        )
     author_post_likes = Like.query.filter_by(author=author_id).join(Post).filter_by(private=False).all()
     author_comment_likes = Like.query.filter_by(author=author_id).join(Comment).join(Post).filter_by(private=False).all()
     author_likes = author_comment_likes + author_post_likes
@@ -560,6 +633,137 @@ def get_user_me() -> Response:
         return utils.json_response(
             httpStatus.OK,
             {"message": res_msg.SUCCESS_VERIFY_USER, "data": current_user.json()},
+        )
+    except Exception as e:
+        return utils.json_response(
+            httpStatus.INTERNAL_SERVER_ERROR,
+            {"message": res_msg.GENERAL_ERROR + str(e)},
+        )
+
+
+@bp.route("/admin/author/<int:author_id>", methods=["POST"])
+@login_required
+def modify_author(author_id: int) -> Response:
+    if not current_user.isAdmin:
+        return (
+            make_response(jsonify(error=res_msg.NO_PERMISSION)),
+            httpStatus.UNAUTHORIZED,
+        )
+    try:
+        author = Author.query.filter_by(id=author_id).first_or_404()
+        author.isAdmin = request.json.get("isAdmin", author.isAdmin)
+        author.isVerified = request.json.get("isVerified", author.isVerified)
+        db.session.commit()
+        return utils.json_response(
+            httpStatus.OK, {"message": res_msg.SUCCESS_USER_UPDATED}
+        )
+    except Exception as e:
+        return utils.json_response(
+            httpStatus.INTERNAL_SERVER_ERROR,
+            {"message": res_msg.GENERAL_ERROR + str(e)},
+        )
+
+
+@bp.route("/admin/author", methods=["PUT"])
+@login_required
+def create_author() -> Response:
+    if not current_user.isAdmin:
+        return (
+            make_response(jsonify(error=res_msg.NO_PERMISSION)),
+            httpStatus.UNAUTHORIZED,
+        )
+    try:
+        displayName = request.json["displayName"]
+        github_username = request.json["github"]
+        resp = urlopen(f"https://api.github.com/users/{github_username}")
+        github_info = json.loads(resp.read().decode("utf-8"))
+        githubId = github_info["id"]
+        profileImageId = github_info["avatar_url"]
+        isAdmin = False
+        isVerified = current_app.config["AUTOMATIC_VERIFICATION"]
+
+        if Author.query.filter_by(githubId=githubId).first():
+            raise ValueError("User already exists.")
+        author = Author(githubId, profileImageId, displayName, isAdmin, isVerified)
+
+        # create author in database
+        db.session.add(author)
+        db.session.commit()
+        return utils.json_response(
+            httpStatus.OK,
+            {"message": res_msg.SUCCESS_USER_CREATED, "data": author.json()},
+        )
+    except ValueError as e:
+        return utils.json_response(
+            httpStatus.BAD_REQUEST,
+            {"message": res_msg.GENERAL_ERROR + str(e)},
+        )
+    except Exception as e:
+        return utils.json_response(
+            httpStatus.INTERNAL_SERVER_ERROR,
+            {"message": res_msg.GENERAL_ERROR + str(e)},
+        )
+
+
+@bp.route("/admin/author/<int:author_id>", methods=["DELETE"])
+@login_required
+def delete_author(author_id: int) -> Response:
+    if not current_user.isAdmin:
+        return (
+            make_response(jsonify(error=res_msg.NO_PERMISSION)),
+            httpStatus.UNAUTHORIZED,
+        )
+    try:
+        author = Author.query.filter_by(id=author_id).first_or_404()
+        db.session.delete(author)
+        db.session.commit()
+        return utils.json_response(
+            httpStatus.OK, {"message": res_msg.SUCCESS_USER_DELETED}
+        )
+    except Exception as e:
+        return utils.json_response(
+            httpStatus.INTERNAL_SERVER_ERROR,
+            {"message": res_msg.GENERAL_ERROR + str(e)},
+        )
+
+
+@bp.route("/admin/settings", methods=["GET"])
+@login_required
+def get_settings() -> Response:
+    if not current_user.isAdmin:
+        return (
+            make_response(jsonify(error=res_msg.NO_PERMISSION)),
+            httpStatus.UNAUTHORIZED,
+        )
+    try:
+        return utils.json_response(
+            httpStatus.OK,
+            {key: current_app.config[key] for key in RUNTIME_SETTINGS},
+        )
+    except Exception as e:
+        return utils.json_response(
+            httpStatus.INTERNAL_SERVER_ERROR,
+            {"message": res_msg.GENERAL_ERROR + str(e)},
+        )
+
+
+@bp.route("/admin/settings", methods=["POST"])
+@login_required
+def set_settings() -> Response:
+    if not current_user.isAdmin:
+        return (
+            make_response(jsonify(error=res_msg.NO_PERMISSION)),
+            httpStatus.UNAUTHORIZED,
+        )
+    try:
+        settings: Dict[str, str] = request.json
+        for key, val in settings.items():
+            if key in RUNTIME_SETTINGS:
+                current_app.config[key] = val
+                print(f"{key} set to {current_app.config[key]}")
+        return utils.json_response(
+            httpStatus.OK,
+            {"message": res_msg.SUCCESS_SETTINGS},
         )
     except Exception as e:
         return utils.json_response(

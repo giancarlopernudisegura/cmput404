@@ -2,30 +2,42 @@ import { h } from 'preact';
 import Post from './Post';
 import { MARKDOWN, PLAIN } from '../utils/constants'
 
-
 type PostListProps = {
-    posts: any[],
+    initialPosts: Array<any>,
+    currentAuthor?: string,
+    onRemove?: Function,
 }
 
-function PostList({ posts }: PostListProps) {
+function PostList({ initialPosts, currentAuthor, onRemove } : PostListProps){
+
+    if (currentAuthor === undefined) {
+        currentAuthor = 'Anonymous';
+    }
+
     return(
         <div id="post-list" class="container">
-            {posts.length === 0 && <h2>No posts found!</h2>}
+            {initialPosts.length === 0 && <h2>No posts found!</h2>}
             <ul>
-                {posts.filter(post => post.contentType === MARKDOWN || post.contentType === PLAIN).map(post => (
-                    <li>
+                {initialPosts
+                    .filter(post => post.contentType === MARKDOWN || post.contentType === PLAIN)
+                    .map(post => (
                         <Post
-                            contentType={post.contentType}
+                            id={post.id}
                             title={post.title}
                             body={post.description}
-                            author={post.author} />
-                    </li>
-                ))}
+                            author={post.author} 
+                            currentAuthor={currentAuthor}
+                            onRemove={onRemove}
+                            contentType={post.contentType}
+                        />
+                    ))
+                }
             </ul>
 
         </div>
 
     );
+    
 }
 
 export default PostList;

@@ -1,10 +1,10 @@
 import { h, Component } from 'preact';
 import { Button, Switch, FormControlLabel } from '@mui/material';
-import { newPublicPost, getCurrentAuthor } from '../utils/apiCalls';
+import { newPublicPost, getCurrentAuthor } from '../../utils/apiCalls';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import ReactMarkdown from 'react-markdown';
-import { MARKDOWN, PLAIN } from '../utils/constants'
+import { MARKDOWN, PLAIN } from '../../utils/constants';
 
 type Props = {  };
 type Image = {

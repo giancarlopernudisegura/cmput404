@@ -17,6 +17,8 @@ class BaseConfig:
     SECRET_KEY = os.getenv("SECRET_KEY")
     SQLALCHEMY_DATABASE_URI = DATABASE_URL
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    # Custom server settings
+    AUTOMATIC_VERIFICATION = True
 
 
 class DevelopmentConfig(BaseConfig):
@@ -31,3 +33,6 @@ class TestingConfig(BaseConfig):
 
 class ProductionConfig(BaseConfig):
     ENV = "production"
+
+
+RUNTIME_SETTINGS = ("AUTOMATIC_VERIFICATION",)

@@ -1,6 +1,6 @@
 from server.models import Author
 from server.exts import db
-from flask import Response
+from flask import Response, current_app
 from server.utils import create_credential_json
 from firebase_admin import auth, credentials
 from urllib.request import urlopen
@@ -15,16 +15,19 @@ from server.utils.exts import get_github_by_id
 # creates the json
 fbs_private_key = create_credential_json.get_fbs_prv_key()
 
-#initialize firebase
+# initialize firebase
 cred = credentials.Certificate(fbs_private_key)
 firebase_admin.initialize_app(cred)
 
+
 def get_github_user_id(decoded_token):
-    return decoded_token['firebase']['identities']['github.com'][0]
+    return decoded_token["firebase"]["identities"]["github.com"][0]
+
 
 def get_displayName(decoded_token):
     user = auth.get_user(decoded_token["user_id"])
     return user.display_name
+
 
 def create_author(decoded_token):
     # if author doesn't exists, create an entry
@@ -32,7 +35,7 @@ def create_author(decoded_token):
     githubId = get_github_user_id(decoded_token)
     profileImageId = decoded_token["picture"]
     isAdmin = False
-    isVerified = False
+    isVerified = current_app.config["AUTOMATIC_VERIFICATION"]
 
     author = Author(githubId, profileImageId, displayName, isAdmin, isVerified)
 
@@ -42,14 +45,16 @@ def create_author(decoded_token):
 
     return author
 
+
 def json_response(status, body={}, headers={}) -> Response:
     res = Response(
-        status=status, 
-        headers=headers, 
+        status=status,
+        headers=headers,
         mimetype="application/json",
-        response=json.dumps(body)
+        response=json.dumps(body),
     )
     return res
+
 
 def get_author(token):
     # create_session_cookie also verifies the token
@@ -58,22 +63,19 @@ def get_author(token):
     # check if user exists in the database
     github_id = utils.get_github_user_id(decoded_token)
     author = Author.query.filter_by(githubId=github_id).first()
-    
+
     return author, decoded_token
+
 
 def get_github_id(gh_username):
     data = get_github_by_id(f'https://api.github.com/users/{gh_username}')
-
     return data["id"]
+
 
 def update_user_me(request, current_user):
     data = request.form
 
-    fields = [
-        "githubUsername",
-        "displayName",
-        "profileImageId"
-    ]
+    fields = ["githubUsername", "displayName", "profileImageId"]
 
     # verify that necessary values to update user were sent
     for field in fields:
