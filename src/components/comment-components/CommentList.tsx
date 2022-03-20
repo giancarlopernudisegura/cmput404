@@ -1,6 +1,9 @@
 import { h } from 'preact'
 import Comment from '../comment-components/Comment'
 
+/**
+ * List component for all comments related to a specific post
+ */
 
 type CommentListProps = {
     allComments: Array<any>
