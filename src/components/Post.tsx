@@ -11,7 +11,6 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import ReactMarkdown from 'react-markdown'
 import { getAllComments, getPostLikes } from '../utils/apiCalls'
 import CommentList from '../components/comment-components/CommentList'
-import MakeComment from '../components/comment-components/MakeComment'
 import CommentForm from '../components/forms/CommentForm'
 /*
     Post component
