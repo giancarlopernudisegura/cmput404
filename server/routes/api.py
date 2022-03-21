@@ -77,8 +77,8 @@ def multiple_authors() -> Response:
     )
 
 
-@bp.route("/authors/<int:author_id>", methods=["GET", "POST"])
-def single_author(author_id: int) -> Response:
+@bp.route("/authors/<string:author_id>", methods=["GET", "POST"])
+def single_author(author_id: str) -> Response:
     """Get or update a single author.
 
     Args:
@@ -95,14 +95,14 @@ def single_author(author_id: int) -> Response:
         pass
 
 
-@bp.route("/authors/<int:author_id>/posts/<int:post_id>", methods=["GET"])
-def get_post(author_id: int, post_id: int) -> Response:
+@bp.route("/authors/<string:author_id>/posts/<string:post_id>", methods=["GET"])
+def get_post(author_id: str, post_id: str) -> Response:
     post = Post.query.filter_by(id=post_id, private=False).first_or_404()
     return make_response(jsonify(post.json())), httpStatus.OK
 
 
-@bp.route("/authors/<int:author_id>/posts/", methods=["GET", "POST"])
-def post(author_id: int) -> Response:
+@bp.route("/authors/<string:author_id>/posts/", methods=["GET", "POST"])
+def post(author_id: str) -> Response:
     if request.method == "GET":
         page, size = pagination(request.args)
         posts = (
@@ -160,10 +160,11 @@ def post(author_id: int) -> Response:
 
 
 @bp.route(
-    "/authors/<int:author_id>/posts/<int:post_id>", methods=["POST", "PUT", "DELETE"]
+    "/authors/<string:author_id>/posts/<string:post_id>", methods=["POST", "PUT", "DELETE"]
 )
 @login_required
-def specific_post(author_id: int, post_id: int) -> Response:
+def specific_post(author_id: str, post_id: str) -> Response:
+    print(f"AUTHOR_ID {author_id}\nTYPE:{type(author_id)}")
     """Modify, create or delete a specific post."""
     if current_user.id != author_id:
         return (
@@ -221,8 +222,8 @@ def specific_post(author_id: int, post_id: int) -> Response:
         return Response(status=httpStatus.NO_CONTENT)
 
 
-@bp.route("/authors/<int:author_id>/posts/<int:post_id>/comments", methods=["GET"])
-def get_comments(author_id: int, post_id: int) -> Response:
+@bp.route("/authors/<string:author_id>/posts/<string:post_id>/comments", methods=["GET"])
+def get_comments(author_id: str, post_id: str) -> Response:
     page, size = pagination(request.args)
     comments = (
         Comment.query.filter_by(post=post_id).paginate(page=page, per_page=size).items
@@ -243,17 +244,17 @@ def get_comments(author_id: int, post_id: int) -> Response:
 
 
 @bp.route(
-    "/authors/<int:author_id>/posts/<int:post_id>/comments/<int:comment_id>",
+    "/authors/<string:author_id>/posts/<string:post_id>/comments/<string:comment_id>",
     methods=["GET"],
 )
-def get_comment(author_id: int, post_id: int, comment_id: int) -> Response:
+def get_comment(author_id: str, post_id: str, comment_id: str) -> Response:
     comment = Comment.query.filter_by(id=comment_id).first_or_404()
     return make_response(jsonify(comment.json())), httpStatus.OK
 
 
-@bp.route("/authors/<int:author_id>/posts/<int:post_id>/comments", methods=["POST"])
+@bp.route("/authors/<string:author_id>/posts/<string:post_id>/comments", methods=["POST"])
 @login_required
-def post_comment(author_id: int, post_id: int) -> Response:
+def post_comment(author_id: str, post_id: str) -> Response:
     try:
         title = request.json["title"]
         content = request.json["content"]
@@ -270,8 +271,8 @@ def post_comment(author_id: int, post_id: int) -> Response:
     return Response(status=httpStatus.OK)
 
 
-@bp.route("/authors/<int:author_id>/posts/<int:post_id>/image", methods=["GET"])
-def serve_image(author_id: int, post_id: int):
+@bp.route("/authors/<string:author_id>/posts/<string:post_id>/image", methods=["GET"])
+def serve_image(author_id: str, post_id: str):
     image_post = Post.query.filter_by(id=post_id).first()
 
     if image_post.contentType != ContentType.jpg and image_post.contentType != ContentType.png:
@@ -286,8 +287,8 @@ def serve_image(author_id: int, post_id: int):
     )
 
 
-@bp.route("/authors/<int:author_id>/followers", methods=["GET"])
-def get_followers(author_id: int) -> Response:
+@bp.route("/authors/<string:author_id>/followers", methods=["GET"])
+def get_followers(author_id: str) -> Response:
     followers = Requests.query.filter_by(to=author_id).all()
     return (
         make_response(
@@ -297,8 +298,8 @@ def get_followers(author_id: int) -> Response:
     )
 
 
-@bp.route("/authors/<int:author_id>/followers/<int:follower_id>", methods=["GET"])
-def is_follower(author_id: int, follower_id: int) -> Response:
+@bp.route("/authors/<string:author_id>/followers/<string:follower_id>", methods=["GET"])
+def is_follower(author_id: str, follower_id: str) -> Response:
     follower = Requests.query.filter_by(to=author_id, initiated=follower_id).first()
     return (
         make_response(
@@ -311,9 +312,9 @@ def is_follower(author_id: int, follower_id: int) -> Response:
     )
 
 
-@bp.route("/authors/<int:author_id>/followers/<int:follower_id>", methods=["DELETE"])
+@bp.route("/authors/<string:author_id>/followers/<string:follower_id>", methods=["DELETE"])
 @login_required
-def remove_follower(author_id: int, follower_id: int) -> Response:
+def remove_follower(author_id: str, follower_id: str) -> Response:
     if current_user.id != follower_id:
         return (
             make_response(jsonify(error=res_msg.NO_PERMISSION)),
@@ -332,9 +333,9 @@ def remove_follower(author_id: int, follower_id: int) -> Response:
     return Response(status=httpStatus.NO_CONTENT)
 
 
-@bp.route("/authors/<int:author_id>/followers/<int:follower_id>", methods=["PUT"])
+@bp.route("/authors/<string:author_id>/followers/<string:follower_id>", methods=["PUT"])
 @login_required
-def add_follower(author_id: int, follower_id: int) -> Response:
+def add_follower(author_id: str, follower_id: str) -> Response:
     if current_user.id != follower_id:
         return (
             make_response(jsonify(error=res_msg.NO_PERMISSION)),
@@ -354,9 +355,9 @@ def add_follower(author_id: int, follower_id: int) -> Response:
     return Response(status=httpStatus.OK)
 
 
-@bp.route("/authors/<int:author_id>/inbox", methods=["GET"])
+@bp.route("/authors/<string:author_id>/inbox", methods=["GET"])
 @login_required
-def get_inbox(author_id: int) -> Response:
+def get_inbox(author_id: str) -> Response:
     if current_user.id != author_id:
         return (
             make_response(jsonify(error=res_msg.NO_PERMISSION)),
@@ -378,9 +379,9 @@ def get_inbox(author_id: int) -> Response:
     )
 
 
-@bp.route("/authors/<int:author_id>/inbox", methods=["POST"])
+@bp.route("/authors/<string:author_id>/inbox", methods=["POST"])
 @login_required
-def post_inbox(author_id: int) -> Response:
+def post_inbox(author_id: str) -> Response:
     try:
         req_type = request.json["type"]
         if req_type not in ("post", "follow", "like"):
@@ -407,9 +408,9 @@ def post_inbox(author_id: int) -> Response:
     )
 
 
-@bp.route("/authors/<int:author_id>/inbox", methods=["DELETE"])
+@bp.route("/authors/<string:author_id>/inbox", methods=["DELETE"])
 @login_required
-def clear_inbox(author_id: int) -> Response:
+def clear_inbox(author_id: str) -> Response:
     if current_user.id != author_id:
         return (
             make_response(jsonify(error=res_msg.NO_PERMISSION)),
@@ -419,8 +420,8 @@ def clear_inbox(author_id: int) -> Response:
     db.session.commit()
     return Response(status=httpStatus.OK)
 
-@bp.route("/authors/<int:author_id>/posts/<int:post_id>/likes", methods=["PUT", "GET", "DELETE"])
-def post_like_methods(author_id: int, post_id: int) -> Response:
+@bp.route("/authors/<string:author_id>/posts/<string:post_id>/likes", methods=["PUT", "GET", "DELETE"])
+def post_like_methods(author_id: str, post_id: str) -> Response:
     post = Post.query.filter_by(id=post_id).first()
     if post is None:#post does not exist
         return utils.json_response(
@@ -460,8 +461,8 @@ def post_like_methods(author_id: int, post_id: int) -> Response:
             make_response(jsonify(error=res_msg.NO_PERMISSION)),
             httpStatus.UNAUTHORIZED)
 
-@bp.route("/authors/<int:author_id>/posts/<int:post_id>/comments/<int:comment_id>/likes", methods=["PUT", "GET", "DELETE"])
-def comment_like_methods(author_id: int, post_id: int, comment_id: int):
+@bp.route("/authors/<string:author_id>/posts/<string:post_id>/comments/<string:comment_id>/likes", methods=["PUT", "GET", "DELETE"])
+def comment_like_methods(author_id: str, post_id: str, comment_id: str):
     comment = Comment.query.filter_by(id=comment_id).first()
     post = Post.query.filter_by(id=post_id).first()
     if post is None:#post does not exist
@@ -515,8 +516,8 @@ def comment_like_methods(author_id: int, post_id: int, comment_id: int):
 
 
 
-@bp.route("/authors/<int:author_id>/liked", methods=["GET"])
-def get_author_liked(author_id: int):
+@bp.route("/authors/<string:author_id>/liked", methods=["GET"])
+def get_author_liked(author_id: str):
     if Author.query.filter_by(id=author_id).first() is None:#author doesn't exist
         return utils.json_response(
             httpStatus.NOT_FOUND, {"message": res_msg.AUTHOR_NOT_EXISTS}
@@ -641,9 +642,9 @@ def get_user_me() -> Response:
         )
 
 
-@bp.route("/admin/author/<int:author_id>", methods=["POST"])
+@bp.route("/admin/author/<string:author_id>", methods=["POST"])
 @login_required
-def modify_author(author_id: int) -> Response:
+def modify_author(author_id: str) -> Response:
     if not current_user.isAdmin:
         return (
             make_response(jsonify(error=res_msg.NO_PERMISSION)),
@@ -705,9 +706,9 @@ def create_author() -> Response:
         )
 
 
-@bp.route("/admin/author/<int:author_id>", methods=["DELETE"])
+@bp.route("/admin/author/<string:author_id>", methods=["DELETE"])
 @login_required
-def delete_author(author_id: int) -> Response:
+def delete_author(author_id: str) -> Response:
     if not current_user.isAdmin:
         return (
             make_response(jsonify(error=res_msg.NO_PERMISSION)),
