@@ -18,7 +18,7 @@ type State = {
     category: string
     title: string
     authorDisplayName: string
-    authorId: number | null
+    authorId: string | null
     markdown: boolean,
     showMarkdown: boolean,
     tabValue: number,
@@ -132,6 +132,9 @@ class PostForm extends Component<Props, State> {
                         "contentType": `${img.file.type}`
                     };
                     try {
+                        if (this.state.authorId === null) {
+                            throw Error("Author Id is null");
+                        }
                         const res = await newPublicPost(this.state.authorId, imageData);
                         // get url
                         const imageUrl = this.getImageUrl(res.id);
@@ -152,6 +155,11 @@ class PostForm extends Component<Props, State> {
             "visibility": "PUBLIC",
             "unlisted": false,
         }
+
+        if (this.state.authorId === null) {
+            throw Error("Author Id is null");
+        }
+
         await newPublicPost(this.state.authorId, postData);
 
         

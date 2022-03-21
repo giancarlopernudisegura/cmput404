@@ -7,7 +7,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import TextField from "@mui/material/TextField";
 
 const Search = () => {
-    const [ currentUserId, setCurrentUserId ] = useState<number | null>(null);
+    const [ currentUserId, setCurrentUserId ] = useState<string | null>(null);
     const [ authors, setAuthors ] = useState(Array());
 
     useEffect(() => {
@@ -16,7 +16,7 @@ const Search = () => {
             let page : number = 1;
             let allAuthors = Array();
             let listOfAuthors = Array();
-            let userId : number | null = null;
+            let userId : string | null = null;
             while (true) {
                 try {
                     res = await getAllAuthors(page);
@@ -48,7 +48,7 @@ const Search = () => {
         getAllAuthorsFromAPI();
     }, []);
 
-    const handleClick = (authorId : number) => {
+    const handleClick = (authorId : string) => {
         route(`/app/user/${authorId}`);
     }
 

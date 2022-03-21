@@ -14,9 +14,9 @@ const Login = (props: Props) => {
   const handleGithub = async (method : string): Promise<void> => {
     try {
       if (method == "signup") {
-        const test = await signUpWithGithub();
+        await signUpWithGithub();
       } else if (method == "signin") {
-        const test2 = await signInWithGithub()
+        await signInWithGithub()
       }
       route('/app')
     } catch (err) {

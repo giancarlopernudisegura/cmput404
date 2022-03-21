@@ -104,7 +104,7 @@ export const getAllAuthors = async (page: number) => {
  * @param authorId  the id of the author
  * @param postData  form data of the post 
  */
-export async function newPublicPost(authorId: any, postData: any) {
+export async function newPublicPost(authorId: string, postData: any) {
   const encodedPostData = JSON.stringify(postData);
 
   let res;
@@ -207,7 +207,7 @@ export const logOutCall = async () => {
   }
 }
 
-export const followerCall = async (currentUserId: number, toFollowId: number, method: string) => {
+export const followerCall = async (currentUserId: string, toFollowId: string, method: string) => {
   try {
     const res = await fetch(`${BACKEND_HOST}/authors/${currentUserId}/followers/${toFollowId}`, {
       mode: 'cors',
@@ -230,7 +230,7 @@ export const followerCall = async (currentUserId: number, toFollowId: number, me
   }
 }
 
-export const getSpecAuthor = async (author_id: number) => {
+export const getSpecAuthor = async (author_id: string) => {
   try {
     const res = await fetch(`${BACKEND_HOST}/authors/${author_id}`, {
       mode: 'cors',
@@ -265,7 +265,7 @@ export const serveImage = async (authorId: string, postId: string) => {
   }
 }
 
-export function deletePost(author_id: number, post_id: number) {
+export function deletePost(author_id: string, post_id: string) {
   const response = fetch(`${BACKEND_HOST}/authors/${author_id}/posts/${post_id}`, {
     mode: 'cors',
     credentials: 'include',

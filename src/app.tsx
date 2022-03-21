@@ -1,4 +1,4 @@
-import { h, render, ComponentChild } from 'preact';
+import { h, render } from 'preact';
 import Router from 'preact-router';
 import { Provider } from 'unistore/preact';
 import store from './store/store';
