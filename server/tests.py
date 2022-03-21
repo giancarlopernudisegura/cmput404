@@ -145,7 +145,7 @@ def test_posts(test_client: FlaskClient):
     r = test_client.get("/authors/{T_USER1_UUID}/posts/2", follow_redirects=True)
     assert r.status_code == 404
     r = test_client.put(
-        f"/authors/{T_USER1_UUID}/posts/3",
+        f"/authors/{T_USER1_UUID}/posts/{T_POST_NEW1_UUID}",
         data=json.dumps(
             {
                 "title": "test title 2",
@@ -159,22 +159,24 @@ def test_posts(test_client: FlaskClient):
         follow_redirects=True,
     )
     assert r.status_code == 201
-    post_id = r.json["id"]
-    r = test_client.get(f"/authors/{T_USER1_UUID}/posts/{post_id}", follow_redirects=True)
+    r = test_client.get(f"/authors/{T_USER1_UUID}/posts/{T_POST_NEW1_UUID}", follow_redirects=True)
     assert r.status_code == 200
-    r = test_client.delete("/authors/{T_USER1_UUID}/posts/{post_id}", follow_redirects=True)
+    r = test_client.delete(f"/authors/{T_USER1_UUID}/posts/{T_POST_NEW1_UUID}", follow_redirects=True)
     assert r.status_code == 204
 
 
 @pytest.mark.order(6)
 def test_comments(test_client: FlaskClient):
-    r = test_client.get("/authors/1/posts/1/comments", follow_redirects=True)
+    #Need to get new first post ID
+    r = test_client.get(f"/authors/{T_USER1_UUID}/posts")
+    first_post_id = r.json["items"][0]["id"]
+    r = test_client.get(f"/authors/{T_USER1_UUID}/posts/{first_post_id}/comments", follow_redirects=True)
     assert r.status_code == 200
     data = json.loads(r.data.decode("utf-8"))
     assert data["type"] == "comments"
     assert data["size"] == 0
     r = test_client.post(
-        "/authors/1/posts/1/comments",
+        f"/authors/{T_USER1_UUID}/posts/{first_post_id}/comments",
         data=json.dumps(
             {
                 "title": "test title",
@@ -186,7 +188,7 @@ def test_comments(test_client: FlaskClient):
         follow_redirects=True,
     )
     assert r.status_code == 200
-    r = test_client.get("/authors/1/posts/1/comments", follow_redirects=True)
+    r = test_client.get( f"/authors/{T_USER1_UUID}/posts/{first_post_id}/comments", follow_redirects=True)
     data = json.loads(r.data.decode("utf-8"))
     assert data["type"] == "comments"
     assert data["size"] == 1
@@ -194,25 +196,25 @@ def test_comments(test_client: FlaskClient):
 
 @pytest.mark.order(7)
 def test_followers(test_client: FlaskClient):
-    r = test_client.get("/authors/2/followers", follow_redirects=True)
+    r = test_client.get(f"/authors/{T_USER2_UUID}/followers", follow_redirects=True)
     data = json.loads(r.data.decode("utf-8"))
     assert data["type"] == "followers"
     assert len(data["items"]) == 0
-    r = test_client.put("/authors/2/followers/1", follow_redirects=True)
+    r = test_client.put(f"/authors/{T_USER2_UUID}/followers/{T_USER1_UUID}", follow_redirects=True)
     assert r.status_code == 200
-    r = test_client.put("/authors/2/followers/3", follow_redirects=True)
+    r = test_client.put(f"/authors/{T_USER2_UUID}/followers/{T_USER3_UUID}", follow_redirects=True)
     assert r.status_code == 403
-    r = test_client.get("/authors/2/followers", follow_redirects=True)
+    r = test_client.get(f"/authors/{T_USER2_UUID}/followers", follow_redirects=True)
     data = json.loads(r.data.decode("utf-8"))
     assert data["type"] == "followers"
     assert len(data["items"]) == 1
-    r = test_client.get("/authors/2/followers/1", follow_redirects=True)
+    r = test_client.get(f"/authors/{T_USER2_UUID}/followers/{T_USER1_UUID}", follow_redirects=True)
     assert r.status_code == 200
     data = json.loads(r.data.decode("utf-8"))
     assert len(data["items"]) == 1
-    r = test_client.delete("/authors/2/followers/1", follow_redirects=True)
+    r = test_client.delete(f"/authors/{T_USER2_UUID}/followers/{T_USER1_UUID}", follow_redirects=True)
     assert r.status_code == 204
-    r = test_client.get("/authors/2/followers/1", follow_redirects=True)
+    r = test_client.get(f"/authors/{T_USER2_UUID}/followers/{T_USER1_UUID}", follow_redirects=True)
     assert r.status_code == 200
     data = json.loads(r.data.decode("utf-8"))
     assert len(data["items"]) == 0
@@ -220,20 +222,20 @@ def test_followers(test_client: FlaskClient):
 
 @pytest.mark.order(8)
 def test_inbox(test_client: FlaskClient):
-    r = test_client.get("/authors/2/inbox", follow_redirects=True)
+    r = test_client.get(f"/authors/{T_USER2_UUID}/inbox", follow_redirects=True)
     assert r.status_code == 401
     # user 1 will follow user 2
-    test_client.put("/authors/2/followers/1", follow_redirects=True)
+    test_client.put(f"/authors/{T_USER2_UUID}/followers/{T_USER1_UUID}", follow_redirects=True)
     logout(test_client)
     login(test_client, T_USER2_UUID)
-    r = test_client.get("/authors/2/inbox", follow_redirects=True)
+    r = test_client.get(f"/authors/{T_USER2_UUID}/inbox", follow_redirects=True)
     assert r.status_code == 200
     data = json.loads(r.data.decode("utf-8"))
     assert data["type"] == "inbox"
     assert len(data["items"]) == 1
     assert data["items"][0]["type"] == "followers"
-    r = test_client.delete("/authors/2/inbox", follow_redirects=True)
-    r = test_client.get("/authors/2/inbox", follow_redirects=True)
+    r = test_client.delete(f"/authors/{T_USER2_UUID}/inbox", follow_redirects=True)
+    r = test_client.get(f"/authors/{T_USER2_UUID}/inbox", follow_redirects=True)
     data = json.loads(r.data.decode("utf-8"))
     assert data["type"] == "inbox"
     assert len(data["items"]) == 0
