@@ -24,7 +24,7 @@ function Profile({path}: profileProps) {
   const [author, setAuthor] = useState(Object());
   const [myPosts, setMyPosts] = useState(Array());
   const [followers, setFollowers] = useState(Array());
-
+  const [friends, setFriends] = useState(Array());
 
   useEffect(() => {    
     const authorPromise = getCurrentAuthor()
@@ -34,7 +34,7 @@ function Profile({path}: profileProps) {
       });
 
     // Set the author's posts
-    var postsPromise = authorPromise.then(authorId => { return getPosts(authorId.toString()); });
+    var postsPromise = authorPromise.then(authorId => { return getPosts(authorId); });
     postsPromise.then(posts => {  setMyPosts(posts); });
 
     // Get the author's followers
@@ -50,59 +50,65 @@ function Profile({path}: profileProps) {
         return followers;
       });
     
-    Promise.all([authorPromise, postsPromise, followersPromise])
-      .then( (results) => {
-        // Get the author's friends, i.e. bidirectional follow
-        async function getFriends(authorId: string, followers: Array<any>){
-          var promises: any[] = [];
+    
+    /**
+     * Resolves the authors and followers promises to get the author's friends
+     * @param authorPromise 
+     * @param followersPromise 
+     * @returns friendPromise
+     */
+    async function getAuthorsFriends(authorPromise: Promise<string>, followersPromise: Promise<any>) {
+      var authorFollowersPromise = await Promise.all([authorPromise, followersPromise]);
+      var authorId = authorFollowersPromise[0];
+      var followers = authorFollowersPromise[1].items;
 
-          // Iterate through the followers and check if the author is following them
-          followers.forEach( (follower) => {
-            promises.push(followerCall(follower.id, authorId, "GET")
-            );
+      // Get the author's friends, i.e. bidirectional follow
+      async function fetchFriends(authorId: string, followers: Array<any>) {
+        var friendPromises: any[] = [];
+
+        // Iterate through the followers and check if the author is following them
+        followers.forEach((follower) => {
+          friendPromises.push(followerCall(follower.id, authorId, "GET")
+          );
+        });
+
+        // Wait for all the follower promises to resolve
+        var friends = await Promise.all(friendPromises)
+          .then( (results) => {
+            let friendList: Array<any> = [];
+            results.forEach((data) => {
+              if (data.status === 200) {
+                friendList.push(...data.items);
+              }
+            })
+            return friendList;
           });
+        
+        return friends;
+      }
 
-          var friendsPromise = await Promise.all(promises)
-            .then( (results) => { 
-              let friends: Array<any> = [];
-              console.log('result:', results);
-              results.forEach( (data) => {
-                if (data.status === 200) {
-                  // console.log(...data.items);
-                  friends.push(...data.items);
-                }
-              })
-              return friends;
-            });
-          
-          return friendsPromise;
-        }
+      return fetchFriends(authorId, followers);
 
-        let authorId = results[0];
-        let followers = results[2].items;
+    }
 
-        return getFriends(authorId, followers); // FIXME returning before it is even complete
+    var myFriendsPromise = getAuthorsFriends(authorPromise, followersPromise);
+    if (myFriendsPromise) {
+      myFriendsPromise.then(friends => { setFriends(friends); });
+    }
+
+    Promise.all([authorPromise, postsPromise, followersPromise, myFriendsPromise])
+      .then(() => {
+        console.log('Successfully retrieved author, posts, followers and friends');
+        setIsLoading(false); 
       })
-      .then(friends => {
-        console.log('FRIENDS:', friends.length)
-      })
-      .then( () => { 
-        console.log('Successfully retrieved author, posts, and followers'); 
-        setIsLoading(false);
-      })
-      .catch(err => {
-        console.log('Error retrieving author, posts, and followers');
-        setErrMsg(err.message);
+      .catch(err => { 
+        setErrMsg('Error retrieving profile data: ' + err.message); 
         setIsLoading(false);
       });
-    
 
   }, []);
 
-  const [friends, setFriends] = useState(Array());
-  useEffect(() => {
-    
-  }, []);
+
 
   function handleRemove(postId: string) {
 
