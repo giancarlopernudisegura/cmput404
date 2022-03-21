@@ -51,7 +51,33 @@ function Profile({path}: profileProps) {
       });
     
     Promise.all([authorPromise, postsPromise, followersPromise])
-      .then( (values) => { 
+      .then( (results) => {
+        
+        // Get the author's friends, i.e. bidirectional follow
+        function getFriends(authorId: string, followers: Array<any>) {
+          var friends: any[] = [];
+          // Iterate through the followers and check if the author is following them
+          followers.forEach(follower => {
+            followerCall(authorId, follower.id, "GET")
+              .then(res => {
+                if (res.status === 200) {
+                  friends.push(follower);
+                }
+              })
+            });
+          console.log('Inside getFriends():', friends);
+          return friends;
+        }
+
+        let authorId = results[0];
+        let followers = results[2].items;
+        
+        return getFriends(authorId, followers); // why is friends 0?
+      })
+      .then(friends => {
+        console.log('FRIENDS:', friends.length)
+      })
+      .then( () => { 
         console.log('Successfully retrieved author, posts, and followers'); 
         setIsLoading(false);
       })
@@ -60,6 +86,7 @@ function Profile({path}: profileProps) {
         setErrMsg(err.message);
         setIsLoading(false);
       });
+    
 
 
   }, []);
