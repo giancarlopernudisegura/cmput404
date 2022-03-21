@@ -6,7 +6,7 @@ SUCCESS_USER_CREATED = "User was successfully created"
 SUCCESS_USER_DELETED = "User was successfully deleted"
 SUCCESS_USER_UPDATED = "User was successfully updated"
 USER_DOES_NOT_EXIST = "User does not exist. Please sign up first."
-USER_ALREADY_EXISTS = "User already exists. Please sign in."
+USER_ALREADY_EXISTS = "User already exists. Please log in instead."
 SUCCESS_VERIFY_USER = "User credentials are valid"
 
 # Error message

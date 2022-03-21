@@ -91,7 +91,7 @@ def single_author(author_id: int) -> Response:
         author = Author.query.filter_by(id=author_id).first_or_404()
         return make_response(jsonify(author.json())), httpStatus.OK
     elif request.method == "POST":
-        # request.form.get('displayName')
+        # request.json.get('displayName')
         pass
 
 
@@ -141,20 +141,22 @@ def post(author_id: int) -> Response:
                 in post_visibility_map
             ):
                 # bad visibility type or no visibility given
-                return Response(status=httpStatus.BAD_REQUEST)
+                return utils.json_response(httpStatus.BAD_REQUEST, { "message": "No visibility given for this post" })
         except KeyError:
             return Response(status=httpStatus.BAD_REQUEST)
         except ValueError:
             return Response(status=httpStatus.BAD_REQUEST)
         except TypeError:
             return Response(status=httpStatus.BAD_REQUEST)
+        except Exception as e:
+            return utils.json_response(httpStatus.BAD_REQUEST, { "message": str(e) })
         private = post_visibility_map[visibility.upper()]
 
         post = Post(author, title, category, content, contentType, private, unlisted)
         db.session.add(post)
         db.session.commit()
         post.push()
-        return Response(status=httpStatus.OK)
+        return utils.json_response(httpStatus.OK, {"message": "Post was created", **post.json()} )
 
 
 @bp.route(
@@ -271,7 +273,8 @@ def post_comment(author_id: int, post_id: int) -> Response:
 @bp.route("/authors/<int:author_id>/posts/<int:post_id>/image", methods=["GET"])
 def serve_image(author_id: int, post_id: int):
     image_post = Post.query.filter_by(id=post_id).first()
-    if image_post.contentType != (ContentType.jpg or ContentType.png):
+
+    if image_post.contentType != ContentType.jpg and image_post.contentType != ContentType.png:
         return utils.json_response(
             httpStatus.BAD_REQUEST, {"message": res_msg.NOT_IMAGE}
         )
@@ -529,7 +532,7 @@ def get_author_liked(author_id: int):
 @bp.route("/signup", methods=["POST"])
 def signup() -> Response:
     # get token from authorization header
-    token = request.form.get("token")
+    token = request.json.get("token")
 
     if not token:
         return utils.json_response(
@@ -549,7 +552,7 @@ def signup() -> Response:
         else:
             return utils.json_response(
                 httpStatus.BAD_REQUEST,
-                {"message": res_msg.USER_ALREADY_EXISTS, "data": author.json()},
+                {"message": res_msg.USER_ALREADY_EXISTS },
             )
     except Exception as e:
         return utils.json_response(
@@ -561,7 +564,7 @@ def signup() -> Response:
 @bp.route("/login", methods=["POST"])
 def login() -> Response:
     # get token from authorization header
-    token = request.form.get("token")
+    token = request.json.get("token")
 
     if not token:
         return utils.json_response(

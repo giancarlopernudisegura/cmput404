@@ -1,3 +1,6 @@
+import { FAILED_GITHUB_STREAM, FAILED_CREATE_POSTS, FETCH_IMG_ERROR } from '../utils/errorMsg';
+
+
 const BACKEND_HOST = process.env.FLASK_HOST;
 /**
  * Returns the current user's information.
@@ -61,6 +64,7 @@ export async function getPosts(author_id: string): Promise<any> {
         'author': data.items[i].author.displayName,
         'title': data.items[i].title,
         'description': data.items[i].description,
+        'contentType': data.items[i].contentType,
       };
       listOfPosts.push(post);
     }
@@ -85,7 +89,6 @@ export const getAllAuthors = async (page: number) => {
 
     if (res.status == 200) {
       const currentUserId = res.headers.get('X-User-Id');
-      console.log("RESPONES", currentUserId);
       let listOfAuthors = await res.json();
       return { ...listOfAuthors, currentUserId };
     } else {
@@ -101,39 +104,88 @@ export const getAllAuthors = async (page: number) => {
  * @param authorId  the id of the author
  * @param postData  form data of the post 
  */
-export function newPublicPost(authorId: any, postData: any) {
-  // postData contains data from the forms 
-  fetch(`${BACKEND_HOST}/authors/${authorId}/posts/`, {
-    mode: 'cors',
-    method: 'POST',
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json; charset=utf-8',
-    },
-    body: postData
-  }).catch(err => { console.log(err) });
+export async function newPublicPost(authorId: any, postData: any) {
+  const encodedPostData = JSON.stringify(postData);
+
+  let res;
+  let json;
+  try {
+    // postData contains data from the forms 
+    res = await fetch(`${BACKEND_HOST}/authors/${authorId}/posts/`, {
+      mode: 'cors',
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8',
+      },
+      body: encodedPostData
+    })
+
+    json = await res.json();
+
+    if (res.status === 200) {
+      return { status: res.status, ...json };
+    } else {
+      throw Error();
+    }
+    // TODO: return post id
+  } catch (err) {
+    throw Error(FAILED_CREATE_POSTS);
+  }
+
 
 }
 
-export async function getInbox(author_id: string) {
-  const res = await fetch(`${BACKEND_HOST}/authors/${author_id}/inbox/`)
-  return await res.json();
-}
+export async function inboxCall(author_id: string, method: string, data?: any) {
+  try {
+    let metadata = {};
 
-export async function getGithubStream(author_id: string, per_page = 30, page = 1): Promise<any> {
-  const res = await fetch(`${BACKEND_HOST}/authors/${author_id}`)
-  const { github } = await res.json();
-  const regexPattern = /^https:\/\/github.com\/(\w+)\/?/;
-  const githubID = regexPattern.exec(github)![1];
-  const stream = await fetch(`https://api.github.com/users/${githubID}/events?per_page=${per_page}&page=${page}`);
-  return await stream.json();
+    if (data !== undefined) {
+      metadata = {
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+        },
+        body: JSON.stringify(data)
+      }
+    }
+
+    const res = await fetch(`${BACKEND_HOST}/authors/${author_id}/inbox/`, {
+      method: method,
+      credentials: 'include',
+      ...metadata
+    })
+    // TODO change return value
+    return await res.json();
+  } catch (err) {
+    throw Error("There was an error getting the inbox");
+  }
 }
 
 export async function clearInbox(author_id: string): Promise<boolean> {
-  const res = await fetch(`${BACKEND_HOST}/authors/${author_id}/inbox/`, {
-    method: 'DELETE'
-  })
-  return res.status === 200;
+  try {
+    const res = await fetch(`${BACKEND_HOST}/authors/${author_id}/inbox/`, {
+      method: 'DELETE'
+    })
+
+    // TODO: change return value
+    return res.status === 200;
+  } catch (err) {
+    throw Error('Unable to clear inbox');
+  }
+}
+
+export async function getGithubStream(author_id: string, per_page = 30, page = 1): Promise<any> {
+  try {
+    // TODO: change return value
+    const res = await fetch(`${BACKEND_HOST}/authors/${author_id}`)
+    const { github } = await res.json();
+    const regexPattern = /^https:\/\/github.com\/(\w+)\/?/;
+    const githubID = regexPattern.exec(github)![1];
+    const stream = await fetch(`https://api.github.com/users/${githubID}/events?per_page=${per_page}&page=${page}`);
+    return await stream.json();
+  } catch (err) {
+    throw Error(FAILED_GITHUB_STREAM);
+  }
 }
 
 export const logOutCall = async () => {
@@ -194,6 +246,22 @@ export const getSpecAuthor = async (author_id: number) => {
     return { status: res.status, ...json };
   } catch (err) {
     throw Error('Unable to get the information about this user');
+  }
+}
+
+export const serveImage = async (authorId: string, postId: string) => {
+  try {
+    const res = await fetch(`${BACKEND_HOST}/authors/${authorId}/posts/${postId}/image`, {
+      method: 'GET'
+    });
+
+    let json = res.json();
+
+    if (res.status === 200) {
+      return { status: res.status, ...json};
+    }
+  } catch(err) {
+    throw Error(FETCH_IMG_ERROR);
   }
 }
 

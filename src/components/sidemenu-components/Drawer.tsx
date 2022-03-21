@@ -49,7 +49,7 @@ function DrawerMenu(props: any) {
     ["Home", "/app/homepage", Home],
     ["Explore", "/app", ExploreIcon],
     ["My Profile", "/app/profile", Person],
-    ["Notifications", "/app/notifications", Notification]
+    ["Inbox", "/app/inbox", Notification]
   ]);
 
   const handleDrawerToggle = () => {

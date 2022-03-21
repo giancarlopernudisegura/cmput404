@@ -2,6 +2,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithPopup, GithubAuthProvider } from "firebase/auth";
 import { firebaseConfig } from './firebaseConfig';
+import { FAILED_GITHUB_AUTH } from '../utils/errorMsg';
 
 // Initialize Firebase
 initializeApp(firebaseConfig);
@@ -21,35 +22,49 @@ const authenticateWithGithub = async (signup: Boolean) => {
         token = await result.user.getIdToken();
     } catch (err) {
         // Handle errors
-        throw Error("Unable to authenticate with Github");
+        throw Error(FAILED_GITHUB_AUTH);
     }
 
+    let json = null;
+    let res = null;
     try {
         // send a request to Backend after signed up
-        let res = await fetch(`${BACKEND_HOST}/${signup ? 'signup' : 'login'}`, {
+        res = await fetch(`${BACKEND_HOST}/${signup ? 'signup' : 'login'}`, {
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
+                'Content-Type': 'application/json',
                 'Set-Cookie': `SameSite=None; Secure;Domain=${BACKEND_HOST}`
             },
             mode: 'cors',
             credentials: 'include',
             method: 'POST',
-            body: new URLSearchParams({
+            body: JSON.stringify({
                 'token': `${token}`
             })
         });
 
-        let json = res.json();
-        return json
+        json = await res.json();
     } catch (err) {
-        throw err;
+        throw Error(FAILED_GITHUB_AUTH);
     }
+
+    if (res.status !== 200) {
+        throw Error(`${FAILED_GITHUB_AUTH} ` + json.message)
+    }
+    return { status: res.status, ...json};
 };
 
 export const signInWithGithub = async () => {
-    return await authenticateWithGithub(false);
+    try {
+        return await authenticateWithGithub(false);
+    } catch (err) {
+        throw Error((err as Error).message);
+    }
 };
 
 export const signUpWithGithub = async () => {
-    return await authenticateWithGithub(true);
+    try {
+        return await authenticateWithGithub(true);
+    } catch (err) {
+        throw Error((err as Error).message);
+    }
 };

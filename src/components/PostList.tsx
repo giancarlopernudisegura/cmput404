@@ -1,5 +1,6 @@
 import { h } from 'preact';
 import Post from './Post';
+import { MARKDOWN, PLAIN } from '../utils/constants'
 
 type PostListProps = {
     initialPosts: Array<any>,
@@ -17,16 +18,20 @@ function PostList({ initialPosts, currentAuthor, onRemove } : PostListProps){
         <div id="post-list" class="container">
             {initialPosts.length === 0 && <h2>No posts found!</h2>}
             <ul>
-                {initialPosts.map(post => (
-                    <Post
-                        id={post.id}
-                        title={post.title}
-                        body={post.description}
-                        author={post.author} 
-                        currentAuthor={currentAuthor}
-                        onRemove={onRemove}
-                    />
-                ))}
+                {initialPosts
+                    .filter(post => post.contentType === MARKDOWN || post.contentType === PLAIN)
+                    .map(post => (
+                        <Post
+                            id={post.id}
+                            title={post.title}
+                            body={post.description}
+                            author={post.author} 
+                            currentAuthor={currentAuthor}
+                            onRemove={onRemove}
+                            contentType={post.contentType}
+                        />
+                    ))
+                }
             </ul>
 
         </div>

@@ -8,6 +8,8 @@ from server.constants import custom_err
 import server.utils.api_support as utils
 import firebase_admin
 import json
+from server.utils.exts import get_github_by_id
+
 
 
 # creates the json
@@ -66,9 +68,7 @@ def get_author(token):
 
 
 def get_github_id(gh_username):
-    resp = urlopen(f"https://api.github.com/users/{gh_username}")
-    data = json.loads(resp.read().decode("utf-8"))
-
+    data = get_github_by_id(f'https://api.github.com/users/{gh_username}')
     return data["id"]
 
 
