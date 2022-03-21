@@ -9,9 +9,10 @@ import Favorite from '@mui/icons-material/Favorite'
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ReactMarkdown from 'react-markdown'
-import { getAllComments } from '../utils/apiCalls'
+import { getAllComments, getPostLikes } from '../utils/apiCalls'
 import CommentList from '../components/comment-components/CommentList'
-
+import MakeComment from '../components/comment-components/MakeComment'
+import CommentForm from '../components/forms/CommentForm'
 /*
     Post component
 */
@@ -67,6 +68,17 @@ function Post({
     const commentButtonText = showComments === false ? 'View Comments' : 'Hide Comments'
     const commentButtonType = showComments === false ? 'outlined' : 'contained'
 
+    //TOGGLE FOR OPENING MAKE COMMENT DIALOG
+    const [open, setOpen] = useState(false)
+
+    const openDialog = () => {
+        setOpen(true)
+    }
+
+    const closeDialog = () => {
+        setOpen(false)
+    }
+
     useEffect(() => {
         // Fetch all the comments of the post from the API
         function fetchComments(authorId: number, postId: number) {
@@ -74,7 +86,11 @@ function Post({
                 .then(data => setComments(data))
                 .catch(err => { setErrMsg(err.message); });
         }
+
+        
+
         fetchComments(authorId, postId);
+        
     } , [])
 ;
 
@@ -124,9 +140,17 @@ function Post({
                     </div>
 
                     <div>
-                        <IconButton color='primary'>
-                            <ChatBubbleOutlineOutlinedIcon fontSize='large' />
-                        </IconButton>
+                        <Button variant='outlined' startIcon={<ChatBubbleOutlineOutlinedIcon fontSize='large' />} onClick={openDialog}>
+                            Comment
+                        </Button>
+                        <CommentForm 
+                        isOpen={open} 
+                        postRepliedTo={title} 
+                        postId={postId}
+                        author_id={authorId}
+                        handleClose={closeDialog} 
+
+                        />
                     </div>
 
                     <div>

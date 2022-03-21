@@ -246,10 +246,39 @@ export function deletePost(author_id: number, post_id: number) {
 /**
  * Get likes for a specific post TODO
  */
-export function getPostLikes(author_id: number, post_id: number){
-  const res = fetch(`${BACKEND_HOST}/authors/${author_id}/posts/${post_id}/likes`, {
+export async function getPostLikes(author_id: number, post_id: number){
+  const res = await fetch(`${BACKEND_HOST}/authors/${author_id}/posts/${post_id}/likes`, {
     mode: 'cors',
     credentials: 'include',
     method: 'GET',
-  })
+  });
+
+  let data = res.json()
+  return data
+
+
+}
+
+/**
+ * Sends a new comment for a specific post
+ */
+ export function newPublicComment(author_id: any, post_id: number, commentData: any) {
+  try {
+    fetch(`${BACKEND_HOST}/authors/${author_id}/posts/${post_id}/comments/`, {
+    mode: 'cors',
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+    },
+    body: commentData,
+  });
+
+  console.log(commentData)
+
+  } catch(err){
+    throw Error("Unable to create a new comment for this post");
+  }
+  
+
 }
