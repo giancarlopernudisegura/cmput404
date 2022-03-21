@@ -150,7 +150,7 @@ export async function inboxCall(author_id: string, method: string, data?: any) {
     }
 
     const res = await fetch(`${BACKEND_HOST}/authors/${author_id}/inbox/`, {
-      method: 'POST',
+      method: method,
       credentials: 'include',
       ...metadata
     })
