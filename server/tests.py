@@ -5,10 +5,11 @@ import sys
 import json
 import uuid
 from flask.testing import FlaskClient
-from test_constants import *
+from server.test_constants import *
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from server.run import create_app
+
 
 def login(client: FlaskClient, user_id: str):
     r = client.post(
@@ -93,7 +94,7 @@ def test_posts(test_client: FlaskClient):
     assert r.status_code == 200
     r = test_client.get("/authors/1/posts/1", follow_redirects=True)
     assert r.status_code == 404
-    login(test_client, 1)
+    login(test_client, T_USER1_UUID)
     r = test_client.post(
         "/authors/1/posts/",
         data=json.dumps(
@@ -222,7 +223,7 @@ def test_inbox(test_client: FlaskClient):
     # user 1 will follow user 2
     test_client.put("/authors/2/followers/1", follow_redirects=True)
     logout(test_client)
-    login(test_client, 2)
+    login(test_client, T_USER2_UUID)
     r = test_client.get("/authors/2/inbox", follow_redirects=True)
     assert r.status_code == 200
     data = json.loads(r.data.decode("utf-8"))
