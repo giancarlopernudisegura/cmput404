@@ -1,6 +1,15 @@
 import json
+from urllib.request import urlopen
+from flask import (
+    Blueprint,
+    jsonify,
+    make_response,
+    request,
+    Response,
+    send_file,
+    current_app,
+)
 from re import L
-from flask import Blueprint, jsonify, make_response, request, Response, send_file, current_app
 import mimetypes
 from telnetlib import STATUS
 from urllib import response
@@ -9,6 +18,7 @@ from flask_login import login_user, login_required, logout_user, current_user
 from server.exts import db
 from server.models import Author, Inbox, Post, Comment, Requests, Like
 from server.enums import ContentType
+from server.config import RUNTIME_SETTINGS
 from http import HTTPStatus as httpStatus
 import os, io, binascii
 from dotenv import load_dotenv
@@ -38,7 +48,7 @@ def pagination(
     Returns:
         A tuple of (page, size) to use for pagination."""
     size = int(arguments.get("size", str(default_page_size)), base=10)
-    page_number = int(arguments.get("page_number", str(default_page_number)), base=10)
+    page_number = int(arguments.get("page", str(default_page_number)), base=10)
     return page_number, size
 
 
@@ -81,7 +91,7 @@ def single_author(author_id: int) -> Response:
         author = Author.query.filter_by(id=author_id).first_or_404()
         return make_response(jsonify(author.json())), httpStatus.OK
     elif request.method == "POST":
-        # request.form.get('displayName')
+        # request.json.get('displayName')
         pass
 
 
@@ -131,20 +141,22 @@ def post(author_id: int) -> Response:
                 in post_visibility_map
             ):
                 # bad visibility type or no visibility given
-                return Response(status=httpStatus.BAD_REQUEST)
+                return utils.json_response(httpStatus.BAD_REQUEST, { "message": "No visibility given for this post" })
         except KeyError:
             return Response(status=httpStatus.BAD_REQUEST)
         except ValueError:
             return Response(status=httpStatus.BAD_REQUEST)
         except TypeError:
             return Response(status=httpStatus.BAD_REQUEST)
+        except Exception as e:
+            return utils.json_response(httpStatus.BAD_REQUEST, { "message": str(e) })
         private = post_visibility_map[visibility.upper()]
 
         post = Post(author, title, category, content, contentType, private, unlisted)
         db.session.add(post)
         db.session.commit()
         post.push()
-        return Response(status=httpStatus.OK)
+        return utils.json_response(httpStatus.OK, {"message": "Post was created", **post.json()} )
 
 
 @bp.route(
@@ -261,7 +273,8 @@ def post_comment(author_id: int, post_id: int) -> Response:
 @bp.route("/authors/<int:author_id>/posts/<int:post_id>/image", methods=["GET"])
 def serve_image(author_id: int, post_id: int):
     image_post = Post.query.filter_by(id=post_id).first()
-    if image_post.contentType != (ContentType.jpg or ContentType.png):
+
+    if image_post.contentType != ContentType.jpg and image_post.contentType != ContentType.png:
         return utils.json_response(
             httpStatus.BAD_REQUEST, {"message": res_msg.NOT_IMAGE}
         )
@@ -269,9 +282,9 @@ def serve_image(author_id: int, post_id: int):
     return send_file(
         io.BytesIO(image_Bytes),
         mimetype=image_post.contentType.value,
-        attachment_filename=f"{image_post.title}.{image_post.contentType.name}"
-        )
-        
+        attachment_filename=f"{image_post.title}.{image_post.contentType.name}",
+    )
+
 
 @bp.route("/authors/<int:author_id>/followers", methods=["GET"])
 def get_followers(author_id: int) -> Response:
@@ -519,7 +532,7 @@ def get_author_liked(author_id: int):
 @bp.route("/signup", methods=["POST"])
 def signup() -> Response:
     # get token from authorization header
-    token = request.form.get("token")
+    token = request.json.get("token")
 
     if not token:
         return utils.json_response(
@@ -539,7 +552,7 @@ def signup() -> Response:
         else:
             return utils.json_response(
                 httpStatus.BAD_REQUEST,
-                {"message": res_msg.USER_ALREADY_EXISTS, "data": author.json()},
+                {"message": res_msg.USER_ALREADY_EXISTS },
             )
     except Exception as e:
         return utils.json_response(
@@ -551,7 +564,7 @@ def signup() -> Response:
 @bp.route("/login", methods=["POST"])
 def login() -> Response:
     # get token from authorization header
-    token = request.form.get("token")
+    token = request.json.get("token")
 
     if not token:
         return utils.json_response(
@@ -620,6 +633,137 @@ def get_user_me() -> Response:
         return utils.json_response(
             httpStatus.OK,
             {"message": res_msg.SUCCESS_VERIFY_USER, "data": current_user.json()},
+        )
+    except Exception as e:
+        return utils.json_response(
+            httpStatus.INTERNAL_SERVER_ERROR,
+            {"message": res_msg.GENERAL_ERROR + str(e)},
+        )
+
+
+@bp.route("/admin/author/<int:author_id>", methods=["POST"])
+@login_required
+def modify_author(author_id: int) -> Response:
+    if not current_user.isAdmin:
+        return (
+            make_response(jsonify(error=res_msg.NO_PERMISSION)),
+            httpStatus.UNAUTHORIZED,
+        )
+    try:
+        author = Author.query.filter_by(id=author_id).first_or_404()
+        author.isAdmin = request.json.get("isAdmin", author.isAdmin)
+        author.isVerified = request.json.get("isVerified", author.isVerified)
+        db.session.commit()
+        return utils.json_response(
+            httpStatus.OK, {"message": res_msg.SUCCESS_USER_UPDATED}
+        )
+    except Exception as e:
+        return utils.json_response(
+            httpStatus.INTERNAL_SERVER_ERROR,
+            {"message": res_msg.GENERAL_ERROR + str(e)},
+        )
+
+
+@bp.route("/admin/author", methods=["PUT"])
+@login_required
+def create_author() -> Response:
+    if not current_user.isAdmin:
+        return (
+            make_response(jsonify(error=res_msg.NO_PERMISSION)),
+            httpStatus.UNAUTHORIZED,
+        )
+    try:
+        displayName = request.json["displayName"]
+        github_username = request.json["github"]
+        resp = urlopen(f"https://api.github.com/users/{github_username}")
+        github_info = json.loads(resp.read().decode("utf-8"))
+        githubId = github_info["id"]
+        profileImageId = github_info["avatar_url"]
+        isAdmin = False
+        isVerified = current_app.config["AUTOMATIC_VERIFICATION"]
+
+        if Author.query.filter_by(githubId=githubId).first():
+            raise ValueError("User already exists.")
+        author = Author(githubId, profileImageId, displayName, isAdmin, isVerified)
+
+        # create author in database
+        db.session.add(author)
+        db.session.commit()
+        return utils.json_response(
+            httpStatus.OK,
+            {"message": res_msg.SUCCESS_USER_CREATED, "data": author.json()},
+        )
+    except ValueError as e:
+        return utils.json_response(
+            httpStatus.BAD_REQUEST,
+            {"message": res_msg.GENERAL_ERROR + str(e)},
+        )
+    except Exception as e:
+        return utils.json_response(
+            httpStatus.INTERNAL_SERVER_ERROR,
+            {"message": res_msg.GENERAL_ERROR + str(e)},
+        )
+
+
+@bp.route("/admin/author/<int:author_id>", methods=["DELETE"])
+@login_required
+def delete_author(author_id: int) -> Response:
+    if not current_user.isAdmin:
+        return (
+            make_response(jsonify(error=res_msg.NO_PERMISSION)),
+            httpStatus.UNAUTHORIZED,
+        )
+    try:
+        author = Author.query.filter_by(id=author_id).first_or_404()
+        db.session.delete(author)
+        db.session.commit()
+        return utils.json_response(
+            httpStatus.OK, {"message": res_msg.SUCCESS_USER_DELETED}
+        )
+    except Exception as e:
+        return utils.json_response(
+            httpStatus.INTERNAL_SERVER_ERROR,
+            {"message": res_msg.GENERAL_ERROR + str(e)},
+        )
+
+
+@bp.route("/admin/settings", methods=["GET"])
+@login_required
+def get_settings() -> Response:
+    if not current_user.isAdmin:
+        return (
+            make_response(jsonify(error=res_msg.NO_PERMISSION)),
+            httpStatus.UNAUTHORIZED,
+        )
+    try:
+        return utils.json_response(
+            httpStatus.OK,
+            {key: current_app.config[key] for key in RUNTIME_SETTINGS},
+        )
+    except Exception as e:
+        return utils.json_response(
+            httpStatus.INTERNAL_SERVER_ERROR,
+            {"message": res_msg.GENERAL_ERROR + str(e)},
+        )
+
+
+@bp.route("/admin/settings", methods=["POST"])
+@login_required
+def set_settings() -> Response:
+    if not current_user.isAdmin:
+        return (
+            make_response(jsonify(error=res_msg.NO_PERMISSION)),
+            httpStatus.UNAUTHORIZED,
+        )
+    try:
+        settings: Dict[str, str] = request.json
+        for key, val in settings.items():
+            if key in RUNTIME_SETTINGS:
+                current_app.config[key] = val
+                print(f"{key} set to {current_app.config[key]}")
+        return utils.json_response(
+            httpStatus.OK,
+            {"message": res_msg.SUCCESS_SETTINGS},
         )
     except Exception as e:
         return utils.json_response(

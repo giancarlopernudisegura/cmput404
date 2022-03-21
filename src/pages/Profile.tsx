@@ -69,8 +69,8 @@ function Profile({path}: profileProps) {
     
   }, []);
 
+  function handleRemove(postId: string) {
 
-  function handleRemove(postId: number) {
     // open the modal to make sure
     var message = "Delete this post?";
     // <Dialog />
@@ -78,7 +78,7 @@ function Profile({path}: profileProps) {
     const newList = myPosts.filter(post => post.id !== postId);
     setMyPosts(newList);
 
-    function removePost(authorId: number, postId: number,) {
+    function removePost(postId: string, authorId: string) {
       // call api to delete post
       deletePost(authorId, postId)
       .catch(err => {setErrMsg(err.message);});
