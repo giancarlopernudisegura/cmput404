@@ -52,27 +52,36 @@ function Profile({path}: profileProps) {
     
     Promise.all([authorPromise, postsPromise, followersPromise])
       .then( (results) => {
-        
         // Get the author's friends, i.e. bidirectional follow
-        function getFriends(authorId: string, followers: Array<any>) {
-          var friends: any[] = [];
+        async function getFriends(authorId: string, followers: Array<any>){
+          var promises: any[] = [];
+
           // Iterate through the followers and check if the author is following them
-          followers.forEach(follower => {
-            followerCall(authorId, follower.id, "GET")
-              .then(res => {
-                if (res.status === 200) {
-                  friends.push(follower);
+          followers.forEach( (follower) => {
+            promises.push(followerCall(follower.id, authorId, "GET")
+            );
+          });
+
+          var friendsPromise = await Promise.all(promises)
+            .then( (results) => { 
+              let friends: Array<any> = [];
+              console.log('result:', results);
+              results.forEach( (data) => {
+                if (data.status === 200) {
+                  // console.log(...data.items);
+                  friends.push(...data.items);
                 }
               })
+              return friends;
             });
-          console.log('Inside getFriends():', friends);
-          return friends;
+          
+          return friendsPromise;
         }
 
         let authorId = results[0];
         let followers = results[2].items;
-        
-        return getFriends(authorId, followers); // why is friends 0?
+
+        return getFriends(authorId, followers); // FIXME returning before it is even complete
       })
       .then(friends => {
         console.log('FRIENDS:', friends.length)
@@ -87,7 +96,6 @@ function Profile({path}: profileProps) {
         setIsLoading(false);
       });
     
-
 
   }, []);
 
