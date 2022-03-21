@@ -55,6 +55,7 @@ jobs:
           FBS_SVC_CLIENT_CERT_URL: ${{ secrets.FBS_SVC_CLIENT_CERT_URL }}
         run: |
           . venv/bin/activate
+          flask db stamp head
           flask db migrate
           flask db upgrade
           pytest --cov=. tests.py

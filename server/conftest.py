@@ -1,5 +1,5 @@
 from doctest import Example
-from test_constants import *
+from server.test_constants import *
 import sqlite3
 
 DB = "test.db"

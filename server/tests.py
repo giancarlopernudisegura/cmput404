@@ -5,7 +5,8 @@ import sys
 import json
 import uuid
 from flask.testing import FlaskClient
-from test_constants import *
+from server.test_constants import *
+from server.test_constants import T_USER1_UUID
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from server.run import create_app
@@ -81,7 +82,7 @@ def test_login(test_client: FlaskClient):
 def test_get_authors(test_client: FlaskClient):
     r = test_client.get("/authors")
     assert r.status_code == 200
-    r = test_client.get(f"/authors/9942c4c6-7d3d-4551-9b30-49bb65a08547")
+    r = test_client.get(f"/authors/{T_USER1_UUID}")
     assert r.status_code == 200
     r = test_client.get("/authors/0")
     assert r.status_code == 404
@@ -89,13 +90,13 @@ def test_get_authors(test_client: FlaskClient):
 
 @pytest.mark.order(5)
 def test_posts(test_client: FlaskClient):
-    r = test_client.get("/authors/1/posts", follow_redirects=True)
+    r = test_client.get(f"/authors/{T_USER1_UUID}/posts", follow_redirects=True)
     assert r.status_code == 200
-    r = test_client.get("/authors/1/posts/1", follow_redirects=True)
+    r = test_client.get(f"/authors/{T_USER1_UUID}/posts/1", follow_redirects=True)
     assert r.status_code == 404
-    login(test_client, 1)
+    login(test_client, T_USER1_UUID)
     r = test_client.post(
-        "/authors/1/posts/",
+        f"/authors/{T_USER1_UUID}/posts/",
         data=json.dumps(
             {
                 "title": "test invalid",
@@ -110,7 +111,7 @@ def test_posts(test_client: FlaskClient):
     )
     assert r.status_code == 400
     r = test_client.post(
-        "/authors/1/posts/",
+        f"/authors/{T_USER1_UUID}/posts/",
         data=json.dumps(
             {
                 "title": "test invalid",
@@ -124,7 +125,7 @@ def test_posts(test_client: FlaskClient):
     )
     assert r.status_code == 400
     r = test_client.post(
-        "/authors/1/posts/",
+        f"/authors/{T_USER1_UUID}/posts/",
         data=json.dumps(
             {
                 "title": "test title",
@@ -138,12 +139,13 @@ def test_posts(test_client: FlaskClient):
         follow_redirects=True,
     )
     assert r.status_code == 200
-    r = test_client.get("/authors/1/posts/1", follow_redirects=True)
+    post_id = r.json["id"]
+    r = test_client.get(f"/authors/{T_USER1_UUID}/posts/{post_id}", follow_redirects=True)
     assert r.status_code == 200
-    r = test_client.get("/authors/1/posts/2", follow_redirects=True)
+    r = test_client.get("/authors/{T_USER1_UUID}/posts/2", follow_redirects=True)
     assert r.status_code == 404
     r = test_client.put(
-        "/authors/1/posts/3",
+        f"/authors/{T_USER1_UUID}/posts/3",
         data=json.dumps(
             {
                 "title": "test title 2",
@@ -157,9 +159,10 @@ def test_posts(test_client: FlaskClient):
         follow_redirects=True,
     )
     assert r.status_code == 201
-    r = test_client.get("/authors/1/posts/3", follow_redirects=True)
+    post_id = r.json["id"]
+    r = test_client.get(f"/authors/{T_USER1_UUID}/posts/{post_id}", follow_redirects=True)
     assert r.status_code == 200
-    r = test_client.delete("/authors/1/posts/3", follow_redirects=True)
+    r = test_client.delete("/authors/{T_USER1_UUID}/posts/{post_id}", follow_redirects=True)
     assert r.status_code == 204
 
 
