@@ -597,6 +597,8 @@ def login_unit_test() -> Response:
     if current_app.testing:
         author_id = request.json.get("author_id")
         author = Author.query.filter_by(id=author_id).first()
+        if author == None:
+            raise Exception(f"Requested unit test author {author_id} is empty on query return!")
         login_user(author)
         return make_response(jsonify({"message": "login ok"})), httpStatus.OK
     return (

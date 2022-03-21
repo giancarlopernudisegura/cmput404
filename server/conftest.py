@@ -1,4 +1,5 @@
 from doctest import Example
+from test_constants import *
 import sqlite3
 
 DB = "test.db"
@@ -10,21 +11,21 @@ def pytest_configure(config):
         "INSERT INTO author VALUES (?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?);",
         (
             # User 1
-            1,
+            T_USER1_UUID,
             "Giancarlo",
             "31188380",
             "https://avatars.githubusercontent.com/u/31188380?v=4",
             True,
             True,
             # User 2
-            2,
+            T_USER2_UUID,
             "Dan",
             "738053",
             "https://avatars.githubusercontent.com/u/738053?v=4",
             False,
             True,
             # User 3
-            3,
+            T_USER3_UUID,
             "Lidia",
             "42719299",
             "https://avatars.githubusercontent.com/u/42719299?v=4",
@@ -47,3 +48,4 @@ def pytest_unconfigure(config):
     conn.execute("DELETE FROM viewablePostRelation;")
     conn.commit()
     conn.close()
+    pass

@@ -3,13 +3,14 @@ import pytest
 import os
 import sys
 import json
+import uuid
 from flask.testing import FlaskClient
+from test_constants import *
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from server.run import create_app
 
-
-def login(client: FlaskClient, user_id: int):
+def login(client: FlaskClient, user_id: str):
     r = client.post(
         "/login/unit_test",
         data=json.dumps({"author_id": user_id}),
@@ -65,14 +66,14 @@ def test_login(test_client: FlaskClient):
     # test login
     r = test_client.get("/login_test")
     assert r.status_code == 401
-    login(test_client, 1)
+    login(test_client, T_USER1_UUID)
     r = test_client.get("/login_test")
     assert r.status_code == 200
     r = test_client.get("/user_me")
     assert r.status_code == 200
     data = json.loads(r.data.decode("utf-8"))["data"]
     assert data["type"] == "author"
-    assert data["id"] == 1
+    assert data["id"] == T_USER1_UUID
     assert data["displayName"] == "Giancarlo"
 
 
@@ -80,7 +81,7 @@ def test_login(test_client: FlaskClient):
 def test_get_authors(test_client: FlaskClient):
     r = test_client.get("/authors")
     assert r.status_code == 200
-    r = test_client.get("/authors/1")
+    r = test_client.get(f"/authors/9942c4c6-7d3d-4551-9b30-49bb65a08547")
     assert r.status_code == 200
     r = test_client.get("/authors/0")
     assert r.status_code == 404
