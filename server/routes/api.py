@@ -545,6 +545,7 @@ def signup() -> Response:
         if not author:
             # create an author
             new_author = utils.create_author(decoded_token)
+            login_user(new_author)
             return utils.json_response(
                 httpStatus.OK,
                 {"message": res_msg.SUCCESS_USER_CREATED, "data": new_author.json()},

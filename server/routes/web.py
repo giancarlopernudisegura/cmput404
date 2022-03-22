@@ -37,11 +37,11 @@ def login():
 
 @bp.route("/inbox", methods=["GET"])
 def inbox():
-    return frontend_page()
+    return frontend_page(True)
 
 @bp.route('/user/<int:user_id>', methods=["GET"])
 def user(user_id):
-    return frontend_page()
+    return frontend_page(True)
     
 @bp.route("/admin", methods=["GET"])
 @login_required
