@@ -20,3 +20,8 @@ def is_local_node(URI: str) -> bool:
 def get_github_info(githubId: str):
     resp = urlopen(f"https://api.github.com/user/{githubId}")
     return json.loads(resp.read().decode("utf-8"))
+
+@lru_cache(maxsize=64)
+def get_github_by_id(gh_username: str):
+    resp = urlopen(f'https://api.github.com/users/{gh_username}')
+    return json.loads(resp.read().decode('utf-8'))

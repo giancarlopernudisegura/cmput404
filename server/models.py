@@ -74,6 +74,8 @@ class Author(db.Model, UserMixin, JSONSerializable):
             "url": f"{HOST}/authors/{self.id}",
             "github": data["html_url"],
             "profileImage": self.profileImageId,
+            "isAdmin": self.isAdmin,
+            "isVerified": self.isVerified,
         }
 
 
@@ -242,10 +244,24 @@ class Like(db.Model, JSONSerializable, InboxItem):
 
     def push(self):
         DbObject = Post if self.post else Comment
-        recepient = DbObject.query.filter_by(id=self.comment).first().author
+        if self.comment:#assume that the constructor is doing a good job
+            recepient = DbObject.query.filter_by(id=self.comment).first().author
+        elif self.post:
+            recepient = DbObject.query.filter_by(id=self.post).first().author
         inbox = Inbox(recepient, like=self.id)
         db.session.add(inbox)
         db.session.commit()
+
+    def delete(self):#remove all like refs from inbox before deleting
+        inboxRefs = Inbox.query.filter_by(like=self.id)
+        for inbox in inboxRefs:
+            db.session.delete(inbox)
+        db.session.commit()
+        db.session.delete(self)#can we do this before the last commit without issues?
+        db.session.commit()
+
+
+            
 
 
 class Requests(db.Model, JSONSerializable):  # follow requests
