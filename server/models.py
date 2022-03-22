@@ -373,7 +373,7 @@ class Remote_Node(db.Model, JSONSerializable):#contains auth info for remote nod
         return{
             "type": "remote",
             "id": self.id,
-            "username": self.id,
+            "username": self.user,
             "password": self.password
         }
 
