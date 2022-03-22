@@ -3,11 +3,11 @@ import { newPublicComment, getCurrentAuthor } from '../../utils/apiCalls';
 import { DialogContent, DialogContentText, DialogTitle, Dialog, FormControlLabel, Switch, Button, TextField, IconButton } from '@mui/material'
 import { Close } from '@mui/icons-material';
 
-type Props = { author_id: number, postId: number, postRepliedTo: string, isOpen: boolean, handleClose: any };
+type Props = { author_id: string, postId: string, postRepliedTo: string, isOpen: boolean, handleClose: any };
 type State = { 
     body: string
     authorDisplayName: string
-    authorId: number | null
+    authorId: string | null
     markdown: boolean
 };
 
