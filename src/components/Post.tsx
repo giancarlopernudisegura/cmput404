@@ -8,36 +8,39 @@ import { useState, useEffect } from 'preact/hooks';
 import Favorite from '@mui/icons-material/Favorite'
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import ReactMarkdown from 'react-markdown'
-import { getAllComments, getPostLikes } from '../utils/apiCalls'
 import CommentList from '../components/comment-components/CommentList'
 import CommentForm from '../components/forms/CommentForm'
+import { getAllComments } from '../utils/apiCalls'
+import ReactMarkdown from 'react-markdown';
+import { MARKDOWN, PLAIN } from '../utils/constants';
+
 /*
     Post component
 */
 
 type PostProps = {
-    postId: number,
+    postId: string,
     title: string,
     body: string,
     authorName: string,
-    authorId: number,
+    authorId: string,
     currentAuthor?: string,
+    contentType: string;
     onRemove?: Function,
 }
 
 
-function Post({ 
-    postId, 
-    title, 
-    body, 
-    authorName, 
-    authorId,
-    currentAuthor, 
-    onRemove 
-    }: PostProps) {
+function Post({ postId, title, body, authorName, authorId, currentAuthor,contentType, onRemove }: PostProps) {
 
     var currentUser: string = currentAuthor as string;
+    const renderBody = () => {
+        switch (contentType) {
+            case MARKDOWN:
+                return <ReactMarkdown>{body}</ReactMarkdown>
+            case PLAIN:
+                return <p className='text-lg'>{body}</p>
+        }
+    }
 
     //Toggle for like button
     const [likeToggle, setLikeToggle] = useState(true)
@@ -80,7 +83,7 @@ function Post({
 
     useEffect(() => {
         // Fetch all the comments of the post from the API
-        function fetchComments(authorId: number, postId: number) {
+        function fetchComments(authorId: string, postId: string) {
             getAllComments(authorId.toString(), postId)
                 .then(data => setComments(data))
                 .catch(err => { setErrMsg(err.message); });
@@ -121,7 +124,7 @@ function Post({
 
                 <div className='px-3 my-2'>
                     <h3 className='font-semibold text-lg mb-2'>{title}</h3>
-                    <p className='text-lg'>{body}</p>
+                    {renderBody()}
                 </div>
 
             </div>

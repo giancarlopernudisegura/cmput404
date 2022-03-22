@@ -10,7 +10,7 @@ import AuthorInfo from '../components/profile/AuthorInfo';
 
 type UserProps = {
     path: string,
-    followId?: number
+    followId?: string
 };
 
 const UserPage = ({ path, followId }: UserProps) => {
@@ -18,7 +18,7 @@ const UserPage = ({ path, followId }: UserProps) => {
     const [ doesFollow, setDoesFollow ] = useState(false);
     const [ isLoading, setIsLoading ] = useState(true);
     const [ isPostLoading, setIsPostLoading ] = useState(true);
-    const [ currentUserId, setCurrentUserId ] = useState(-1);
+    const [ currentUserId, setCurrentUserId ] = useState("");
     const [ authorInfo, setAuthorInfo ] = useState<null | any>(null);
     const [ posts, setPosts ] = useState(Array());
 
@@ -26,9 +26,9 @@ const UserPage = ({ path, followId }: UserProps) => {
     useEffect(() => {
         
         // Get the user's post 
-        const getPostsApiCall = async (userId: number) => {
+        const getPostsApiCall = async (userId: string) => {
             try {
-                const fetchedPosts = await getPosts(userId.toString());
+                const fetchedPosts = await getPosts(userId);
                 setPosts(fetchedPosts);
                 setIsPostLoading(false);
             } catch (err) {
@@ -39,7 +39,7 @@ const UserPage = ({ path, followId }: UserProps) => {
 
         // Check if the user is following the author
         const isFollowerApiCall = async () => {
-            const myUserId = parseInt(await get_author_id()); // Currently returns the loggedin used
+            const myUserId = await get_author_id(); // Currently returns the loggedin used
             setCurrentUserId(myUserId);
 
             let res;
