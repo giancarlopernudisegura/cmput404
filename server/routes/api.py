@@ -327,7 +327,7 @@ def remove_follower(author_id: str, follower_id: str) -> Response:
             httpStatus.NOT_FOUND,
             {"message": f"Follower {follower_id} is not following {author_id}."}
         )
-    Inbox.query.filter_by(follow=follower_id).delete()
+    Inbox.query.filter_by(follow=follower_id).delete() 
     db.session.delete(follower)
     db.session.commit()
     return Response(status=httpStatus.NO_CONTENT)
@@ -349,7 +349,7 @@ def add_follower(author_id: str, follower_id: str) -> Response:
         )
     follower = Requests(follower_id, author_id)
     db.session.add(follower)
-    inbox = Inbox(author_id, follow=follower_id)
+    inbox = Inbox(author_id, follow=follower.id)
     db.session.add(inbox)
     db.session.commit()
     return Response(status=httpStatus.OK)

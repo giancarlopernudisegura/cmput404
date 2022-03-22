@@ -287,6 +287,8 @@ class Requests(db.Model, JSONSerializable):  # follow requests
         self.timestamp = datetime.datetime.now()
         self.initiated = initiated
         self.to = to
+        if self.id == None:
+            self.id = str(uuid.uuid4())#odd bug fix
 
     def __repr__(self):
         return f"<id {self.id}>"
