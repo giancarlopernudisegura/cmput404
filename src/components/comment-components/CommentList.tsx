@@ -20,7 +20,7 @@ function CommentList({allComments}: CommentListProps) {
           <ul>
             {allComments.map((comment) => 
               <li key={comment.author}>
-                <Comment author={comment.author} body={comment.comment} timeStamp={comment.published}/>
+                <Comment author={comment.author} body={comment.comment} timeStamp={comment.published} title={comment.title}/>
               </li>
             )}
           </ul>
