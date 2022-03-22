@@ -12,12 +12,12 @@ import SimpleModal from "../components/Modal";
 type profileProps = {path: string}
 
 function Profile({path}: profileProps) {
-  const [errMsg, setErrMsg] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
+  const [ errMsg, setErrMsg ] = useState("");
+  const [ isLoading, setIsLoading ] = useState(true);
 
   // get author data 
-  const [author, setAuthor] = useState(Object());
-  const [myPosts, setMyPosts] = useState(Array());
+  const [ author, setAuthor ] = useState(Object());
+  const [ myPosts, setMyPosts ] = useState(Array());
 
   useEffect(() => {
     function getAuthorAndPosts() {

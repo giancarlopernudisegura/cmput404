@@ -2,7 +2,7 @@ import { h } from 'preact';
 import DrawerMenu from "../components/sidemenu-components/Drawer";
 import { CircularProgress } from '@mui/material';
 import { useEffect, useState } from "preact/hooks";
-import { get_author_id, followerCall, getSpecAuthor, getPosts } from '../utils/apiCalls';
+import { get_author_id, followerCall, getSpecAuthor, getPosts, inboxCall } from '../utils/apiCalls';
 import { Alert, Button } from "@mui/material";
 
 import PostList from '../components/PostList';

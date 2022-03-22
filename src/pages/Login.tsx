@@ -13,10 +13,11 @@ const Login = (props: Props) => {
 
   const handleGithub = async (method : string): Promise<void> => {
     try {
+      let userInfo;
       if (method == "signup") {
-        await signUpWithGithub();
+        userInfo = await signUpWithGithub();
       } else if (method == "signin") {
-        await signInWithGithub()
+        userInfo = await signInWithGithub()
       }
       route('/app')
     } catch (err) {

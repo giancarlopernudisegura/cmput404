@@ -7,7 +7,7 @@ import PostForm from '../components/forms/PostForm';
 import DrawerMenu from '../components/sidemenu-components/Drawer';
 import SearchBar from './SearchBar';
 import PostList from '../components/PostList';
-import { Alert } from '@mui/material';
+import Alert from '@mui/material/Alert';
 
 
 type ExplorePageProps = { path: string };

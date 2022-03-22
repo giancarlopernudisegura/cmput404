@@ -5,6 +5,7 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import ReactMarkdown from 'react-markdown';
 import { MARKDOWN, PLAIN } from '../../utils/constants';
+import { FAILED_PUBL_POST } from '../../utils/errorMsg';
 
 type Props = {  };
 type Image = {
@@ -142,7 +143,6 @@ class PostForm extends Component<Props, State> {
                     } catch (err) {
                         console.log("ERROR", (err as Error).message);
                     }
-
                 }
             }
         }
@@ -160,11 +160,18 @@ class PostForm extends Component<Props, State> {
             throw Error("Author Id is null");
         }
 
-        await newPublicPost(this.state.authorId, postData);
+        let postResponse;
+        try {
+            postResponse = await newPublicPost(this.state.authorId, postData);
 
+            if (postResponse.status !== 200) {
+                throw Error(FAILED_PUBL_POST);
+            }
+        } catch (err) {
+            // TODO: handle error
+        }
         
         alert('You have successfully posted to your public page!');
-        event.preventDefault();
     };
 
     handleTabChange = (event: any, newValue: number): void => {

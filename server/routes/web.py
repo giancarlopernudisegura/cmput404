@@ -33,15 +33,13 @@ def login():
     else:
         return frontend_page(True)
 
-
 @bp.route("/inbox", methods=["GET"])
 def inbox():
     return frontend_page(True)
     
-@bp.route("/user/<int:user_id>", methods=["GET"])
+@bp.route("/user/<string:user_id>", methods=["GET"])
 def user(user_id):
     return frontend_page(current_user.is_authenticated)
-
 
 @bp.route("/admin", methods=["GET"])
 @login_required

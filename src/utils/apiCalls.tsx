@@ -132,8 +132,6 @@ export async function newPublicPost(authorId: string, postData: any) {
   } catch (err) {
     throw Error(FAILED_CREATE_POSTS);
   }
-
-
 }
 
 export async function inboxCall(author_id: string, method: string, data?: any) {
@@ -154,8 +152,10 @@ export async function inboxCall(author_id: string, method: string, data?: any) {
       credentials: 'include',
       ...metadata
     })
+
+    let json = await res.json();
     // TODO change return value
-    return await res.json();
+    return { status: res.status, ...json };
   } catch (err) {
     throw Error("There was an error getting the inbox");
   }
@@ -207,9 +207,9 @@ export const logOutCall = async () => {
   }
 }
 
-export const followerCall = async (currentUserId: string, toFollowId: string, method: string) => {
+export const followerCall = async (toFollowId: string, currentUserId: string, method: string) => {
   try {
-    const res = await fetch(`${BACKEND_HOST}/authors/${currentUserId}/followers/${toFollowId}`, {
+    const res = await fetch(`${BACKEND_HOST}/authors/${toFollowId}/followers/${currentUserId}`, {    
       mode: 'cors',
       credentials: 'include',
       method,

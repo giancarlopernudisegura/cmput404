@@ -8,6 +8,7 @@ SUCCESS_USER_UPDATED = "User was successfully updated"
 USER_DOES_NOT_EXIST = "User does not exist. Please sign up first."
 USER_ALREADY_EXISTS = "User already exists. Please log in instead."
 SUCCESS_VERIFY_USER = "User credentials are valid"
+SUCCESS_FOLLOW_USER = "Author successfully follows user"
 
 # Error message
 GENERAL_ERROR = "There was an error: "

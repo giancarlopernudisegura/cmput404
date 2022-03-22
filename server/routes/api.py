@@ -355,7 +355,7 @@ def add_follower(author_id: str, follower_id: str) -> Response:
     inbox = Inbox(author_id, follow=follower.id)
     db.session.add(inbox)
     db.session.commit()
-    return Response(status=httpStatus.OK)
+    return utils.json_response(httpStatus.OK, {"message": res_msg.SUCCESS_FOLLOW_USER } ) 
 
 
 @bp.route("/authors/<string:author_id>/inbox", methods=["GET"])

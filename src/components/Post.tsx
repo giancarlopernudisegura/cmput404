@@ -48,8 +48,6 @@ function Post({ id, title, body, author, currentAuthor, onRemove, contentType }:
                             />
                         </span>
                     }
-
-                    
                 </div>
 
                 <div className='px-3 my-2'>
