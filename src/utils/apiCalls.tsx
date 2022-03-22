@@ -331,23 +331,24 @@ export async function getPostLikes(author_id: string, post_id: string){
 /**
  * Sends a new comment for a specific post
  */
- export function newPublicComment(author_id: any, post_id: string, commentData: any) {
+export function newPublicComment(author_id: any, post_id: string, commentData: any) {
+  const encodedCommentData = JSON.stringify(commentData);
+
   try {
     fetch(`${BACKEND_HOST}/authors/${author_id}/posts/${post_id}/comments/`, {
-    mode: 'cors',
-    method: 'POST',
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json; charset=utf-8',
-    },
-    body: commentData,
-  });
+      mode: 'cors',
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8',
+      },
+      body: encodedCommentData,
+    });
 
-  console.log(commentData)
+  console.log(encodedCommentData)
 
   } catch(err){
     throw Error("Unable to create a new comment for this post");
   }
-  
 
 }

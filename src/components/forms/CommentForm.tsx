@@ -42,6 +42,8 @@ class CommentForm extends Component<Props, State>{
     }
 
     setAuthorDetails() {
+        // TODO: don't call current author, call the one to get the id
+        // get_author_id
         getCurrentAuthor().then(data => {
             this.setState({ 
                 authorDisplayName: data.displayName,
@@ -64,16 +66,19 @@ class CommentForm extends Component<Props, State>{
             "type": "author",
         }
 
+        // const commentData = {
+        //     "comment": this.state.body,
+        //     "contentType": contentType, 
+        //     "published": date,
+        //     "author": authorData,
+        //     "type": "comment",
+        // }
         const commentData = {
-            "comment": this.state.body,
-            "contentType": contentType, 
-            "published": date,
-            "author": authorData,
-            "type": "comment",
-        }
-        const encodedCommentData = JSON.stringify(commentData);
-        console.log(JSON.parse(encodedCommentData))
-        newPublicComment(this.state.authorId, this.props.postId, encodedCommentData);
+            "title": "Hello",
+            "content": this.state.body,
+            "contentType": contentType
+        };
+        newPublicComment(this.state.authorId, this.props.postId, commentData);
         
         alert('You have successfully commented on ' + this.props.postRepliedTo + '!');
         event.preventDefault();
@@ -83,36 +88,38 @@ class CommentForm extends Component<Props, State>{
         return(
         <Dialog open={this.props.isOpen} style={{margin: `28px`}}>
             <IconButton size='small' onClick={this.props.handleClose} style={{paddingTop: `10px`}}>
-            <Close fontSize='small'/>
+                <Close fontSize='small'/>
             </IconButton>
-          <DialogTitle>Comment On Post: {this.props.postRepliedTo}</DialogTitle>
-          <DialogContent>
-            <form onSubmit={this.handleSubmit} className="w-full">
 
-            <textarea type="text"
-                value={this.state.body}
-                onChange={this.handleBody}
-                style={{width: `500px`, borderColor: `#dadada`, borderWidth: `1px`}}
-            >    
-            </textarea>
+            <DialogTitle>Comment On Post: {this.props.postRepliedTo}</DialogTitle>
 
-            <div className="flex flex-row justify-between mt-3">
-                <FormControlLabel 
-                    control={<Switch />} 
-                    label="Markdown" 
-                    onChange={this.setMarkdown}
-                />
+            <DialogContent>
+                <form onSubmit={this.handleSubmit} className="w-full">
+                    <textarea type="text"
+                        value={this.state.body}
+                        onChange={this.handleBody}
+                        style={{width: `500px`, borderColor: `#dadada`, borderWidth: `1px`}}
+                    >    
+                    </textarea>
 
-                <Button variant="contained"
-                    type="submit"
-                    className="w-1/3"
-                    disableElevation={true}
-                >Send Comment
-                </Button>
-            </div>
-            </form>
-          </DialogContent>
-            </Dialog>
+                    <div className="flex flex-row justify-between mt-3">
+                        <FormControlLabel 
+                            control={<Switch />} 
+                            label="Markdown" 
+                            onChange={this.setMarkdown}
+                        />
+
+                        <Button variant="contained"
+                            type="submit"
+                            className="w-1/3"
+                            disableElevation={true}
+                        >
+                            Send Comment
+                        </Button>
+                    </div>
+                </form>
+            </DialogContent>
+        </Dialog>
         )
     }
 }
