@@ -15,7 +15,7 @@ from telnetlib import STATUS
 from urllib import response
 from server.constants import res_msg
 from flask_login import login_user, login_required, logout_user, current_user
-from server.exts import db
+from server.exts import db, LOCAL_AUTH_USER, LOCAL_AUTH_PASSWORD
 from server.models import Author, Inbox, Post, Comment, Requests, Like, Remote_Node
 from server.enums import ContentType
 from server.config import RUNTIME_SETTINGS
@@ -779,6 +779,11 @@ def set_settings() -> Response:
 
 @bp.route("/remotes", methods=["GET"])
 def get_remote() -> Response:
+    if not request.authorization or request.authorization.username != LOCAL_AUTH_USER or  request.authorization.password != LOCAL_AUTH_PASSWORD:
+         return utils.json_response(
+            httpStatus.UNAUTHORIZED,
+            {"message": "Basic auth failed. Give the correct user/password combination"}
+        )
     remotes = Remote_Node.query.all()
     if len(remotes) == 0:
         return utils.json_response(
@@ -786,7 +791,6 @@ def get_remote() -> Response:
             {"message": "No remotes were found! Note: Remote info must be manually added to database locally."}
         )
     remote_list = [remote.json() for remote in remotes]
-    print(f"\n\nRMLOST {remote_list}\n")
     return (
         make_response(
             jsonify(
@@ -796,3 +800,4 @@ def get_remote() -> Response:
         ),
         httpStatus.OK,
     )
+    
