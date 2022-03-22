@@ -785,12 +785,12 @@ def get_remote() -> Response:
             httpStatus.NOT_FOUND,
             {"message": "No remotes were found! Note: Remote info must be manually added to database locally."}
         )
-    remote_list = [remote.id for remote in remotes]
+    remote_list = [remote.json() for remote in remotes]
     print(f"\n\nRMLOST {remote_list}\n")
     return (
         make_response(
             jsonify(
-                type="remote",
+                type="remotes",
                 items=remote_list,
             )
         ),
