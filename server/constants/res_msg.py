@@ -31,6 +31,7 @@ NOT_IMAGE = "The given post is not an image."
 
 SUCCESS_SETTINGS = "Settings were successfully updated"
 
+
 # likes
 AUTHOR_LIKE_CONFLICT = "The current user has already liked the requested resource."
 AUTHOR_LIKE_NOT_EXIST = "Current user has not liked the requested resource."
