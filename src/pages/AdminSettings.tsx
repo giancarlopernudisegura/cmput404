@@ -30,6 +30,9 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import { useEffect, useState } from "preact/hooks";
 
+const AUTH_USERNAME = process.env.LOCAL_AUTH_USER;
+const AUTH_PASSWD = process.env.LOCAL_AUTH_PASSWORD;
+
 type SettingsProps = {
     path: string
 };
@@ -46,10 +49,18 @@ type User = {
     isVerified: boolean,
 }
 
+type RemoteNode = {
+    type: string,
+    id: string,
+    username: string,
+    password: string,
+}
+
 const Settings = ({ path }: SettingsProps) => {
     const [errMsg, setErrMsg] = useState("");
     const [isLoading, setIsLoading] = useState(true);
     const [users, setUsers] = useState<User[]>([]);
+    const [remoteNodes, setRemoteNodes] = useState<RemoteNode[]>([]);
     const [verifyNewUsers, setVerifyNewUsers] = useState(false);
     const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
     const [open, setOpen] = useState(false);
@@ -91,9 +102,23 @@ const Settings = ({ path }: SettingsProps) => {
             .then(data => {
                 setVerifyNewUsers(data.AUTOMATIC_VERIFICATION);
             })
+        // from: https://developer.mozilla.org/en-US/docs/Glossary/Base64
+        const token = window.btoa(unescape(encodeURIComponent(`${AUTH_USERNAME
+            }:${AUTH_PASSWD}`)))
+        console.info(token)
+        fetch("/remotes", {
+            headers: {
+                'Authorization': `Basic ${token}`
+            }
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.items)
+                    setRemoteNodes(data.items);
+            })
     }, []);
 
-    const tableColumns = [
+    const authorTableColumns = [
         "ID",
         "Name",
         "GitHub",
@@ -101,6 +126,12 @@ const Settings = ({ path }: SettingsProps) => {
         "URL",
         "Admin",
         "Verified"
+    ]
+
+    const remoteTableColumns = [
+        "URL",
+        "HTTP Basic Auth Username",
+        "HTTP Basic Auth Password"
     ]
 
     return (
@@ -161,7 +192,7 @@ const Settings = ({ path }: SettingsProps) => {
                                 <TableHead>
                                     <TableRow>
                                         <TableCell></TableCell>
-                                        {tableColumns.map(column => {
+                                        {authorTableColumns.map(column => {
                                             return <TableCell>{column}</TableCell>
                                         })}
                                     </TableRow>
@@ -284,6 +315,60 @@ const Settings = ({ path }: SettingsProps) => {
                                 }}>Subscribe</Button>
                             </DialogActions>
                         </Dialog>
+                    </Box>
+                    <br />
+                    <Box>
+                        <Toolbar>
+                            <Typography
+                                sx={{ flex: '1 1 100%' }}
+                                variant="h6"
+                                id="tableTitle"
+                                component="div"
+                            >
+                                Remote Nodes
+                            </Typography>
+                            <IconButton onClick={() => {
+                                selectedUsers.forEach(id => {
+                                    // TODO: replace with remote node DELETE URI
+                                    fetch(`/admin/author/${id}`, {
+                                        method: "DELETE"
+                                    })
+                                        .then(() => {
+                                            setUsers(users.filter(u => u.id !== id));
+                                        })
+                                        .catch(err => {
+                                            setErrMsg(err.message);
+                                        });
+                                })
+                            }}>
+                                <DeleteIcon />
+                            </IconButton>
+                        </Toolbar>
+                        <TableContainer>
+                            <Table>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell></TableCell>
+                                        {remoteTableColumns.map(column => {
+                                            return <TableCell>{column}</TableCell>
+                                        })}
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {remoteNodes.map(({ id, username, password }, index) => {
+                                        const label = { inputProps: { 'aria-label': 'Checkbox' } };
+                                        return <TableRow>
+                                            <TableCell><Checkbox {...label} checked={selectedUsers.includes(id)} onClick={e => {
+                                                addOrRemoveUserToSelected(id);
+                                            }} /></TableCell>
+                                            <TableCell><Link href={id} target="_blank" rel="noreferrer">{id}</Link></TableCell>
+                                            <TableCell>{username}</TableCell>
+                                            <TableCell><i>{password}</i></TableCell>
+                                        </TableRow>
+                                    })}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
                     </Box>
                 </Box>}
             </DrawerMenu>
