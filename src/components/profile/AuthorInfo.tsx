@@ -9,8 +9,6 @@ type AuthorProps = {
 };
 
 function AuthorInfo({ author, followers, friends }: AuthorProps) {
-    const [errMsg, setErrMsg] = useState("");
-
 
     if (author === undefined) {
         return <h1>Error loading information about this author.</h1>;
