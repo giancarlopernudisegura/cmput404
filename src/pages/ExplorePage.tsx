@@ -13,6 +13,11 @@ import { Alert } from '@mui/material';
 type ExplorePageProps = { path: string };
 
 function ExplorePage({ path }: ExplorePageProps) {
+    // postForm states
+    const [ postBody, setPostBody ] = useState<string>("");
+    const [ postCat, setPostCat ] = useState<string>("");
+    const [ postTitle, setPostTitle ] = useState<string>("");
+    const [ postMkd, setPostMkd ] = useState<boolean>(false);
 
     const [ posts, setPosts ] = useState(Array());
     const [ githubActivity, setGithubActivity ] = useState(Array());
@@ -59,7 +64,16 @@ function ExplorePage({ path }: ExplorePageProps) {
             {errMsg && (
                 <Alert severity="error">{errMsg}</Alert>
             )}
-            <PostForm />
+            <PostForm
+                body={postBody}
+                setBody={setPostBody}
+                category={postCat}
+                setCategory={setPostCat}
+                title={postTitle}
+                setTitle={setPostTitle}
+                markdown={postMkd}
+                setMarkdown={setPostMkd}
+            />
             
             {posts.length > 0 &&
                 <PostList 
