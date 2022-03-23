@@ -14,11 +14,12 @@ type ExplorePageProps = { path: string };
 
 function ExplorePage({ path }: ExplorePageProps) {
     // postForm states
-    const [ postBody, setPostBody ] = useState<string>("");
-    const [ postCat, setPostCat ] = useState<string>("");
-    const [ postTitle, setPostTitle ] = useState<string>("");
-    const [ postMkd, setPostMkd ] = useState<boolean>(false);
+    const [ newPostBody, setNewPostBody ] = useState<string>("");
+    const [ newPostCat, setNewPostCat ] = useState<string>("");
+    const [ newPostTitle, setNewPostTitle ] = useState<string>("");
+    const [ newPostMkd, setNewPostMkd ] = useState<boolean>(false);
 
+    // getPosts states
     const [ posts, setPosts ] = useState(Array());
     const [ githubActivity, setGithubActivity ] = useState(Array());
     const [ errMsg, setErrMsg ] = useState("");
@@ -65,14 +66,14 @@ function ExplorePage({ path }: ExplorePageProps) {
                 <Alert severity="error">{errMsg}</Alert>
             )}
             <PostForm
-                body={postBody}
-                setBody={setPostBody}
-                category={postCat}
-                setCategory={setPostCat}
-                title={postTitle}
-                setTitle={setPostTitle}
-                markdown={postMkd}
-                setMarkdown={setPostMkd}
+                body={newPostBody}
+                setBody={setNewPostBody}
+                category={newPostCat}
+                setCategory={setNewPostCat}
+                title={newPostTitle}
+                setTitle={setNewPostTitle}
+                markdown={newPostMkd}
+                setMarkdown={setNewPostMkd}
             />
             
             {posts.length > 0 &&
