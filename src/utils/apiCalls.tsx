@@ -258,9 +258,9 @@ export const serveImage = async (authorId: string, postId: string) => {
     let json = res.json();
 
     if (res.status === 200) {
-      return { status: res.status, ...json};
+      return { status: res.status, ...json };
     }
-  } catch(err) {
+  } catch (err) {
     throw Error(FETCH_IMG_ERROR);
   }
 }
@@ -271,12 +271,17 @@ export function deletePost(author_id: string, post_id: string) {
     credentials: 'include',
     method: 'DELETE',
   })
-  .then(res => {
-    return res.status;
-  })
-  .catch(err => {
-    throw Error('Unable to delete post');
-  });
+    .then(res => {
+      return res.status;
+    })
+    .catch(err => {
+      throw Error('Unable to delete post');
+    });
 
   return response;
+}
+
+export function isLocal(node: string) {
+  const regex = `^${BACKEND_HOST}`;
+  return Boolean(node.match(regex))
 }
