@@ -283,19 +283,19 @@ export async function getAllComments(author_id: string, post_id: string) {
     let data = await res.json();
     let listOfComments = Array();
 
-      for (let i = 0; i < data.comments.length; i++) {
-        var t = data.comments[i].published;
-        var publishTime = t.substring(0, t.lastIndexOf("T"));
-        const comment: any = {
-          title: data.comments[i].title,
-          author: data.comments[i].author.displayName,
-          comment: data.comments[i].comment,
-          published: publishTime,
-        };
-        listOfComments.push(comment);
-      }
+    for (let i = 0; i < data.comments.length; i++) {
+      var t = data.comments[i].published;
+      var publishTime = t.substring(0, t.lastIndexOf("T"));
+      const comment: any = {
+        title: data.comments[i].title,
+        author: data.comments[i].author.displayName,
+        comment: data.comments[i].comment,
+        published: publishTime,
+      };
+      listOfComments.push(comment);
+    }
 
-    return {...listOfComments, status: res.status};
+    return { ...listOfComments, status: res.status };
   } catch (err) {
     throw Error("Unable to retrieve comments for this post");
   }

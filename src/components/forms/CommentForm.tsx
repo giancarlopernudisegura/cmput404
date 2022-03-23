@@ -1,17 +1,12 @@
 import { h, Component } from "preact";
-import {
-  newPublicComment,
-  get_author_id,
-} from "../../utils/apiCalls";
+import { newPublicComment, get_author_id } from "../../utils/apiCalls";
 import {
   DialogContent,
-  DialogContentText,
   DialogTitle,
   Dialog,
   FormControlLabel,
   Switch,
   Button,
-  TextField,
   IconButton,
 } from "@mui/material";
 import { Close } from "@mui/icons-material";
@@ -87,28 +82,20 @@ class CommentForm extends Component<Props, State> {
 
     let date = new Date().toISOString();
 
-    // const authorData = {
-    //     "displayName": this.state.authorDisplayName,
-    //     "id": this.state.authorId,
-    //     "type": "author",
-    // }
-
     const commentData = {
       title: this.state.title,
       comment: this.state.body,
       contentType: contentType,
       published: date,
     };
-    // const encodedCommentData = JSON.stringify(commentData);
-    // console.log(JSON.parse(encodedCommentData))
     newPublicComment(this.state.authorId, this.props.postId, commentData);
 
     alert(
       "You have successfully commented on " + this.props.postRepliedTo + "!"
     );
     event.preventDefault();
-    this.setState({title: ''})
-    this.setState({body: ''})
+    this.setState({ title: "" });
+    this.setState({ body: "" });
   };
 
   render() {
