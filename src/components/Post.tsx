@@ -6,6 +6,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ReactMarkdown from 'react-markdown';
 import { MARKDOWN, PLAIN } from '../utils/constants';
+import { useState } from 'preact/hooks';
 
 /*
     Post component
@@ -19,9 +20,12 @@ type PostProps = {
     currentAuthor?: string
     contentType: string;
     onRemove?: Function,
+    handleEdit?: Function,
+    visibility: string,
+    unlisted: boolean 
 }
 
-function Post({ id, title, body, author, currentAuthor, onRemove, contentType }: PostProps) {
+function Post({ id, title, body, author, currentAuthor, onRemove, contentType, handleEdit, visibility, unlisted }: PostProps) {
     var currentUser: string = currentAuthor as string;
     const renderBody = () => {
         switch (contentType) {
@@ -41,15 +45,34 @@ function Post({ id, title, body, author, currentAuthor, onRemove, contentType }:
                 {/* Display these buttons if the author of the  post is the current author */}
                     {author === currentUser && 
                         <span className="flex space-x-4">
-                            <EditIcon />
-                            <DeleteIcon onClick={ () => { 
-                                if (onRemove) { onRemove(id) } 
-                                } }
+                            <EditIcon 
+                                cursor="pointer"
+                                onClick={() => {
+                                    const editPost = {
+                                        id,
+                                        title,
+                                        description: body,
+                                        contentType,
+                                        visibility,
+                                        unlisted
+                                    };
+
+                                    if (handleEdit){
+                                        // TODO: 
+                                        handleEdit(editPost);
+                                    }
+                                }}
+                            />
+                            <DeleteIcon
+                                cursor="pointer"
+                                onClick={() => { 
+                                    if (onRemove) { 
+                                        onRemove(id) 
+                                    } 
+                                }}
                             />
                         </span>
                     }
-
-                    
                 </div>
 
                 <div className='px-3 my-2'>
@@ -66,7 +89,6 @@ function Post({ id, title, body, author, currentAuthor, onRemove, contentType }:
                     <ShareOutlinedIcon fontSize='large'/>
                 </div>
             </div>
-
         </li>
     );
 

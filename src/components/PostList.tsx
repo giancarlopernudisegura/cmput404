@@ -6,37 +6,41 @@ type PostListProps = {
     initialPosts: Array<any>,
     currentAuthor?: string,
     onRemove?: Function,
+    handleEdit?: Function
 }
 
-function PostList({ initialPosts, currentAuthor, onRemove } : PostListProps){
+function PostList({ initialPosts, currentAuthor, onRemove, handleEdit } : PostListProps){
 
-    if (currentAuthor === undefined) {
-        currentAuthor = 'Anonymous';
-    }
+  if (currentAuthor === undefined) {
+    currentAuthor = 'Anonymous';
+  }
 
-    return(
-        <div id="post-list" class="container">
-            {initialPosts.length === 0 && <h2>No posts found!</h2>}
-            <ul>
-                {initialPosts
-                    .filter(post => post.contentType === MARKDOWN || post.contentType === PLAIN)
-                    .map(post => (
-                        <Post
-                            id={post.id}
-                            title={post.title}
-                            body={post.description}
-                            author={post.author} 
-                            currentAuthor={currentAuthor}
-                            onRemove={onRemove}
-                            contentType={post.contentType}
-                        />
-                    ))
-                }
-            </ul>
+  return(
+    <div id="post-list" class="container">
+      {initialPosts.length === 0 && <h2>No posts found!</h2>}
+      <ul>
+          {initialPosts
+            .filter(post => post.contentType === MARKDOWN || post.contentType === PLAIN)
+            .map(post => (
+              <Post
+                id={post.id}
+                title={post.title}
+                body={post.description}
+                author={post.author} 
+                currentAuthor={currentAuthor}
+                onRemove={onRemove}
+                handleEdit={handleEdit}
+                contentType={post.contentType}
+                visibility={post.visibility}
+                unlisted={post.unlisted}
+              />
+            ))
+          }
+        </ul>
 
-        </div>
+    </div>
 
-    );
+  );
     
 }
 

@@ -1,4 +1,4 @@
-import { FAILED_GITHUB_STREAM, FAILED_CREATE_POSTS, FETCH_IMG_ERROR } from '../utils/errorMsg';
+import { FAILED_GITHUB_STREAM, FAILED_CREATE_POSTS, FETCH_IMG_ERROR, FAILED_EDIT_POST } from '../utils/errorMsg';
 
 
 const BACKEND_HOST = process.env.FLASK_HOST;
@@ -48,7 +48,6 @@ export const get_author_id = async () => {
  * @returns Array<Post>
  */
 export async function getPosts(author_id: string): Promise<any> {
-
   try {
     let res = await fetch(`${BACKEND_HOST}/authors/${author_id}/posts/`, {
       mode: 'cors',
@@ -65,6 +64,8 @@ export async function getPosts(author_id: string): Promise<any> {
         'title': data.items[i].title,
         'description': data.items[i].description,
         'contentType': data.items[i].contentType,
+        'visibility': data.items[i].visibility,
+        'unlisted': data.items[i].unlisted
       };
       listOfPosts.push(post);
     }
@@ -279,4 +280,24 @@ export function deletePost(author_id: string, post_id: string) {
   });
 
   return response;
+}
+
+export async function editPost(author_id: string, post_id: string, postInfo: any) {
+  try {
+    const response = await fetch(`${BACKEND_HOST}/authors/${author_id}/posts/${post_id}`, {
+      method: 'PUT',
+      body: JSON.stringify(postInfo)
+    });
+
+    let json = await response.json();
+
+    if (response.status !== 200) {
+      throw Error();
+    }
+
+    return { status: response.status, ...json };
+  } catch (err) {
+    throw Error(FAILED_EDIT_POST);
+  }
+
 }
