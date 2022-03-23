@@ -824,8 +824,6 @@ def set_settings() -> Response:
 
 @bp.route("/remotes", methods=["GET"])
 def get_remote() -> Response:
-    print(LOCAL_AUTH_USER, LOCAL_AUTH_PASSWORD)
-    print(request.authorization)
     if (
         not request.authorization
         or request.authorization.username != LOCAL_AUTH_USER
@@ -847,4 +845,64 @@ def get_remote() -> Response:
             )
         ),
         httpStatus.OK,
+    )
+
+
+@bp.route("/remotes", methods=["PUT"])
+def add_remote() -> Response:
+    if (
+        not request.authorization
+        or request.authorization.username != LOCAL_AUTH_USER
+        or request.authorization.password != LOCAL_AUTH_PASSWORD
+    ):
+        return utils.json_response(
+            httpStatus.UNAUTHORIZED,
+            {
+                "message": "Basic auth failed. Give the correct user/password combination"
+            },
+        )
+    try:
+        remote_id = request.json.get("url")
+        remote_username = request.json.get("username")
+        remote_password = request.json.get("password")
+    except Exception as e:
+        return utils.json_response(
+            httpStatus.BAD_REQUEST,
+            {"message": res_msg.GENERAL_ERROR + str(e)},
+        )
+    remote_node = Remote_Node.query.filter_by(id=remote_id).first()
+    if remote_node:
+        return utils.json_response(
+            httpStatus.BAD_REQUEST,
+            {"message": "Remote node already exists."},
+        )
+    remote_node = Remote_Node(remote_id, remote_username, remote_password)
+    db.session.add(remote_node)
+    db.session.commit()
+    return utils.json_response(
+        httpStatus.OK,
+        {"message": "Remote node added"},
+    )
+
+
+@bp.route("/remotes/<string:remote_id>", methods=["DELETE"])
+def delete_remote(remote_id: str) -> Response:
+    if (
+        not request.authorization
+        or request.authorization.username != LOCAL_AUTH_USER
+        or request.authorization.password != LOCAL_AUTH_PASSWORD
+    ):
+        print(request.authorization.username, request.authorization.password)
+        return utils.json_response(
+            httpStatus.UNAUTHORIZED,
+            {
+                "message": "Basic auth failed. Give the correct user/password combination"
+            },
+        )
+    remote_node = Remote_Node.query.filter_by(id=remote_id).first_or_404()
+    db.session.delete(remote_node)
+    db.session.commit()
+    return utils.json_response(
+        httpStatus.OK,
+        {"message": "Remote node deleted"},
     )

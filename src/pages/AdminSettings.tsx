@@ -56,6 +56,10 @@ type RemoteNode = {
     password: string,
 }
 
+// from: https://developer.mozilla.org/en-US/docs/Glossary/Base64
+const token = window.btoa(unescape(encodeURIComponent(`${AUTH_USERNAME
+    }:${AUTH_PASSWD}`)))
+
 const Settings = ({ path }: SettingsProps) => {
     const [errMsg, setErrMsg] = useState("");
     const [isLoading, setIsLoading] = useState(true);
@@ -63,16 +67,31 @@ const Settings = ({ path }: SettingsProps) => {
     const [remoteNodes, setRemoteNodes] = useState<RemoteNode[]>([]);
     const [verifyNewUsers, setVerifyNewUsers] = useState(false);
     const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
-    const [open, setOpen] = useState(false);
+    const [selectedRemoteNodes, setSelectedRemoteNodes] = useState<string[]>([]);
+    const [open1, setOpen1] = useState(false);
+    const [open2, setOpen2] = useState(false);
+
+    // New field states
     const [newUserName, setNewUserName] = useState("");
     const [newUserGithub, setNewUserGithub] = useState("");
+    const [newRemoteNodeURL, setNewRemoteNodeURL] = useState("");
+    const [newRemoteNodeUsername, setNewRemoteNodeUsername] = useState("");
+    const [newRemoteNodePassword, setNewRemoteNodePassword] = useState("");
 
-    const openDialogue = () => {
-        setOpen(true);
+    const openDialogue1 = () => {
+        setOpen1(true);
     };
 
-    const closeDialogue = () => {
-        setOpen(false);
+    const closeDialogue1 = () => {
+        setOpen1(false);
+    };
+
+    const openDialogue2 = () => {
+        setOpen2(true);
+    };
+
+    const closeDialogue2 = () => {
+        setOpen2(false);
     };
 
     const addOrRemoveUserToSelected = (userId: string) => {
@@ -80,6 +99,14 @@ const Settings = ({ path }: SettingsProps) => {
             setSelectedUsers(selectedUsers.filter(id => id !== userId));
         } else {
             setSelectedUsers([...selectedUsers, userId]);
+        }
+    }
+
+    const addOrRemoveRemoteNodeToSelected = (userId: string) => {
+        if (selectedRemoteNodes.includes(userId)) {
+            setSelectedRemoteNodes(selectedRemoteNodes.filter(id => id !== userId));
+        } else {
+            setSelectedRemoteNodes([...selectedRemoteNodes, userId]);
         }
     }
 
@@ -94,6 +121,20 @@ const Settings = ({ path }: SettingsProps) => {
         return u.concat(await loadUsers(page + 1));
     }
 
+    const loadRemoteNodes = async (): Promise<void> => {
+        const res = await fetch("/remotes", {
+            headers: {
+                'Authorization': `Basic ${token}`
+            }
+        })
+        if (res.status !== 200) {
+            setIsLoading(false);
+            return;
+        }
+        const data = await res.json();
+        setRemoteNodes(data.items);
+    }
+
     useEffect(() => {
         loadUsers(1)
             .then(users => { setUsers(users) });
@@ -102,20 +143,7 @@ const Settings = ({ path }: SettingsProps) => {
             .then(data => {
                 setVerifyNewUsers(data.AUTOMATIC_VERIFICATION);
             })
-        // from: https://developer.mozilla.org/en-US/docs/Glossary/Base64
-        const token = window.btoa(unescape(encodeURIComponent(`${AUTH_USERNAME
-            }:${AUTH_PASSWD}`)))
-        console.info(token)
-        fetch("/remotes", {
-            headers: {
-                'Authorization': `Basic ${token}`
-            }
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (data.items)
-                    setRemoteNodes(data.items);
-            })
+        loadRemoteNodes();
     }, []);
 
     const authorTableColumns = [
@@ -259,8 +287,8 @@ const Settings = ({ path }: SettingsProps) => {
                         />
                     </Box>
                     <Box>
-                        <Button variant="contained" startIcon={<AddIcon />} onClick={openDialogue}>Create User</Button>
-                        <Dialog open={open} onClose={closeDialogue}>
+                        <Button variant="contained" startIcon={<AddIcon />} onClick={openDialogue1}>Create User</Button>
+                        <Dialog open={open1} onClose={closeDialogue1}>
                             <DialogTitle>Subscribe</DialogTitle>
                             <DialogContent>
                                 <DialogContentText>
@@ -289,7 +317,7 @@ const Settings = ({ path }: SettingsProps) => {
                                 />
                             </DialogContent>
                             <DialogActions>
-                                <Button onClick={closeDialogue}>Cancel</Button>
+                                <Button onClick={closeDialogue1}>Cancel</Button>
                                 <Button onClick={(event) => {
                                     fetch('/admin/author', {
                                         method: 'PUT',
@@ -302,7 +330,7 @@ const Settings = ({ path }: SettingsProps) => {
                                         })
                                     })
                                         .then(res => {
-                                            closeDialogue();
+                                            closeDialogue1();
                                             if (res.status === 200) {
                                                 setNewUserName('');
                                                 setNewUserGithub('');
@@ -328,18 +356,21 @@ const Settings = ({ path }: SettingsProps) => {
                                 Remote Nodes
                             </Typography>
                             <IconButton onClick={() => {
-                                selectedUsers.forEach(id => {
-                                    // TODO: replace with remote node DELETE URI
-                                    fetch(`/admin/author/${id}`, {
-                                        method: "DELETE"
+                                selectedRemoteNodes.forEach(id => {
+                                    fetch(`/remotes/${id}`, {
+                                        method: "DELETE",
+                                        headers: {
+                                            'Authorization': `Basic ${token}`
+                                        }
                                     })
                                         .then(() => {
-                                            setUsers(users.filter(u => u.id !== id));
+                                            setRemoteNodes(remoteNodes.filter(r => r.id !== id));
                                         })
                                         .catch(err => {
-                                            setErrMsg(err.message);
+                                            setErrMsg(`Remote node <${id}> does not exist.`);
                                         });
                                 })
+                                loadRemoteNodes();
                             }}>
                                 <DeleteIcon />
                             </IconButton>
@@ -358,8 +389,8 @@ const Settings = ({ path }: SettingsProps) => {
                                     {remoteNodes.map(({ id, username, password }, index) => {
                                         const label = { inputProps: { 'aria-label': 'Checkbox' } };
                                         return <TableRow>
-                                            <TableCell><Checkbox {...label} checked={selectedUsers.includes(id)} onClick={e => {
-                                                addOrRemoveUserToSelected(id);
+                                            <TableCell><Checkbox {...label} checked={selectedRemoteNodes.includes(id)} onClick={e => {
+                                                addOrRemoveRemoteNodeToSelected(id);
                                             }} /></TableCell>
                                             <TableCell><Link href={id} target="_blank" rel="noreferrer">{id}</Link></TableCell>
                                             <TableCell>{username}</TableCell>
@@ -369,6 +400,77 @@ const Settings = ({ path }: SettingsProps) => {
                                 </TableBody>
                             </Table>
                         </TableContainer>
+                    </Box>
+                    <br />
+                    <Box>
+                        <Button variant="contained" startIcon={<AddIcon />} onClick={openDialogue2}>Add Remote Node</Button>
+                        <Dialog open={open2} onClose={closeDialogue2}>
+                            <DialogTitle>Subscribe</DialogTitle>
+                            <DialogContent>
+                                <DialogContentText>
+                                    To subscribe a user, add they're public github username. We'll take care of the rest.
+                                </DialogContentText>
+                                <TextField
+                                    autoFocus
+                                    margin="dense"
+                                    id="remote_url"
+                                    value={newRemoteNodeURL}
+                                    onChange={e => { setNewRemoteNodeURL(e.target.value) }}
+                                    label="Remote Node Base URL"
+                                    type="text"
+                                    fullWidth
+                                    variant="standard"
+                                />
+                                <TextField
+                                    margin="dense"
+                                    id="remote_username"
+                                    value={newRemoteNodeUsername}
+                                    onChange={e => { setNewRemoteNodeUsername(e.target.value) }}
+                                    label="Authentication Username"
+                                    type="text"
+                                    fullWidth
+                                    variant="standard"
+                                />
+                                <TextField
+                                    margin="dense"
+                                    id="remote_password"
+                                    value={newRemoteNodePassword}
+                                    onChange={e => { setNewRemoteNodePassword(e.target.value) }}
+                                    label="Authentication Password"
+                                    type="text"
+                                    fullWidth
+                                    variant="standard"
+                                />
+                            </DialogContent>
+                            <DialogActions>
+                                <Button onClick={closeDialogue2}>Cancel</Button>
+                                <Button onClick={(event) => {
+                                    fetch('/remotes', {
+                                        method: 'PUT',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'Authorization': `Basic ${token}`
+                                        },
+                                        body: JSON.stringify({
+                                            url: newRemoteNodeURL,
+                                            username: newRemoteNodeUsername,
+                                            password: newRemoteNodePassword
+                                        })
+                                    })
+                                        .then(res => {
+                                            closeDialogue2();
+                                            if (res.status === 200) {
+                                                setNewRemoteNodeURL('');
+                                                setNewRemoteNodeUsername('');
+                                                setNewRemoteNodePassword('');
+                                                loadRemoteNodes();
+                                            } else {
+                                                setErrMsg("Remote node exists. Set a different remote node URL.");
+                                            }
+                                        })
+                                }}>Subscribe</Button>
+                            </DialogActions>
+                        </Dialog>
                     </Box>
                 </Box>}
             </DrawerMenu>
