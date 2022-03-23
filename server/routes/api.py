@@ -15,7 +15,13 @@ from telnetlib import STATUS
 from urllib import response
 from server.constants import res_msg
 from flask_login import login_user, login_required, logout_user, current_user
-from server.exts import db, LOCAL_AUTH_USER, LOCAL_AUTH_PASSWORD
+from server.exts import (
+    db,
+    LOCAL_AUTH_USER,
+    LOCAL_AUTH_PASSWORD,
+    http_basic_authentication,
+    require_authentication,
+)
 from server.models import Author, Inbox, Post, Comment, Requests, Like, Remote_Node
 from server.enums import ContentType
 from server.config import RUNTIME_SETTINGS
@@ -400,7 +406,7 @@ def get_inbox(author_id: str) -> Response:
 
 
 @bp.route("/authors/<string:author_id>/inbox", methods=["POST"])
-@login_required
+@require_authentication
 def post_inbox(author_id: str) -> Response:
     try:
         req_type = request.json["type"]
@@ -825,11 +831,7 @@ def set_settings() -> Response:
 
 @bp.route("/remotes", methods=["GET"])
 def get_remote() -> Response:
-    if (
-        not request.authorization
-        or request.authorization.username != LOCAL_AUTH_USER
-        or request.authorization.password != LOCAL_AUTH_PASSWORD
-    ):
+    if not http_basic_authentication():
         return utils.json_response(
             httpStatus.UNAUTHORIZED,
             {
@@ -851,11 +853,7 @@ def get_remote() -> Response:
 
 @bp.route("/remotes", methods=["PUT"])
 def add_remote() -> Response:
-    if (
-        not request.authorization
-        or request.authorization.username != LOCAL_AUTH_USER
-        or request.authorization.password != LOCAL_AUTH_PASSWORD
-    ):
+    if not http_basic_authentication():
         return utils.json_response(
             httpStatus.UNAUTHORIZED,
             {
@@ -888,11 +886,7 @@ def add_remote() -> Response:
 
 @bp.route("/remotes/<string:remote_id>", methods=["DELETE"])
 def delete_remote(remote_id: str) -> Response:
-    if (
-        not request.authorization
-        or request.authorization.username != LOCAL_AUTH_USER
-        or request.authorization.password != LOCAL_AUTH_PASSWORD
-    ):
+    if not http_basic_authentication():
         print(request.authorization.username, request.authorization.password)
         return utils.json_response(
             httpStatus.UNAUTHORIZED,
