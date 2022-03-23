@@ -1,5 +1,5 @@
 import { Divider } from '@mui/material';
-import { h } from 'preact'
+import { h } from 'preact';
 
 type CommentProps = {
     title: string;

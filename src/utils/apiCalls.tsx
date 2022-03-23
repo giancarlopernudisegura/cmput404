@@ -2,6 +2,7 @@ import {
   FAILED_GITHUB_STREAM,
   FAILED_CREATE_POSTS,
   FETCH_IMG_ERROR,
+  FAILED_CREATE_COMMENT,
 } from "../utils/errorMsg";
 
 const BACKEND_HOST = process.env.FLASK_HOST;
@@ -282,18 +283,19 @@ export async function getAllComments(author_id: string, post_id: string) {
     let data = await res.json();
     let listOfComments = Array();
 
-    for (let i = 0; i < data.comments.length; i++) {
-      var t = data.comments[i].published;
-      var publishTime = t.substring(0, t.lastIndexOf("T"));
-      const comment: any = {
-        title: data.comments[i].title,
-        author: data.comments[i].author.displayName,
-        comment: data.comments[i].comment,
-        published: publishTime,
-      };
-      listOfComments.push(comment);
-    }
-    return listOfComments;
+      for (let i = 0; i < data.comments.length; i++) {
+        var t = data.comments[i].published;
+        var publishTime = t.substring(0, t.lastIndexOf("T"));
+        const comment: any = {
+          title: data.comments[i].title,
+          author: data.comments[i].author.displayName,
+          comment: data.comments[i].comment,
+          published: publishTime,
+        };
+        listOfComments.push(comment);
+      }
+
+    return {...listOfComments, status: res.status};
   } catch (err) {
     throw Error("Unable to retrieve comments for this post");
   }
@@ -357,7 +359,7 @@ export async function getPostLikes(author_id: string, post_id: string) {
 /**
  * Sends a new comment for a specific post
  */
-export function newPublicComment(
+export async function newPublicComment(
   author_id: any,
   post_id: string,
   commentData: any
@@ -365,20 +367,29 @@ export function newPublicComment(
   const encodedCommentData = JSON.stringify(commentData);
 
   try {
-    fetch(`${BACKEND_HOST}/authors/${author_id}/posts/${post_id}/comments/`, {
-      mode: "cors",
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json; charset=utf-8",
-      },
-      body: encodedCommentData,
-    });
+    const res = await fetch(
+      `${BACKEND_HOST}/authors/${author_id}/posts/${post_id}/comments/`,
+      {
+        mode: "cors",
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+        },
+        body: encodedCommentData,
+      }
+    );
 
-    
+    let json = await res.json();
+
+    if (res.status === 200) {
+      return { status: res.status, ...json };
+    } else {
+      throw Error();
+    }
 
     console.log(encodedCommentData);
   } catch (err) {
-    throw Error("Unable to create a new comment for this post");
+    throw Error(FAILED_CREATE_COMMENT);
   }
 }
