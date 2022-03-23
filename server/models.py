@@ -358,3 +358,23 @@ class Inbox(db.Model, JSONSerializable):
         elif self.follow:
             follow = Requests.query.filter_by(id=self.follow).first()
             return follow.json()
+
+class Remote_Node(db.Model, JSONSerializable):#contains auth info for remote nodes
+    __tablename__ = "remote_node"
+    id = db.Column(db.String(), primary_key=True)#host name
+    user = db.Column(db.String())
+    password = db.Column(db.String())
+
+    def __init__(self, user, password):#Should create/write to db from outside our application
+        self.user = user
+        self.password = password
+
+    def json(self) -> Dict[str, Any]:
+        return{
+            "type": "remote",
+            "id": self.id,
+            "username": self.user,
+            "password": self.password
+        }
+
+    
