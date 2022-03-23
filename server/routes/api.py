@@ -26,6 +26,8 @@ from dotenv import load_dotenv
 import server.utils.api_support as utils
 from typing import Dict, Tuple
 
+from server.utils.exts import get_github_by_id
+
 load_dotenv()
 
 HOST = os.getenv("FLASK_HOST")
@@ -725,8 +727,7 @@ def create_author() -> Response:
     try:
         displayName = request.json["displayName"]
         github_username = request.json["github"]
-        resp = urlopen(f"https://api.github.com/users/{github_username}")
-        github_info = json.loads(resp.read().decode("utf-8"))
+        github_info = get_github_by_id(github_username)
         githubId = github_info["id"]
         profileImageId = github_info["avatar_url"]
         isAdmin = False
