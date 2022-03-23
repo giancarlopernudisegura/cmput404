@@ -16,8 +16,8 @@ type PostProps = {
     title: string, 
     body: string, 
     author: string, 
-    currentAuthor?: string
-    contentType: string;
+    currentAuthor?: string,
+    contentType: string,
     onRemove?: Function,
 }
 

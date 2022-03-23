@@ -4,11 +4,12 @@ import { getFollowers, get_author_id } from '../../utils/apiCalls';
 
 type AuthorProps = {
     author: any,
-    followers: Array<any>,
-    friends: Array<any>,
+
 };
 
-function AuthorInfo({ author, followers, friends }: AuthorProps) {
+function AuthorInfo({ author }: AuthorProps) {
+    const [followers, setFollowers] = useState([]);
+    const [friends, setFriends] = useState([]);
 
     if (author === undefined) {
         return <h1>Error loading information about this author.</h1>;
