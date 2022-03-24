@@ -81,7 +81,6 @@ function Profile({path}: profileProps) {
     setEditPostTitle(newPostBody.title);
     setEditIsPostMkd(newPostBody.contentType === MARKDOWN);
 
-    // setPostToEdit(newPostBody);
     setOnOpenDialog(true);
   }
 
