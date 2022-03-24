@@ -6,12 +6,11 @@ import useFollowersAndFriends from './useFollowersAndFriends';
 
 type AuthorProps = {
     author: any,
-
 };
 
 function AuthorInfo({ author }: AuthorProps) {
-    const [followers, setFollowers] = useState([]);
-    const [friends, setFriends] = useState<Array<any>>([])
+    const [myFollowers, setMyFollowers] = useState(Array());
+    const [myFriends, setMyFriends] = useState(Array())
 
     if (author === undefined) {
         return <h1>Error loading information about this author.</h1>;
@@ -23,7 +22,7 @@ function AuthorInfo({ author }: AuthorProps) {
             try {
                 let result = await getFollowers(author.id);
                 let followers = result.items;
-                setFollowers(followers);
+                setMyFollowers(followers);
 
                 return followers;
             }
@@ -34,15 +33,13 @@ function AuthorInfo({ author }: AuthorProps) {
 
         async function fetchFriends() {
             let followersPromise = fetchFollowers();
-            console.log('FOLLOWERS PROMISE', followersPromise);
 
             followersPromise
                 .then(followers => {
 
-                    var friends: Array<object> = [];
+                    var friends = new Array();
 
                     followers.forEach( (follower: any) => {
-                        console.log('initiated', author.id, 'to', follower.id);
                         let result = followerCall(follower.id, author.id, "GET")
                         result.then(data => { 
                             // if the array is non-empty, then the author is following their follower
@@ -55,13 +52,16 @@ function AuthorInfo({ author }: AuthorProps) {
                     return friends;
                 })
                 .then( (friends) => { 
-                    setFriends(friends);
+                    console.log('TYPE:', typeof(friends), 'LENGTH:', friends.length);
+                    console.log(friends);
+                    if (friends.length > 0) {
+                        setMyFriends(friends);
+                    }
                 })
                 .catch(err => { console.log('Error in fetchFriends:', err) });
 
         }
         fetchFriends();
-
     }, [])
 
 
@@ -87,8 +87,8 @@ function AuthorInfo({ author }: AuthorProps) {
 
                 {/* TODO: add friends */}
                 <div className='flex flex-row space-x-8'>
-                    <span>{friends.length} Friends</span>
-                    <span>{followers.length} Followers</span>
+                    <span>{myFriends.length} Friends</span>
+                    <span>{myFollowers.length} Followers</span>
                 </div>
 
             </div>
