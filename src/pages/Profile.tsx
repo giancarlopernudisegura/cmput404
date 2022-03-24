@@ -9,6 +9,8 @@ import PostList from "../components/PostList";
 import AuthorInfo from "../components/profile/AuthorInfo";
 import SimpleModal from "../components/Modal";
 import DialogTemplate from '../components/DialogTemplate';
+import { MARKDOWN } from '../utils/constants';
+
 
 type profileProps = {path: string}
 
@@ -17,8 +19,13 @@ function Profile({path}: profileProps) {
   const [isLoading, setIsLoading] = useState(true);
   // Dialog
   const [ openDialog, setOnOpenDialog ] = useState<boolean>(false);
-  const [ postToEdit, setPostToEdit ] = useState();
 
+  // editPost
+  const [ IdEditPost, setIdEditPost] = useState<string>("");
+  const [ editPostBody, setEditPostBody ] = useState<string>("");
+  const [ editPostCat, setEditPostCat ] = useState<string>("");
+  const [ editPostTitle, setEditPostTitle ] = useState<string>("");
+  const [ editIsPostMkd, setEditIsPostMkd ] = useState<boolean>(false);
 
   // get author data 
   const [ author, setAuthor ] = useState(Object());
@@ -66,19 +73,27 @@ function Profile({path}: profileProps) {
 
   async function handleEdit(newPostBody: any) {
     console.log("BODY", newPostBody);
-    setPostToEdit(newPostBody);
+
+    // initialize values
+    setIdEditPost(newPostBody.id);
+    setEditPostBody(newPostBody.description);
+    setEditPostCat("");
+    setEditPostTitle(newPostBody.title);
+    setEditIsPostMkd(newPostBody.contentType === MARKDOWN);
+
+    // setPostToEdit(newPostBody);
     setOnOpenDialog(true);
   }
 
-  async function editPostCall(postId: string, newPostBody: any) {
+  async function editPostCall(authorId: string, newPostBody: any) {
     try {
-      await editPost(author.id, postId, newPostBody);
+      await editPost(authorId, IdEditPost, newPostBody);
     } catch (err) {
       setErrMsg((err as Error).message);
     }
 
     const newList = myPosts.map(post => {
-      if (post.id === postId) {
+      if (post.id === IdEditPost) {
         return newPostBody;
       } else {
         return post;
@@ -114,8 +129,15 @@ function Profile({path}: profileProps) {
               {openDialog && <DialogTemplate 
                 open={openDialog}
                 handleClose={() => setOnOpenDialog(false)}
-                data={postToEdit}
                 updatePost={editPostCall}
+                postBody={editPostBody}
+                setPostBody={setEditPostBody}
+                postCat={editPostCat}
+                setPostCat={setEditPostCat}
+                postTitle={editPostTitle}
+                setPostTitle={setEditPostTitle}
+                isMarkdown={editIsPostMkd}
+                setIsMarkdown={setEditIsPostMkd}
               />}
             </div>
         )

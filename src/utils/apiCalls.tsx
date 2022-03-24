@@ -133,9 +133,8 @@ export async function newPublicPost(authorId: string, postData: any) {
   } catch (err) {
     throw Error(FAILED_CREATE_POSTS);
   }
-
-
 }
+
 
 export async function inboxCall(author_id: string, method: string, data?: any) {
   try {
@@ -285,8 +284,11 @@ export function deletePost(author_id: string, post_id: string) {
 export async function editPost(author_id: string, post_id: string, postInfo: any) {
   try {
     const response = await fetch(`${BACKEND_HOST}/authors/${author_id}/posts/${post_id}`, {
-      method: 'PUT',
-      body: JSON.stringify(postInfo)
+      method: 'POST',
+      body: JSON.stringify(postInfo),
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8',
+      }
     });
 
     let json = await response.json();

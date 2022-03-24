@@ -173,6 +173,7 @@ def specific_post(author_id: str, post_id: str) -> Response:
         )
     if request.method != "PUT":
         post = Post.query.filter_by(id=post_id).first_or_404()
+
     if request.method != "DELETE":
         try:
             author = author_id

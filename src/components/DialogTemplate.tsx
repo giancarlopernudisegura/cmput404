@@ -5,38 +5,43 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import { Button } from '@mui/material';
 import { useState } from 'preact/hooks';
+import PostForm from '../components/forms/PostForm';
 
 type DialogProps = {
     open: boolean,
     handleClose: Function,
-    data?: any,
-    updatePost: Function
+    updatePost: Function,
+    postBody: string,
+    setPostBody: Function,
+    postCat: string,
+    setPostCat: Function,
+    postTitle: string,
+    setPostTitle: Function,
+    isMarkdown: boolean,
+    setIsMarkdown: Function,
 };
 
-const DialogTemplate = ({ open, handleClose, data, updatePost }: DialogProps) => {
-    const [ newPostInfo, setPostInfo ] = useState(data); 
+const DialogTemplate = ({ open, handleClose, updatePost, postBody, setPostBody, postCat, setPostCat, postTitle, setPostTitle, isMarkdown, setIsMarkdown }: DialogProps) => {
 
-    const handlePostInfo = (event: Event) => {
-        setPostInfo((event.target as HTMLTextAreaElement).value);
-    }
-
-    console.log("TEST", data);
     return (
         <Dialog open={open} onClose={() => handleClose()}>
-            {/* <DialogTitle>{data.title}</DialogTitle> */}
-
-            <textarea
-                type="text"
-                value={newPostInfo.description}
-                onChange={handlePostInfo}
-            >
-            </textarea>
+            <PostForm
+                body={postBody}
+                setBody={setPostBody}
+                category={postCat}
+                setCategory={setPostCat}
+                title={postTitle}
+                setTitle={setPostTitle}
+                isMarkdown={isMarkdown}
+                setIsMarkdown={setIsMarkdown}
+                buttonName={"Update Post"}
+                submitAction={updatePost}
+            />
 
             <Button onClick={() => {
-                updatePost(newPostInfo);
                 handleClose();
             }}>
-                Save
+                Close
             </Button>
         </Dialog>
     );

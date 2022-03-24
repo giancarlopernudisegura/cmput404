@@ -14,8 +14,10 @@ type PostFormProps = {
     setCategory: Function,
     title: string,
     setTitle: Function,
-    markdown: boolean,
-    setMarkdown: Function
+    isMarkdown: boolean,
+    setIsMarkdown: Function,
+    buttonName: string,
+    submitAction: Function
 };
 
 type Image = {
@@ -24,25 +26,13 @@ type Image = {
     imgUrl: string
 };
 
-type State = { 
-    body: string
-    category: string
-    title: string
-    authorDisplayName: string
-    authorId: string | null
-    markdown: boolean,
-    showMarkdown: boolean,
-    tabValue: number,
-    imageMkd: string,
-    images: Array<Image>
-};
-
 const placeholderContent = {
     tempBody: "What's on your mind?",
     tempTitle: "Enter your title here",
+    tempCategory: "Enter the category here"
 };
 
-function PostForm({ body, setBody, category, setCategory, title, setTitle, markdown, setMarkdown } : PostFormProps) {
+function PostForm({ body, setBody, category, setCategory, title, setTitle, isMarkdown, setIsMarkdown, buttonName, submitAction } : PostFormProps) {
     const [ authorId, setAuthorId] = useState(null);
     const [ authorDisplayName, setAuthorDisplayName] = useState("");
     const [ tabValue, setTabValue ] = useState<number>(0);
@@ -102,7 +92,7 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, markd
     const handleSubmit = async (event: any) => {
         var contentType = PLAIN;
         let imgMkd = '';
-        if (markdown === true) {
+        if (isMarkdown === true) {
             contentType = MARKDOWN;
             const imagesList = [...images];
             // send images if there are images to send
@@ -146,7 +136,7 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, markd
             throw Error("Author Id is null");
         }
 
-        await newPublicPost(authorId, postData);
+        await submitAction(authorId, postData);
 
         
         alert('You have successfully posted to your public page!');
@@ -194,7 +184,6 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, markd
         // update state values
         setImages(allImgs);
         setImageMkd(imgMkd);
-        
     }
 
     return (
@@ -210,12 +199,14 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, markd
                         <input 
                             type="text"
                             placeholder={placeholderContent.tempTitle}
-                            onChange={handleTitle}></input>
+                            onChange={handleTitle}
+                            value={title}
+                        ></input>
                     </div>
                     
                     <Tabs value={tabValue} onChange={handleTabChange}>
                         <Tab label="Text"></Tab>
-                        {(markdown === true) && <Tab label="Preview"></Tab>}
+                        {(isMarkdown === true) && <Tab label="Preview"></Tab>}
                     </Tabs>
 
                     {(tabValue === 0) && <textarea type="text"
@@ -230,10 +221,15 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, markd
 
                     <div className='grid grid-cols-1 gap-y-2'>
                         <label>Category</label>
-                        <input type="text"></input>
+                        <input 
+                            placeholder={placeholderContent.tempCategory}
+                            type="text"
+                            onChange={handleCategory}
+                            value={category}
+                        ></input>
                     </div>
 
-                    {markdown && (
+                    {isMarkdown && (
                         <div>
                             {imageMkd && <ReactMarkdown>{imageMkd}</ReactMarkdown>}
                             <input 
@@ -248,17 +244,18 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, markd
                     
 
                     <div className="flex flex-row justify-between mt-3">
-                        <FormControlLabel 
+                        <FormControlLabel
+                            checked={isMarkdown}
                             control={<Switch />} 
                             label="Markdown" 
-                            onChange={() => setMarkdown(!markdown)}
+                            onChange={() => setIsMarkdown(!isMarkdown)}
                         />
                     </div>
                     <div>
                         <Button variant="contained"
                             onClick={handleSubmit}
                             className="w-1/3"
-                        >Share
+                        >{buttonName}
                         </Button>
                     {/* TODO: toggle public or private */}
                     </div>

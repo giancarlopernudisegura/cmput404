@@ -1,7 +1,7 @@
 import { h } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import GitHubActivity from '../components/GitHubActivity';
-import { getPosts, get_author_id, inboxCall, getGithubStream } from '../utils/apiCalls';
+import { getPosts, get_author_id, inboxCall, getGithubStream, newPublicPost } from '../utils/apiCalls';
 
 import PostForm from '../components/forms/PostForm';
 import DrawerMenu from '../components/sidemenu-components/Drawer';
@@ -17,7 +17,7 @@ function ExplorePage({ path }: ExplorePageProps) {
     const [ newPostBody, setNewPostBody ] = useState<string>("");
     const [ newPostCat, setNewPostCat ] = useState<string>("");
     const [ newPostTitle, setNewPostTitle ] = useState<string>("");
-    const [ newPostMkd, setNewPostMkd ] = useState<boolean>(false);
+    const [ newPostIsMkd, setNewIsPostMkd ] = useState<boolean>(false);
 
     // getPosts states
     const [ posts, setPosts ] = useState(Array());
@@ -72,8 +72,10 @@ function ExplorePage({ path }: ExplorePageProps) {
                 setCategory={setNewPostCat}
                 title={newPostTitle}
                 setTitle={setNewPostTitle}
-                markdown={newPostMkd}
-                setMarkdown={setNewPostMkd}
+                isMarkdown={newPostIsMkd}
+                setIsMarkdown={setNewIsPostMkd}
+                buttonName={"Share Post"}
+                submitAction={newPublicPost}
             />
             
             {posts.length > 0 &&
