@@ -1,6 +1,8 @@
 import { h } from 'preact';
 import { useState, useEffect } from 'preact/hooks';
-import { getFollowers, get_author_id } from '../../utils/apiCalls';
+import { getFollowers, followerCall } from '../../utils/apiCalls';
+import useFollowersAndFriends from './useFollowersAndFriends';
+
 
 type AuthorProps = {
     author: any,
@@ -9,11 +11,66 @@ type AuthorProps = {
 
 function AuthorInfo({ author }: AuthorProps) {
     const [followers, setFollowers] = useState([]);
-    const [friends, setFriends] = useState([]);
+    const [friends, setFriends] = useState([])
 
     if (author === undefined) {
         return <h1>Error loading information about this author.</h1>;
     }
+
+
+    useEffect( () => {
+        async function fetchFollowers() {
+            try {
+                let result = await getFollowers(author.id);
+                let followers = result.items;
+                setFollowers(followers);
+
+                return followers;
+            }
+            catch (err) {
+                console.log('Error fetching followers:', err);
+            }
+        }
+
+        async function fetchFriends() {
+            let followersPromise = fetchFollowers();
+            console.log('FOLLOWERS PROMISE', followersPromise);
+
+            var friendPromises: Array< Promise <any> > = [];
+            
+            followersPromise.then(followers => {
+                followers.forEach( (follower: any) => {
+                    console.log('initiated', author.id, 'to', follower.id);
+                    let result = followerCall(author.id, follower.id, "GET")
+                    
+                    console.log('FOLLOWER CALL', result); // FIXME: returning the wrong results 
+
+                    friendPromises.push(result);
+                });
+            });
+
+            console.log('FRIEND PROMISES', friendPromises); // Wrong length?
+            var allPromises = await Promise.all(friendPromises);
+            console.log(allPromises); //FIXME: why is this empty?
+            // allPromises.then((results) => {
+            //     let friendList: Array<any> = [];
+            //     results.forEach((data) => {
+            //         if (data.status === 200) {
+            //             friendList.push(...data.items);
+            //         }
+            //     })
+            //     return friendList;
+            // });
+            
+            console.log('FRIENDS', allPromises);
+            // friendsPromise.then( (friends:any) => { setFriends(friends); });
+
+        }
+        fetchFriends();
+    
+    }, [])
+
+
 
 
     return(

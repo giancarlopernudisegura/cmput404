@@ -281,7 +281,7 @@ export function deletePost(author_id: string, post_id: string) {
   return response;
 }
 
-export function getFollowers(author_id: number) {
+export function getFollowers(author_id: string) : Promise<any> {
   const response = fetch(`${BACKEND_HOST}/authors/${author_id}/followers/`, {
     mode: 'cors',
     method: 'GET',
