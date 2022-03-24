@@ -36,6 +36,7 @@ function AuthorInfo({ author }: AuthorProps) {
                 let followers = await fetchFollowers();
                 var friends = new Array();
 
+                /*
                 // APPROACH 1
                 let promises: any = [];
                 followers.forEach((follower: any) => {
@@ -59,12 +60,24 @@ function AuthorInfo({ author }: AuthorProps) {
 
                 console.log('FRIENDS', friends);
                 setMyFriends(friends);
-            
+                */
 
-                // // APPROACH 2
-                // for (let follower of followers) {
-
-                // }
+                // APPROACH 2
+                for (let follower of followers) {
+                    let res = await followerCall(follower.id, author.id, "GET");
+                    // Make an API call to check if the author is following the follower
+                    if (res.status === 200) {
+                        let data = res.items;
+                        // if the array is non-empty, it is a follow
+                        if (data.length > 0) {
+                            friends.push(follower);
+                        }
+                    } else {
+                        throw Error();
+                    }
+                }
+                console.log('FRIENDS', friends);
+                setMyFriends(friends);
 
             } catch (err) {
                 console.log('Error fetching friends:', err);
