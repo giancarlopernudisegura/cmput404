@@ -5,7 +5,9 @@ import os
 #utils
 
 def convert_id_to_remote(id: str, url: str):#
-    pass
+    if "://" in id:
+        return id
+    return url + id
 
 def find_remote_author(author_id: str):
     nodes = Remote_Node.query.all()
@@ -17,7 +19,7 @@ def find_remote_author(author_id: str):
 
 #endpoint interactions
     
-def get_all_remote_authors():#for downed remote https://website404.herokuapp.com/authors?size=10&page=1
+def get_all_remote_authors():
     nodes = Remote_Node.query.all()
     items = []   
     for node in nodes:
@@ -99,9 +101,14 @@ def get_remote_author_liked(author_id: str):
 def get_remote_followers(author_id: str):
     nodes = Remote_Node.query.all()
     for node in nodes:
-        r = requests.get(f"{node.id}authors/{author_id}/followers", auth=(node.username, node.password))
-        if r.status_code == 200 and (r.json()["type"] == "following" or r.json()["type"] == "followers" ):
+        #node 1
+        r = requests.get(f"{node.id}authors/{author_id}/following", auth=(node.username, node.password))
+        if r.status_code == 200 and r.json()["type"] == "following":
             return r.json()["items"]
+        #node 2
+        r = requests.get(f"{node.id}authors/{author_id}/followers", auth=(node.username, node.password))
+        if r.status_code == 200 and r.json()["type"] == "followers":
+            pass#too much headache to integrate right now
     return []
 
 def check_remote_is_following(author_id: str, follower_id: str):
