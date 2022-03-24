@@ -10,6 +10,7 @@ from server.models import Author, Post
 from server.enums import ContentType
 import os
 from dotenv import load_dotenv
+from flask import request
 
 
 load_dotenv()
@@ -65,16 +66,19 @@ def create_app(config_filename=None):
     # add CORS
     @app.after_request
     def after_request(response):
-        response.headers.add("Access-Control-Allow-Origin", f"{FRONT_END_HOST}")
-        response.headers.add(
-            "Access-Control-Allow-Headers", "Content-Type,Authorization,Set-Cookie"
-        )
-        response.headers.add("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE")
-        response.headers.add("Access-Control-Allow-Credentials", "true")
-        response.headers.add("Access-Control-Expose-Headers", "X-User-Id")
-        if current_user.is_authenticated:
-            response.headers.add("X-User-Id", f"{current_user.id}")
-        return response
+        allowed_origins = [f"{FRONT_END_HOST}", "https://frontend404.herokuapp.com", "https://website404.herokuapp.com", "https://backend-404.herokuapp.com"]
+
+        if request.headers["Origin"] in allowed_origins:
+            response.headers.add("Access-Control-Allow-Origin", f"{FRONT_END_HOST}")
+            response.headers.add(
+                "Access-Control-Allow-Headers", "Content-Type,Authorization,Set-Cookie"
+            )
+            response.headers.add("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE")
+            response.headers.add("Access-Control-Allow-Credentials", "true")
+            response.headers.add("Access-Control-Expose-Headers", "X-User-Id")
+            if current_user.is_authenticated:
+                response.headers.add("X-User-Id", f"{current_user.id}")
+            return response
 
     return app
 
