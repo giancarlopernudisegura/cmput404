@@ -200,7 +200,7 @@ class Comment(db.Model, JSONSerializable):
         return {
             "type": "comment",
             "author": author.json(),
-            "comment": self.content,
+            "content": self.content,
             "contentType": str(self.contentType),
             "published": self.timestamp.isoformat(),
             "id": f"{HOST}/authors/{author.id}/posts/{self.post}/comments/{self.id}",

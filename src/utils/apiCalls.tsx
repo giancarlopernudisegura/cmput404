@@ -1,58 +1,64 @@
-import { FAILED_GITHUB_STREAM, FAILED_CREATE_POSTS, FETCH_IMG_ERROR } from '../utils/errorMsg';
-
+import {
+  FAILED_GITHUB_STREAM,
+  FAILED_CREATE_POSTS,
+  FETCH_IMG_ERROR,
+  FAILED_CREATE_COMMENT,
+} from "../utils/errorMsg";
 
 const BACKEND_HOST = process.env.FLASK_HOST;
 /**
  * Returns the current user's information.
- * 
+ *
  * Reference: https://dev.to/ramonak/javascript-how-to-access-the-return-value-of-a-promise-object-1bck
  */
 export function getCurrentAuthor() {
   const currentAuthor = fetch(`${BACKEND_HOST}/user_me`, {
-    mode: 'cors',
-    credentials: 'include',
-    method: 'GET',
+    mode: "cors",
+    credentials: "include",
+    method: "GET",
   })
-    .then(res => res.json())
-    .then(user_data => { return user_data.data })
-    .catch(err => { console.log("ERROR:", err) });
+    .then((res) => res.json())
+    .then((user_data) => {
+      return user_data.data;
+    })
+    .catch((err) => {
+      console.log("ERROR:", err);
+    });
 
   const getAuthor = async () => {
     const author = await currentAuthor;
     return author;
-  }
+  };
 
   return getAuthor();
-
-};
+}
 
 export const get_author_id = async () => {
   const res = await fetch(`${BACKEND_HOST}/login_test`, {
-    mode: 'cors',
-    credentials: 'include',
-    method: 'GET',
+    mode: "cors",
+    credentials: "include",
+    method: "GET",
   });
   if (res.status === 200) {
-    const currentUserId = res.headers.get('X-User-Id') as string;
+    const currentUserId = res.headers.get("X-User-Id") as string;
     if (currentUserId === null) {
-      throw new Error('Could not get user id');
+      throw new Error("Could not get user id");
     }
     return currentUserId;
   }
-  throw new Error('Could not get user id');
+  throw new Error("Could not get user id");
 };
 
 /**
  * Gets the posts of the given author_id
- * @param author_id 
+ * @param author_id
  * @returns Array<Post>
  */
 export async function getPosts(author_id: string): Promise<any> {
-
   try {
     let res = await fetch(`${BACKEND_HOST}/authors/${author_id}/posts/`, {
-      mode: 'cors',
-      method: 'GET',
+      mode: "cors",
+      method: "GET",
     });
 
     let data = await res.json();
@@ -60,11 +66,12 @@ export async function getPosts(author_id: string): Promise<any> {
 
     for (let i = 0; i < data.items.length; i++) {
       const post: any = {
-        'id': data.items[i].id,
-        'author': data.items[i].author.displayName,
-        'title': data.items[i].title,
-        'description': data.items[i].description,
-        'contentType': data.items[i].contentType,
+        postId: data.items[i].id,
+        authorName: data.items[i].author.displayName,
+        authorId: data.items[i].author.id,
+        title: data.items[i].title,
+        description: data.items[i].description,
+        contentType: data.items[i].contentType,
       };
       listOfPosts.push(post);
     }
@@ -73,7 +80,7 @@ export async function getPosts(author_id: string): Promise<any> {
   } catch (err) {
     throw Error("There was an error fetching the posts");
   }
-};
+}
 
 /**
  * Gets a list of all authenticated authors
@@ -83,26 +90,26 @@ export async function getPosts(author_id: string): Promise<any> {
 export const getAllAuthors = async (page: number) => {
   try {
     const res = await fetch(`${BACKEND_HOST}/authors/?size=10&page=${page}`, {
-      mode: 'cors',
-      method: 'GET',
+      mode: "cors",
+      method: "GET",
     });
 
     if (res.status == 200) {
-      const currentUserId = res.headers.get('X-User-Id');
+      const currentUserId = res.headers.get("X-User-Id");
       let listOfAuthors = await res.json();
       return { ...listOfAuthors, currentUserId };
     } else {
-      return { items: [] }
+      return { items: [] };
     }
   } catch (err) {
-    throw Error('There was an error fetching all authors');
+    throw Error("There was an error fetching all authors");
   }
-}
+};
 
 /**
  * Sends a post to the backend
  * @param authorId  the id of the author
- * @param postData  form data of the post 
+ * @param postData  form data of the post
  */
 export async function newPublicPost(authorId: string, postData: any) {
   const encodedPostData = JSON.stringify(postData);
@@ -110,16 +117,16 @@ export async function newPublicPost(authorId: string, postData: any) {
   let res;
   let json;
   try {
-    // postData contains data from the forms 
+    // postData contains data from the forms
     res = await fetch(`${BACKEND_HOST}/authors/${authorId}/posts/`, {
-      mode: 'cors',
-      method: 'POST',
-      credentials: 'include',
+      mode: "cors",
+      method: "POST",
+      credentials: "include",
       headers: {
-        'Content-Type': 'application/json; charset=utf-8',
+        "Content-Type": "application/json; charset=utf-8",
       },
-      body: encodedPostData
-    })
+      body: encodedPostData,
+    });
 
     json = await res.json();
 
@@ -132,8 +139,6 @@ export async function newPublicPost(authorId: string, postData: any) {
   } catch (err) {
     throw Error(FAILED_CREATE_POSTS);
   }
-
-
 }
 
 export async function inboxCall(author_id: string, method: string, data?: any) {
@@ -143,17 +148,17 @@ export async function inboxCall(author_id: string, method: string, data?: any) {
     if (data !== undefined) {
       metadata = {
         headers: {
-          'Content-Type': 'application/json; charset=utf-8',
+          "Content-Type": "application/json; charset=utf-8",
         },
-        body: JSON.stringify(data)
-      }
+        body: JSON.stringify(data),
+      };
     }
 
     const res = await fetch(`${BACKEND_HOST}/authors/${author_id}/inbox/`, {
       method: method,
-      credentials: 'include',
-      ...metadata
-    })
+      credentials: "include",
+      ...metadata,
+    });
     // TODO change return value
     return await res.json();
   } catch (err) {
@@ -164,24 +169,30 @@ export async function inboxCall(author_id: string, method: string, data?: any) {
 export async function clearInbox(author_id: string): Promise<boolean> {
   try {
     const res = await fetch(`${BACKEND_HOST}/authors/${author_id}/inbox/`, {
-      method: 'DELETE'
-    })
+      method: "DELETE",
+    });
 
     // TODO: change return value
     return res.status === 200;
   } catch (err) {
-    throw Error('Unable to clear inbox');
+    throw Error("Unable to clear inbox");
   }
 }
 
-export async function getGithubStream(author_id: string, per_page = 30, page = 1): Promise<any> {
+export async function getGithubStream(
+  author_id: string,
+  per_page = 30,
+  page = 1
+): Promise<any> {
   try {
     // TODO: change return value
-    const res = await fetch(`${BACKEND_HOST}/authors/${author_id}`)
+    const res = await fetch(`${BACKEND_HOST}/authors/${author_id}`);
     const { github } = await res.json();
     const regexPattern = /^https:\/\/github.com\/(\w+)\/?/;
     const githubID = regexPattern.exec(github)![1];
-    const stream = await fetch(`https://api.github.com/users/${githubID}/events?per_page=${per_page}&page=${page}`);
+    const stream = await fetch(
+      `https://api.github.com/users/${githubID}/events?per_page=${per_page}&page=${page}`
+    );
     return await stream.json();
   } catch (err) {
     throw Error(FAILED_GITHUB_STREAM);
@@ -191,9 +202,9 @@ export async function getGithubStream(author_id: string, per_page = 30, page = 1
 export const logOutCall = async () => {
   try {
     const res = await fetch(`${BACKEND_HOST}/logout`, {
-      mode: 'cors',
-      credentials: 'include',
-      method: 'POST',
+      mode: "cors",
+      credentials: "include",
+      method: "POST",
     });
 
     if (res.status === 200) {
@@ -203,17 +214,24 @@ export const logOutCall = async () => {
       return { status: res.status };
     }
   } catch (err) {
-    throw Error('Unable to log out user');
+    throw Error("Unable to log out user");
   }
-}
+};
 
-export const followerCall = async (currentUserId: string, toFollowId: string, method: string) => {
+export const followerCall = async (
+  currentUserId: string,
+  toFollowId: string,
+  method: string
+) => {
   try {
-    const res = await fetch(`${BACKEND_HOST}/authors/${currentUserId}/followers/${toFollowId}`, {
-      mode: 'cors',
-      credentials: 'include',
-      method,
-    });
+    const res = await fetch(
+      `${BACKEND_HOST}/authors/${currentUserId}/followers/${toFollowId}`,
+      {
+        mode: "cors",
+        credentials: "include",
+        method,
+      }
+    );
 
     if (res.status === 200) {
       let json = [];
@@ -224,18 +242,18 @@ export const followerCall = async (currentUserId: string, toFollowId: string, me
 
       return { ...json, status: res.status };
     }
-    return { status: res.status }
+    return { status: res.status };
   } catch (err) {
-    throw Error('Unable to make follow actions on user');
+    throw Error("Unable to make follow actions on user");
   }
-}
+};
 
 export const getSpecAuthor = async (author_id: string) => {
   try {
     const res = await fetch(`${BACKEND_HOST}/authors/${author_id}`, {
-      mode: 'cors',
-      credentials: 'include',
-      method: 'GET',
+      mode: "cors",
+      credentials: "include",
+      method: "GET",
     });
 
     let json = [];
@@ -245,15 +263,54 @@ export const getSpecAuthor = async (author_id: string) => {
 
     return { status: res.status, ...json };
   } catch (err) {
-    throw Error('Unable to get the information about this user');
+    throw Error("Unable to get the information about this user");
+  }
+};
+
+/**
+ * Get all comments for a specific post
+ */
+export async function getAllComments(author_id: string, post_id: string) {
+  try {
+    const res = await fetch(
+      `${BACKEND_HOST}/authors/${author_id}/posts/${post_id}/comments`,
+      {
+        mode: "cors",
+        method: "GET",
+      }
+    );
+
+    let data = await res.json();
+    console.log(data)
+    let listOfComments = Array();
+
+    for (let i = 0; i < data.comments.length; i++) {
+      var t = data.comments[i].published;
+      var publishTime = t.substring(0, t.lastIndexOf("T"));
+      const comment: any = {
+        // title: data.comments[i].title,
+        author: data.comments[i].author.displayName,
+        content: data.comments[i].content,
+        published: publishTime,
+      };
+      listOfComments.push(comment);
+    }
+
+    return listOfComments
+    // return { ...listOfComments, status: res.status };
+  } catch (err) {
+    throw Error("Unable to retrieve comments for this post");
   }
 }
 
 export const serveImage = async (authorId: string, postId: string) => {
   try {
-    const res = await fetch(`${BACKEND_HOST}/authors/${authorId}/posts/${postId}/image`, {
-      method: 'GET'
-    });
+    const res = await fetch(
+      `${BACKEND_HOST}/authors/${authorId}/posts/${postId}/image`,
+      {
+        method: "GET",
+      }
+    );
 
     let json = res.json();
 
@@ -263,25 +320,75 @@ export const serveImage = async (authorId: string, postId: string) => {
   } catch (err) {
     throw Error(FETCH_IMG_ERROR);
   }
-}
+};
 
 export function deletePost(author_id: string, post_id: string) {
-  const response = fetch(`${BACKEND_HOST}/authors/${author_id}/posts/${post_id}`, {
-    mode: 'cors',
-    credentials: 'include',
-    method: 'DELETE',
-  })
-    .then(res => {
+  const response = fetch(
+    `${BACKEND_HOST}/authors/${author_id}/posts/${post_id}`,
+    {
+      mode: "cors",
+      credentials: "include",
+      method: "DELETE",
+    }
+  )
+    .then((res) => {
       return res.status;
     })
-    .catch(err => {
-      throw Error('Unable to delete post');
+    .catch((err) => {
+      throw Error("Unable to delete post");
     });
 
   return response;
 }
 
+/**
+ * Get likes for a specific post TODO
+ */
+export async function getPostLikes(author_id: string, post_id: string) {
+  const res = await fetch(
+    `${BACKEND_HOST}/authors/${author_id}/posts/${post_id}/likes`,
+    {
+      mode: "cors",
+      credentials: "include",
+      method: "GET",
+    }
+  );
+
+  let data = res.json();
+  return data;
+}
+/**
+ * Sends a new comment for a specific post
+ */
+export async function newPublicComment(
+  author_id: any,
+  post_id: string,
+  commentData: any
+) {
+  const encodedCommentData = JSON.stringify(commentData);
+
+  try {
+    const res = await fetch(
+      `${BACKEND_HOST}/authors/${author_id}/posts/${post_id}/comments/`,
+      {
+        mode: "cors",
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+        },
+        body: encodedCommentData,
+      }
+    );
+
+    console.log(encodedCommentData);
+    
+  } catch (err) {
+    throw Error(FAILED_CREATE_COMMENT);
+  }
+}
+
 export function isLocal(node: string) {
   const regex = `^${BACKEND_HOST}`;
-  return Boolean(node.match(regex))
+  return Boolean(node.match(regex));
 }
