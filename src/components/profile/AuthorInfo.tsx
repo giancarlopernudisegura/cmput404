@@ -11,7 +11,7 @@ type AuthorProps = {
 
 function AuthorInfo({ author }: AuthorProps) {
     const [followers, setFollowers] = useState([]);
-    const [friends, setFriends] = useState([])
+    const [friends, setFriends] = useState<Array<any>>([])
 
     if (author === undefined) {
         return <h1>Error loading information about this author.</h1>;
@@ -36,38 +36,32 @@ function AuthorInfo({ author }: AuthorProps) {
             let followersPromise = fetchFollowers();
             console.log('FOLLOWERS PROMISE', followersPromise);
 
-            var friendPromises: Array< Promise <any> > = [];
-            
-            followersPromise.then(followers => {
-                followers.forEach( (follower: any) => {
-                    console.log('initiated', author.id, 'to', follower.id);
-                    let result = followerCall(author.id, follower.id, "GET")
-                    
-                    console.log('FOLLOWER CALL', result); // FIXME: returning the wrong results 
+            followersPromise
+                .then(followers => {
 
-                    friendPromises.push(result);
-                });
-            });
+                    var friends: Array<object> = [];
 
-            console.log('FRIEND PROMISES', friendPromises); // Wrong length?
-            var allPromises = await Promise.all(friendPromises);
-            console.log(allPromises); //FIXME: why is this empty?
-            // allPromises.then((results) => {
-            //     let friendList: Array<any> = [];
-            //     results.forEach((data) => {
-            //         if (data.status === 200) {
-            //             friendList.push(...data.items);
-            //         }
-            //     })
-            //     return friendList;
-            // });
-            
-            console.log('FRIENDS', allPromises);
-            // friendsPromise.then( (friends:any) => { setFriends(friends); });
+                    followers.forEach( (follower: any) => {
+                        console.log('initiated', author.id, 'to', follower.id);
+                        let result = followerCall(follower.id, author.id, "GET")
+                        result.then(data => { 
+                            // if the array is non-empty, then the author is following their follower
+                            if (data.items.length > 0) {
+                                friends.push(follower);
+                            }
+                        });
+                    });
+
+                    return friends;
+                })
+                .then( (friends) => { 
+                    setFriends(friends);
+                })
+                .catch(err => { console.log('Error in fetchFriends:', err) });
 
         }
         fetchFriends();
-    
+
     }, [])
 
 
