@@ -15,7 +15,6 @@ function AuthorInfo({ author }: AuthorProps) {
         return <h1>Error loading information about this author.</h1>;
     }
 
-
     useEffect( () => {
         async function fetchFollowers() {
             try {
@@ -30,17 +29,18 @@ function AuthorInfo({ author }: AuthorProps) {
             }
         }
 
+        fetchFollowers();
+    }, [])
+
+    
+    useEffect( () => {
+
         async function fetchFriends() {
             
             try {
-                // let followers = await fetchFollowers();
-                let result = await getFollowers(author.id);
-                let followers = result.items;
-                setMyFollowers(followers);
-                
                 var friends = new Array();
 
-                followers.forEach( async (follower: any) => {
+                myFollowers.forEach( async (follower: any) => {
                     let result = await followerCall(follower.id, author.id, "GET")
                     let data = result.items;
                     if (data.length > 0) {
@@ -54,36 +54,11 @@ function AuthorInfo({ author }: AuthorProps) {
                 console.log('Error fetching friends:', err);
             }
 
-            // followersPromise
-            //     .then(followers => {
-
-            //         var friends = new Array();
-
-            //         // Iterate through the followers and check if the author is following any of their followers 
-            //         followers.forEach( (follower: any) => {
-            //             // Make an API call to check if the author is following the follower
-            //             let result = followerCall(follower.id, author.id, "GET")
-            //             result.then(data => { 
-            //                 // if the array is non-empty, it is a follow
-            //                 if (data.items.length > 0) {
-            //                     friends.push(follower);
-            //                 }
-            //             });
-            //         });
-
-            //         return friends;
-            //     })
-            //     .then( (friends) => { 
-            //         console.log('friends:', friends);
-            //         setMyFriends(friends); //FIXME returns 0, i don't have friends 😭
-            //     })
-            //     .catch(err => { console.log('Error in fetchFriends:', err) });
-
         }
         fetchFriends();
       
-    }, [])
-
+    }, [myFollowers]); // run after myFollowers has been set 
+    
 
 
     return(
