@@ -3,7 +3,7 @@ from flask import current_app
 from server.exts import db
 from server.enums import ContentType
 from server.utils.exts import get_github_info
-import datetime
+import datetime, uuid
 import os
 from dotenv import load_dotenv
 import json
@@ -13,6 +13,10 @@ from typing import Any, Dict, Union, Sequence
 load_dotenv()
 
 HOST = os.getenv("FLASK_HOST")
+
+
+def generate_uuid():
+    return str(uuid.uuid4())
 
 
 class JSONSerializable(object):
@@ -38,7 +42,7 @@ class InboxItem(object):
 # Models go here
 class Author(db.Model, UserMixin, JSONSerializable):
     __tablename__ = "author"
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String(), primary_key=True, default=generate_uuid)
     displayName = db.Column(db.String())
     githubId = db.Column(db.String())
     profileImageId = db.Column(db.String())
@@ -81,7 +85,7 @@ class Author(db.Model, UserMixin, JSONSerializable):
 
 class Post(db.Model, JSONSerializable, InboxItem):
     __tablename__ = "post"
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String(), primary_key=True, default=generate_uuid)
     author = db.Column(db.ForeignKey("author.id"))
     timestamp = db.Column(db.DateTime())
     private = db.Column(db.Boolean())  # only friends can see
@@ -169,7 +173,7 @@ class Post(db.Model, JSONSerializable, InboxItem):
 
 class Comment(db.Model, JSONSerializable):
     __tablename__ = "comment"
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String(), primary_key=True, default=generate_uuid)
     author = db.Column(db.ForeignKey("author.id"))
     post = db.Column(db.ForeignKey("post.id"))
     content = db.Column(db.String())
@@ -205,7 +209,7 @@ class Comment(db.Model, JSONSerializable):
 
 
 class Like(db.Model, JSONSerializable, InboxItem):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String(), primary_key=True, default=generate_uuid)
     author = db.Column(db.ForeignKey("author.id"))
     post = db.Column(db.ForeignKey("post.id"))
     comment = db.Column(db.ForeignKey("comment.id"))
@@ -244,7 +248,7 @@ class Like(db.Model, JSONSerializable, InboxItem):
 
     def push(self):
         DbObject = Post if self.post else Comment
-        if self.comment:#assume that the constructor is doing a good job
+        if self.comment:  # assume that the constructor is doing a good job
             recepient = DbObject.query.filter_by(id=self.comment).first().author
         elif self.post:
             recepient = DbObject.query.filter_by(id=self.post).first().author
@@ -252,21 +256,18 @@ class Like(db.Model, JSONSerializable, InboxItem):
         db.session.add(inbox)
         db.session.commit()
 
-    def delete(self):#remove all like refs from inbox before deleting
+    def delete(self):  # remove all like refs from inbox before deleting
         inboxRefs = Inbox.query.filter_by(like=self.id)
         for inbox in inboxRefs:
             db.session.delete(inbox)
         db.session.commit()
-        db.session.delete(self)#can we do this before the last commit without issues?
+        db.session.delete(self)  # can we do this before the last commit without issues?
         db.session.commit()
-
-
-            
 
 
 class Requests(db.Model, JSONSerializable):  # follow requests
     __tablename__ = "requests"
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String(), primary_key=True, default=generate_uuid)
     initiated = db.Column(db.ForeignKey("author.id"))  # follower
     to = db.Column(db.ForeignKey("author.id"))
     timestamp = db.Column(db.DateTime())
@@ -279,6 +280,8 @@ class Requests(db.Model, JSONSerializable):  # follow requests
         self.timestamp = datetime.datetime.now()
         self.initiated = initiated
         self.to = to
+        if self.id == None:
+            self.id = str(uuid.uuid4())  # odd bug fix
 
     def __repr__(self):
         return f"<id {self.id}>"
@@ -302,7 +305,7 @@ class Requests(db.Model, JSONSerializable):  # follow requests
 
 class ViewablePostRelation(db.Model):
     __tablename__ = "viewablePostRelation"
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String(), primary_key=True, default=generate_uuid)
     post = db.Column(db.ForeignKey("post.id"))
     # the person who is allowed to view post
     viewConsumer = db.Column(db.ForeignKey("author.id"))
@@ -318,7 +321,7 @@ def __init__(self, post, viewConsumer):
 
 class Inbox(db.Model, JSONSerializable):
     __tablename__ = "inbox"
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String(), primary_key=True, default=generate_uuid)
     owner = db.Column(db.ForeignKey("author.id"))
     post = db.Column(db.ForeignKey("post.id"))
     like = db.Column(db.ForeignKey("like.id"))
@@ -355,3 +358,24 @@ class Inbox(db.Model, JSONSerializable):
         elif self.follow:
             follow = Requests.query.filter_by(id=self.follow).first()
             return follow.json()
+
+
+class Remote_Node(db.Model, JSONSerializable):  # contains auth info for remote nodes
+    __tablename__ = "remote_node"
+    id = db.Column(db.String(), primary_key=True)  # host name
+    user = db.Column(db.String())
+    password = db.Column(db.String())
+
+    def __init__(self, id, user, password):
+        # Should create/write to db from outside our application
+        self.id = id
+        self.user = user
+        self.password = password
+
+    def json(self) -> Dict[str, Any]:
+        return {
+            "type": "remote",
+            "id": self.id,
+            "username": self.user,
+            "password": self.password,
+        }

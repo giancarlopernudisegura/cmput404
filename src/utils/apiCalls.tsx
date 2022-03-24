@@ -281,21 +281,23 @@ export async function getAllComments(author_id: string, post_id: string) {
     );
 
     let data = await res.json();
+    console.log(data)
     let listOfComments = Array();
 
-      for (let i = 0; i < data.comments.length; i++) {
-        var t = data.comments[i].published;
-        var publishTime = t.substring(0, t.lastIndexOf("T"));
-        const comment: any = {
-          title: data.comments[i].title,
-          author: data.comments[i].author.displayName,
-          comment: data.comments[i].comment,
-          published: publishTime,
-        };
-        listOfComments.push(comment);
-      }
+    for (let i = 0; i < data.comments.length; i++) {
+      var t = data.comments[i].published;
+      var publishTime = t.substring(0, t.lastIndexOf("T"));
+      const comment: any = {
+        // title: data.comments[i].title,
+        author: data.comments[i].author.displayName,
+        comment: data.comments[i].comment,
+        published: publishTime,
+      };
+      listOfComments.push(comment);
+    }
 
-    return {...listOfComments, status: res.status};
+    return listOfComments
+    // return { ...listOfComments, status: res.status };
   } catch (err) {
     throw Error("Unable to retrieve comments for this post");
   }
@@ -355,7 +357,6 @@ export async function getPostLikes(author_id: string, post_id: string) {
   let data = res.json();
   return data;
 }
-
 /**
  * Sends a new comment for a specific post
  */
@@ -380,6 +381,8 @@ export async function newPublicComment(
       }
     );
 
+    console.log(encodedCommentData);
+
     let json = await res.json();
 
     if (res.status === 200) {
@@ -388,8 +391,13 @@ export async function newPublicComment(
       throw Error();
     }
 
-    console.log(encodedCommentData);
+    
   } catch (err) {
     throw Error(FAILED_CREATE_COMMENT);
   }
+}
+
+export function isLocal(node: string) {
+  const regex = `^${BACKEND_HOST}`;
+  return Boolean(node.match(regex));
 }

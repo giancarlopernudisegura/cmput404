@@ -21,8 +21,7 @@ def frontend_page(authenticated: bool) -> Response:
 @bp.route("/", methods=["GET"])
 @bp.route("/homepage", methods=["GET"])
 @bp.route("/profile", methods=["GET"])
-@bp.route("/notifications", methods=["GET"])
-@bp.route("/user/<int:user_id>", methods=["GET"])
+@bp.route("/inbox", methods=["GET"])
 def index():
     return frontend_page(current_user.is_authenticated)
 
@@ -35,14 +34,11 @@ def login():
         return frontend_page(True)
 
 
-@bp.route("/inbox", methods=["GET"])
-def inbox():
-    return frontend_page()
-
-@bp.route('/user/<int:user_id>', methods=["GET"])
+@bp.route("/user/<int:user_id>", methods=["GET"])
 def user(user_id):
-    return frontend_page()
-    
+    return frontend_page(current_user.is_authenticated)
+
+
 @bp.route("/admin", methods=["GET"])
 @login_required
 def admin():
