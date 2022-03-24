@@ -22,6 +22,7 @@ from server.config import RUNTIME_SETTINGS
 from http import HTTPStatus as httpStatus
 import os, io, binascii
 from dotenv import load_dotenv
+from server.remote_query import *
 
 import server.utils.api_support as utils
 from typing import Dict, Tuple
@@ -66,6 +67,8 @@ def multiple_authors() -> Response:
     """
     page, size = pagination(request.args)
     authors = Author.query.paginate(page=page, per_page=size).items
+    remote_authors =get_all_remote_authors()
+    print(f"Remote authors {remote_authors}")
     return (
         make_response(
             jsonify(
@@ -90,8 +93,16 @@ def single_author(author_id: str) -> Response:
         Response: Flask.Response object containing the json of the author.
     """
     if request.method == "GET":
-        author = Author.query.filter_by(id=author_id).first_or_404()
-        return make_response(jsonify(author.json())), httpStatus.OK
+        author = Author.query.filter_by(id=author_id).first()
+        if author != None:#local author
+            return make_response(jsonify(author.json())), httpStatus.OK
+        else:#try remote author
+            remote_author_dict = get_remote_author(author_id)
+            if remote_author_dict != None:
+                return make_response(jsonify(remote_author_dict)), httpStatus.OK
+            else:
+                return Response(status=httpStatus.NOT_FOUND)
+
     elif request.method == "POST":
         # request.json.get('displayName')
         pass
