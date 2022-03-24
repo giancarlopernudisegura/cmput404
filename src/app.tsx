@@ -20,11 +20,10 @@ const App = () => {
       <Router>
         <ExplorePage path="/app" />
         <Login path="/app/login" />
-        <Homepage path="/app/homepage"/>
-        <Profile path="/app/profile"/>
-        <Inbox path="/app/inbox"/>
+        <Homepage path="/app/homepage" />
+        <Profile path="/app/profile" />
+        <Inbox path="/app/inbox" />
         <UserPage path="/app/user/:followId" />
-        <AdminSettings path="/app/admin" />
         <AdminSettings path="/app/admin" />
       </Router>
     </div>
