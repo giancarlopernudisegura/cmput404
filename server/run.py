@@ -66,6 +66,7 @@ def create_app(config_filename=None):
     # add CORS
     @app.after_request
     def after_request(response):
+        #TODO: get URLs from Remote_Node table
         allowed_origins = [f"{FRONT_END_HOST}", "https://frontend404.herokuapp.com", "https://website404.herokuapp.com", "https://backend-404.herokuapp.com"]
 
         if request.environ.get('HTTP_ORIGIN', f"{FRONT_END_HOST}") in allowed_origins:
