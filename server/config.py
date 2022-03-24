@@ -21,6 +21,7 @@ class BaseConfig:
     AUTOMATIC_VERIFICATION = True
 
 
+
 class DevelopmentConfig(BaseConfig):
     ENV = "development"
     DEBUG = True
