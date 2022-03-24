@@ -71,3 +71,23 @@ def get_remote_comment_likes(author_id: str, post_id: str, comment_id: str):
         if r.status_code == 200 and r.json()["type"] == "likes":
             return r.json()["items"]
     return []
+
+
+def get_remote_author_liked(author_id: str):
+    nodes = Remote_Node.query.all()
+    for node in nodes:
+        r = requests.get(f"{node.id}authors/{author_id}/liked?size=30&page=1")
+        if r.status_code == 200 and r.json()["type"] == "liked":  
+            return r.json()["items"]
+        return []
+
+def get_remote_followers():
+    pass
+
+def get_remote_inbox(author_id: str):
+    nodes = Remote_Node.query.all()
+    for node in nodes:
+        r = requests.get(f"{node.id}authors/{author_id}/inbox", auth=(node.username, node.password))
+        if r.status_code == 200 and r.json()["type"] == "inbox":
+            pass
+    pass
