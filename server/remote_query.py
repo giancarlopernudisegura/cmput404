@@ -1,6 +1,21 @@
 from server.models import Author, Inbox, Post, Comment, Requests, Like, Remote_Node
 import requests
+import os
 
+#utils
+
+def convert_id_to_remote(id: str, url: str):#
+    pass
+
+def find_remote_author(author_id: str):
+    nodes = Remote_Node.query.all()
+    for node in nodes:
+        r = requests.get(f"{node.id}authors/{author_id}")
+        if r.status_code == 200 and r.json()["type"] == "author":
+            return node.id
+    return None
+
+#endpoint interactions
     
 def get_all_remote_authors():#for downed remote https://website404.herokuapp.com/authors?size=10&page=1
     nodes = Remote_Node.query.all()
@@ -102,6 +117,7 @@ def check_remote_is_following(author_id: str, follower_id: str):
             
     return False
 
+#inbox wrappers
 
 def post_remote_inbox(author_id: str, obj):#posts a given model to inbox
     nodes = Remote_Node.query.all()
@@ -110,9 +126,33 @@ def post_remote_inbox(author_id: str, obj):#posts a given model to inbox
         if r.status_code == 200 and r.json()["type"] == "author":
             obj_json = obj.json()
             r = requests.post(f"{node.id}authors/{author_id}/inbox", auth=(node.username, node.password), json=obj_json)
-            
-
         
+
+def put_remote_like_inbox(remote_author_id: str, like_author_id: str, comment_id = None, post_id = None):
+    if comment_id and post_id:
+        raise Exception("remote inbox put got mixed id types")
+    if not comment_id and not post_id:
+        raise Exception("posting to a remote inbox requires object ids")  
+    remote_host = find_remote_author(remote_author_id)
+    if remote_host == None:
+        return#couldn't find post
+    local_host = os.getenv("FLASK_HOST")
+    if comment_id:
+        remote_object_url = f"{remote_host}authors/{remote_author_id}/posts/{post_id}/comments/{comment_id}"
+    else:
+        remote_object_url = f"{remote_host}authors/{remote_author_id}/posts/{post_id}"
+    inbox_like = {
+        "type": "like",
+        "summary": "",
+        "author": f"{local_host}authors/{like_author_id}",
+        "object": remote_object_url
+    }
+    r = requests.post(f"{remote_host}authors/{remote_author_id}/inbox", json=inbox_like)
+
+
+    
+    
+
 # def get_remote_inbox(author_id: str):
 #     nodes = Remote_Node.query.all()
 #     for node in nodes:
