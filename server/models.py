@@ -31,7 +31,7 @@ class InboxItem(object):
     """
 
     @staticmethod
-    def get_subscribers(author_id: int) -> Sequence[int]:
+    def get_subscribers(author_id: str) -> Sequence[str]:
         subscribers = Requests.query.filter_by(to=author_id).all()
         return [s.initiated for s in subscribers]
 
@@ -97,7 +97,7 @@ class Post(db.Model, JSONSerializable, InboxItem):
 
     def __init__(
         self,
-        author: int,
+        author: str,
         title: str,
         category: str,
         content: str,
@@ -181,10 +181,9 @@ class Comment(db.Model, JSONSerializable):
     timestamp = db.Column(db.DateTime())
     likes = db.Column(db.ForeignKey("author.id"))  # NEEDS TO CHANGE TO LIST
 
-    def __init__(self, author: int, post: int, title: str, contentType, content: str):
+    def __init__(self, author: str, post: str, contentType, content: str):
         self.author = author
         self.post = post
-        self.title = title
         self.contentType = contentType
         self.content = content
         self.timestamp = datetime.datetime.now()
@@ -274,8 +273,8 @@ class Requests(db.Model, JSONSerializable):  # follow requests
 
     def __init__(
         self,
-        initiated: int,
-        to: int,
+        initiated: str,
+        to: str,
     ):
         self.timestamp = datetime.datetime.now()
         self.initiated = initiated
@@ -291,7 +290,7 @@ class Requests(db.Model, JSONSerializable):  # follow requests
         return follower.json()
 
     @staticmethod
-    def are_friends(author_id1: int, author_id2: int) -> bool:
+    def are_friends(author_id1: str, author_id2: str) -> bool:
         r1 = Requests.query.filter_by(initiated=author_id1, to=author_id2).first()
         r2 = Requests.query.filter_by(initiated=author_id2, to=author_id1).first()
         return r1 and r2
