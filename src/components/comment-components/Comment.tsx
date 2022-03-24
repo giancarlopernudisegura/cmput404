@@ -2,13 +2,12 @@ import { Divider } from "@mui/material";
 import { h } from "preact";
 
 type CommentProps = {
-  title: string;
   author: string;
   body: string;
   timeStamp: string;
 };
 
-function Comment({ author, body, timeStamp, title }: CommentProps) {
+function Comment({ author, body, timeStamp }: CommentProps) {
   return (
     <div
       id="comment-component"
@@ -30,7 +29,6 @@ function Comment({ author, body, timeStamp, title }: CommentProps) {
           </div>
         </div>
         <div className="my-2 pb-4">
-          <h1 className="text-lg font-bold">{title}</h1>
           <p className="text-lg">{body}</p>
         </div>
       </div>

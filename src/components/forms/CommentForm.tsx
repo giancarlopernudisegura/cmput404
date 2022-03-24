@@ -21,7 +21,6 @@ type Props = {
 };
 type State = {
   body: string;
-  title: string;
   authorDisplayName: string;
   authorId: string | null;
   markdown: boolean;
@@ -33,14 +32,12 @@ class CommentForm extends Component<Props, State> {
 
     this.state = {
       body: "",
-      title: "",
       authorDisplayName: "",
       authorId: null,
       markdown: false,
     };
 
     this.handleBody = this.handleBody.bind(this);
-    this.handleTitle = this.handleTitle.bind(this);
     this.setAuthorDetails = this.setAuthorDetails.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.setMarkdown = this.setMarkdown.bind(this);
@@ -54,12 +51,6 @@ class CommentForm extends Component<Props, State> {
     }
   }
 
-  handleTitle(event: Event) {
-    if (event) {
-      this.setState({ title: (event.target as HTMLTextAreaElement).value });
-    }
-  }
-
   setMarkdown() {
     this.setState({ markdown: !this.state.markdown });
     console.log("MARKDOWN:", this.state.markdown);
@@ -68,7 +59,7 @@ class CommentForm extends Component<Props, State> {
   setAuthorDetails() {
     get_author_id().then((data) => {
       this.setState({
-        authorId: data,
+        authorId: data.toString(),
       });
       console.log(data);
     });
@@ -83,8 +74,7 @@ class CommentForm extends Component<Props, State> {
     let date = new Date().toISOString();
 
     const commentData = {
-      title: this.state.title,
-      comment: this.state.body,
+      content: this.state.body,
       contentType: contentType,
       published: date,
     };
@@ -94,7 +84,6 @@ class CommentForm extends Component<Props, State> {
       "You have successfully commented on " + this.props.postRepliedTo + "!"
     );
     event.preventDefault();
-    this.setState({ title: "" });
     this.setState({ body: "" });
   };
 
@@ -111,18 +100,6 @@ class CommentForm extends Component<Props, State> {
         <DialogTitle>Comment On Post: {this.props.postRepliedTo}</DialogTitle>
         <DialogContent>
           <form onSubmit={this.handleSubmit} className="w-full">
-            <h2>Title</h2>
-            <textarea
-              type="text"
-              value={this.state.title}
-              onChange={this.handleTitle}
-              label="Title"
-              style={{
-                width: `500px`,
-                borderColor: `#dadada`,
-                borderWidth: `1px`,
-              }}
-            ></textarea>
             <h2>Content</h2>
             <textarea
               type="text"

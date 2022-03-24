@@ -290,7 +290,7 @@ export async function getAllComments(author_id: string, post_id: string) {
       const comment: any = {
         // title: data.comments[i].title,
         author: data.comments[i].author.displayName,
-        comment: data.comments[i].comment,
+        content: data.comments[i].content,
         published: publishTime,
       };
       listOfComments.push(comment);
@@ -382,15 +382,6 @@ export async function newPublicComment(
     );
 
     console.log(encodedCommentData);
-
-    let json = await res.json();
-
-    if (res.status === 200) {
-      return { status: res.status, ...json };
-    } else {
-      throw Error();
-    }
-
     
   } catch (err) {
     throw Error(FAILED_CREATE_COMMENT);

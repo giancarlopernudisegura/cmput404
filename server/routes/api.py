@@ -15,7 +15,13 @@ from telnetlib import STATUS
 from urllib import response
 from server.constants import res_msg
 from flask_login import login_user, login_required, logout_user, current_user
-from server.exts import db, LOCAL_AUTH_USER, LOCAL_AUTH_PASSWORD
+from server.exts import (
+    db,
+    LOCAL_AUTH_USER,
+    LOCAL_AUTH_PASSWORD,
+    http_basic_authentication,
+    require_authentication,
+)
 from server.models import Author, Inbox, Post, Comment, Requests, Like, Remote_Node
 from server.enums import ContentType
 from server.config import RUNTIME_SETTINGS
@@ -170,7 +176,7 @@ def post(author_id: str) -> Response:
     "/authors/<string:author_id>/posts/<string:post_id>",
     methods=["POST", "PUT", "DELETE"],
 )
-@login_required
+@require_authentication
 def specific_post(author_id: str, post_id: str) -> Response:
     print(f"AUTHOR_ID {author_id}\nTYPE:{type(author_id)}")
     """Modify, create or delete a specific post."""
@@ -265,10 +271,9 @@ def get_comment(author_id: str, post_id: str, comment_id: str) -> Response:
 @bp.route(
     "/authors/<string:author_id>/posts/<string:post_id>/comments", methods=["POST"]
 )
-@login_required
+@require_authentication
 def post_comment(author_id: str, post_id: str) -> Response:
     try:
-        title = request.json["title"]
         content = request.json["content"]
         contentType = ContentType(request.json.get("contentType"))
     except KeyError:
@@ -277,7 +282,7 @@ def post_comment(author_id: str, post_id: str) -> Response:
         return Response(status=httpStatus.BAD_REQUEST)
     except TypeError:
         return Response(status=httpStatus.BAD_REQUEST)
-    comment = Comment(current_user.id, post_id, title, contentType, content)
+    comment = Comment(current_user.id, post_id, contentType, content)
     db.session.add(comment)
     db.session.commit()
     return Response(status=httpStatus.OK)
@@ -330,7 +335,7 @@ def is_follower(author_id: str, follower_id: str) -> Response:
 @bp.route(
     "/authors/<string:author_id>/followers/<string:follower_id>", methods=["DELETE"]
 )
-@login_required
+@require_authentication
 def remove_follower(author_id: str, follower_id: str) -> Response:
     if current_user.id != follower_id:
         return (
@@ -354,7 +359,7 @@ def remove_follower(author_id: str, follower_id: str) -> Response:
 
 
 @bp.route("/authors/<string:author_id>/followers/<string:follower_id>", methods=["PUT"])
-@login_required
+@require_authentication
 def add_follower(author_id: str, follower_id: str) -> Response:
     if current_user.id != follower_id:
         return (
@@ -376,7 +381,7 @@ def add_follower(author_id: str, follower_id: str) -> Response:
 
 
 @bp.route("/authors/<string:author_id>/inbox", methods=["GET"])
-@login_required
+@require_authentication
 def get_inbox(author_id: str) -> Response:
     if current_user.id != author_id:
         return (
@@ -400,7 +405,7 @@ def get_inbox(author_id: str) -> Response:
 
 
 @bp.route("/authors/<string:author_id>/inbox", methods=["POST"])
-@login_required
+@require_authentication
 def post_inbox(author_id: str) -> Response:
     try:
         req_type = request.json["type"]
@@ -429,7 +434,7 @@ def post_inbox(author_id: str) -> Response:
 
 
 @bp.route("/authors/<string:author_id>/inbox", methods=["DELETE"])
-@login_required
+@require_authentication
 def clear_inbox(author_id: str) -> Response:
     if current_user.id != author_id:
         return (
@@ -661,7 +666,7 @@ def login_unit_test() -> Response:
 
 
 @bp.route("/logout", methods=["POST"])
-@login_required
+@require_authentication
 def logout() -> Response:
     try:
         logout_user()
@@ -673,13 +678,13 @@ def logout() -> Response:
 
 
 @bp.route("/login_test", methods=["GET"])
-@login_required
+@require_authentication
 def login_test() -> Response:
     return make_response(jsonify(message="Successful log in")), httpStatus.OK
 
 
 @bp.route("/user_me")
-@login_required
+@require_authentication
 def get_user_me() -> Response:
     try:
         return utils.json_response(
@@ -694,7 +699,7 @@ def get_user_me() -> Response:
 
 
 @bp.route("/admin/author/<string:author_id>", methods=["POST"])
-@login_required
+@require_authentication
 def modify_author(author_id: str) -> Response:
     if not current_user.isAdmin:
         return (
@@ -717,7 +722,7 @@ def modify_author(author_id: str) -> Response:
 
 
 @bp.route("/admin/author", methods=["PUT"])
-@login_required
+@require_authentication
 def create_author() -> Response:
     if not current_user.isAdmin:
         return (
@@ -757,7 +762,7 @@ def create_author() -> Response:
 
 
 @bp.route("/admin/author/<string:author_id>", methods=["DELETE"])
-@login_required
+@require_authentication
 def delete_author(author_id: str) -> Response:
     if not current_user.isAdmin:
         return (
@@ -779,7 +784,7 @@ def delete_author(author_id: str) -> Response:
 
 
 @bp.route("/admin/settings", methods=["GET"])
-@login_required
+@require_authentication
 def get_settings() -> Response:
     if not current_user.isAdmin:
         return (
@@ -799,7 +804,7 @@ def get_settings() -> Response:
 
 
 @bp.route("/admin/settings", methods=["POST"])
-@login_required
+@require_authentication
 def set_settings() -> Response:
     if not current_user.isAdmin:
         return (
@@ -825,11 +830,7 @@ def set_settings() -> Response:
 
 @bp.route("/remotes", methods=["GET"])
 def get_remote() -> Response:
-    if (
-        not request.authorization
-        or request.authorization.username != LOCAL_AUTH_USER
-        or request.authorization.password != LOCAL_AUTH_PASSWORD
-    ):
+    if not http_basic_authentication():
         return utils.json_response(
             httpStatus.UNAUTHORIZED,
             {
@@ -851,11 +852,7 @@ def get_remote() -> Response:
 
 @bp.route("/remotes", methods=["PUT"])
 def add_remote() -> Response:
-    if (
-        not request.authorization
-        or request.authorization.username != LOCAL_AUTH_USER
-        or request.authorization.password != LOCAL_AUTH_PASSWORD
-    ):
+    if not http_basic_authentication():
         return utils.json_response(
             httpStatus.UNAUTHORIZED,
             {
@@ -888,11 +885,7 @@ def add_remote() -> Response:
 
 @bp.route("/remotes/<string:remote_id>", methods=["DELETE"])
 def delete_remote(remote_id: str) -> Response:
-    if (
-        not request.authorization
-        or request.authorization.username != LOCAL_AUTH_USER
-        or request.authorization.password != LOCAL_AUTH_PASSWORD
-    ):
+    if not http_basic_authentication():
         print(request.authorization.username, request.authorization.password)
         return utils.json_response(
             httpStatus.UNAUTHORIZED,
