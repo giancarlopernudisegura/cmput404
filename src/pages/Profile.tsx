@@ -1,25 +1,26 @@
 import { h } from "preact";
 import { useState, useEffect } from "preact/hooks";
-import DrawerMenu from '../components/sidemenu-components/Drawer'
-import { Alert, CircularProgress, Dialog } from "@mui/material";
+import DrawerMenu from "../components/sidemenu-components/Drawer";
+import { Alert, CircularProgress } from "@mui/material";
 
-import { 
-  getCurrentAuthor, 
-  getPosts, 
+import {
+  getCurrentAuthor,
+  getPosts,
   deletePost,
+  getAllComments,
 } from "../utils/apiCalls";
 
 import PostList from "../components/PostList";
 import AuthorInfo from "../components/profile/AuthorInfo";
 
 
-type profileProps = {path: string}
+type profileProps = { path: string };
 
-function Profile({path}: profileProps) {
+function Profile({ path }: profileProps) {
   const [errMsg, setErrMsg] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
-  // get author data 
+  // get author data
   const [author, setAuthor] = useState(Object());
   const [myPosts, setMyPosts] = useState(Array());
 
@@ -49,15 +50,14 @@ function Profile({path}: profileProps) {
 
 
   function handleRemove(postId: string) {
-
     // open the modal to make sure
     // var message = "Delete this post?";
     // // <Dialog />
 
-    const newList = myPosts.filter(post => post.id !== postId);
+    const newList = myPosts.filter((post) => post.id !== postId);
     setMyPosts(newList);
 
-    function removePost(postId: string, authorId: string) {
+    function removePost(authorId: string, postId: string) {
       // call api to delete post
       deletePost(authorId, postId)
       .catch(err => {setErrMsg(err.message);});
@@ -66,36 +66,28 @@ function Profile({path}: profileProps) {
     removePost(author.id, postId);
   }
 
-
   function handleEdit() {
     // TODO
   }
 
-
   return (
     <div id="profile">
-      <DrawerMenu
-        pageName="My Profile"
-      >
+      <DrawerMenu pageName="My Profile">
         {errMsg && <Alert severity="error">{errMsg}</Alert>}
 
-        {isLoading === true ? 
-          <CircularProgress 
-            className="grid place-items-center h-screen"/> : (
-            <div className="flex flex-col m-auto">
-              <AuthorInfo
-                author={author}
-              />
+        {isLoading === true ? (
+          <CircularProgress className="grid place-items-center h-screen" />
+        ) : (
+          <div className="flex flex-col m-auto">
+            <AuthorInfo author={author} />
 
-              <PostList 
-                initialPosts={myPosts} 
-                currentAuthor={author.displayName} 
-                onRemove={handleRemove}
-              />
-            </div>
-        )
-      }
-
+            <PostList
+              initialPosts={myPosts}
+              currentAuthor={author.displayName}
+              onRemove={handleRemove}
+            />
+          </div>
+        )}
       </DrawerMenu>
     </div>
   );

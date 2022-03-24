@@ -15,8 +15,14 @@ from telnetlib import STATUS
 from urllib import response
 from server.constants import res_msg
 from flask_login import login_user, login_required, logout_user, current_user
-from server.exts import db
-from server.models import Author, Inbox, Post, Comment, Requests, Like
+from server.exts import (
+    db,
+    LOCAL_AUTH_USER,
+    LOCAL_AUTH_PASSWORD,
+    http_basic_authentication,
+    require_authentication,
+)
+from server.models import Author, Inbox, Post, Comment, Requests, Like, Remote_Node
 from server.enums import ContentType
 from server.config import RUNTIME_SETTINGS
 from http import HTTPStatus as httpStatus
@@ -25,6 +31,8 @@ from dotenv import load_dotenv
 
 import server.utils.api_support as utils
 from typing import Dict, Tuple
+
+from server.utils.exts import get_github_by_id
 
 load_dotenv()
 
@@ -141,7 +149,10 @@ def post(author_id: str) -> Response:
                 in post_visibility_map
             ):
                 # bad visibility type or no visibility given
-                return utils.json_response(httpStatus.BAD_REQUEST, { "message": "No visibility given for this post" })
+                return utils.json_response(
+                    httpStatus.BAD_REQUEST,
+                    {"message": "No visibility given for this post"},
+                )
         except KeyError:
             return Response(status=httpStatus.BAD_REQUEST)
         except ValueError:
@@ -149,20 +160,23 @@ def post(author_id: str) -> Response:
         except TypeError:
             return Response(status=httpStatus.BAD_REQUEST)
         except Exception as e:
-            return utils.json_response(httpStatus.BAD_REQUEST, { "message": str(e) })
+            return utils.json_response(httpStatus.BAD_REQUEST, {"message": str(e)})
         private = post_visibility_map[visibility.upper()]
 
         post = Post(author, title, category, content, contentType, private, unlisted)
         db.session.add(post)
         db.session.commit()
         post.push()
-        return utils.json_response(httpStatus.OK, {"message": "Post was created", **post.json()} )
+        return utils.json_response(
+            httpStatus.OK, {"message": "Post was created", **post.json()}
+        )
 
 
 @bp.route(
-    "/authors/<string:author_id>/posts/<string:post_id>", methods=["POST", "PUT", "DELETE"]
+    "/authors/<string:author_id>/posts/<string:post_id>",
+    methods=["POST", "PUT", "DELETE"],
 )
-@login_required
+@require_authentication
 def specific_post(author_id: str, post_id: str) -> Response:
     print(f"AUTHOR_ID {author_id}\nTYPE:{type(author_id)}")
     """Modify, create or delete a specific post."""
@@ -222,7 +236,9 @@ def specific_post(author_id: str, post_id: str) -> Response:
         return Response(status=httpStatus.NO_CONTENT)
 
 
-@bp.route("/authors/<string:author_id>/posts/<string:post_id>/comments", methods=["GET"])
+@bp.route(
+    "/authors/<string:author_id>/posts/<string:post_id>/comments", methods=["GET"]
+)
 def get_comments(author_id: str, post_id: str) -> Response:
     page, size = pagination(request.args)
     comments = (
@@ -252,11 +268,12 @@ def get_comment(author_id: str, post_id: str, comment_id: str) -> Response:
     return make_response(jsonify(comment.json())), httpStatus.OK
 
 
-@bp.route("/authors/<string:author_id>/posts/<string:post_id>/comments", methods=["POST"])
-@login_required
+@bp.route(
+    "/authors/<string:author_id>/posts/<string:post_id>/comments", methods=["POST"]
+)
+@require_authentication
 def post_comment(author_id: str, post_id: str) -> Response:
     try:
-        title = request.json["title"]
         content = request.json["content"]
         contentType = ContentType(request.json.get("contentType"))
     except KeyError:
@@ -265,7 +282,7 @@ def post_comment(author_id: str, post_id: str) -> Response:
         return Response(status=httpStatus.BAD_REQUEST)
     except TypeError:
         return Response(status=httpStatus.BAD_REQUEST)
-    comment = Comment(current_user.id, post_id, title, contentType, content)
+    comment = Comment(current_user.id, post_id, contentType, content)
     db.session.add(comment)
     db.session.commit()
     return Response(status=httpStatus.OK)
@@ -275,7 +292,10 @@ def post_comment(author_id: str, post_id: str) -> Response:
 def serve_image(author_id: str, post_id: str):
     image_post = Post.query.filter_by(id=post_id).first()
 
-    if image_post.contentType != ContentType.jpg and image_post.contentType != ContentType.png:
+    if (
+        image_post.contentType != ContentType.jpg
+        and image_post.contentType != ContentType.png
+    ):
         return utils.json_response(
             httpStatus.BAD_REQUEST, {"message": res_msg.NOT_IMAGE}
         )
@@ -312,8 +332,10 @@ def is_follower(author_id: str, follower_id: str) -> Response:
     )
 
 
-@bp.route("/authors/<string:author_id>/followers/<string:follower_id>", methods=["DELETE"])
-@login_required
+@bp.route(
+    "/authors/<string:author_id>/followers/<string:follower_id>", methods=["DELETE"]
+)
+@require_authentication
 def remove_follower(author_id: str, follower_id: str) -> Response:
     if current_user.id != follower_id:
         return (
@@ -322,12 +344,12 @@ def remove_follower(author_id: str, follower_id: str) -> Response:
         )
     follower = Requests.query.filter_by(to=author_id, initiated=follower_id).first()
     if not follower:
-        #return Response(status=httpStatus.NOT_FOUND)
+        # return Response(status=httpStatus.NOT_FOUND)
         return utils.json_response(
             httpStatus.NOT_FOUND,
-            {"message": f"Follower {follower_id} is not following {author_id}."}
+            {"message": f"Follower {follower_id} is not following {author_id}."},
         )
-    #Inbox.query.filter_by(follow=follower_id).delete()
+    # Inbox.query.filter_by(follow=follower_id).delete()
     inbox = Inbox.query.filter_by(follow=follower.id).first()
     db.session.delete(inbox)
     db.session.commit()
@@ -337,7 +359,7 @@ def remove_follower(author_id: str, follower_id: str) -> Response:
 
 
 @bp.route("/authors/<string:author_id>/followers/<string:follower_id>", methods=["PUT"])
-@login_required
+@require_authentication
 def add_follower(author_id: str, follower_id: str) -> Response:
     if current_user.id != follower_id:
         return (
@@ -359,7 +381,7 @@ def add_follower(author_id: str, follower_id: str) -> Response:
 
 
 @bp.route("/authors/<string:author_id>/inbox", methods=["GET"])
-@login_required
+@require_authentication
 def get_inbox(author_id: str) -> Response:
     if current_user.id != author_id:
         return (
@@ -383,7 +405,7 @@ def get_inbox(author_id: str) -> Response:
 
 
 @bp.route("/authors/<string:author_id>/inbox", methods=["POST"])
-@login_required
+@require_authentication
 def post_inbox(author_id: str) -> Response:
     try:
         req_type = request.json["type"]
@@ -412,7 +434,7 @@ def post_inbox(author_id: str) -> Response:
 
 
 @bp.route("/authors/<string:author_id>/inbox", methods=["DELETE"])
-@login_required
+@require_authentication
 def clear_inbox(author_id: str) -> Response:
     if current_user.id != author_id:
         return (
@@ -423,29 +445,36 @@ def clear_inbox(author_id: str) -> Response:
     db.session.commit()
     return Response(status=httpStatus.OK)
 
-@bp.route("/authors/<string:author_id>/posts/<string:post_id>/likes", methods=["PUT", "GET", "DELETE"])
+
+@bp.route(
+    "/authors/<string:author_id>/posts/<string:post_id>/likes",
+    methods=["PUT", "GET", "DELETE"],
+)
 def post_like_methods(author_id: str, post_id: str) -> Response:
     post = Post.query.filter_by(id=post_id).first()
-    if post is None:#post does not exist
+    if post is None:  # post does not exist
         return utils.json_response(
-            httpStatus.NOT_FOUND,
-            {"message": f"post {post_id} does not exist."}
+            httpStatus.NOT_FOUND, {"message": f"post {post_id} does not exist."}
         )
-    if post.author != author_id:#post not made by given author
+    if post.author != author_id:  # post not made by given author
         return (
             make_response(jsonify(error=res_msg.AUTHOR_URI_NOT_MATCH)),
-            httpStatus.BAD_REQUEST)
+            httpStatus.BAD_REQUEST,
+        )
     if (current_user.id == author_id) or (post.private == False):
-        if request.method == "GET":#Get all likes for a given post
+        if request.method == "GET":  # Get all likes for a given post
             post_likes = Like.query.filter_by(post=post_id).all()
-            return (make_response(jsonify(
-                likes=[like.json() for like in post_likes]
-        )), httpStatus.OK)
-        elif request.method == "PUT":#create a new like for a given post as a user
-            if Like.query.filter_by(post=post_id, author=current_user.id).first() is not None:#user has already liked post
+            return (
+                make_response(jsonify(likes=[like.json() for like in post_likes])),
+                httpStatus.OK,
+            )
+        elif request.method == "PUT":  # create a new like for a given post as a user
+            if (
+                Like.query.filter_by(post=post_id, author=current_user.id).first()
+                is not None
+            ):  # user has already liked post
                 return utils.json_response(
-                    httpStatus.CONFLICT,
-                    {"message": res_msg.AUTHOR_LIKE_CONFLICT}
+                    httpStatus.CONFLICT, {"message": res_msg.AUTHOR_LIKE_CONFLICT}
                 )
             author = current_user.id
             like = Like(author, post=post_id)
@@ -453,48 +482,56 @@ def post_like_methods(author_id: str, post_id: str) -> Response:
             db.session.commit()
             like.push()
             return Response(status=httpStatus.CREATED)
-        elif request.method == "DELETE":#remove a like for a given post as a user
+        elif request.method == "DELETE":  # remove a like for a given post as a user
             like = Like.query.filter_by(post=post_id, author=current_user.id).first()
-            if like is None:#user has not liked post
+            if like is None:  # user has not liked post
                 return Response(status=httpStatus.NOT_FOUND)
             like.delete()
             return Response(status=httpStatus.NO_CONTENT)
     else:
         return (
             make_response(jsonify(error=res_msg.NO_PERMISSION)),
-            httpStatus.UNAUTHORIZED)
+            httpStatus.UNAUTHORIZED,
+        )
 
-@bp.route("/authors/<string:author_id>/posts/<string:post_id>/comments/<string:comment_id>/likes", methods=["PUT", "GET", "DELETE"])
+
+@bp.route(
+    "/authors/<string:author_id>/posts/<string:post_id>/comments/<string:comment_id>/likes",
+    methods=["PUT", "GET", "DELETE"],
+)
 def comment_like_methods(author_id: str, post_id: str, comment_id: str):
     comment = Comment.query.filter_by(id=comment_id).first()
     post = Post.query.filter_by(id=post_id).first()
-    if post is None:#post does not exist
+    if post is None:  # post does not exist
+        return utils.json_response(
+            httpStatus.NOT_FOUND, {"message": f"post {post_id} does not exist."}
+        )
+    if comment is None:  # comment doesn't exist
+        return utils.json_response(
+            httpStatus.NOT_FOUND, {"message": f"comment {comment_id} does not exist."}
+        )
+    if (post.author != author_id) or (
+        post.id != comment.post
+    ):  # post author or comment post do not match
         return utils.json_response(
             httpStatus.NOT_FOUND,
-            {"message": f"post {post_id} does not exist."}
+            {"message": "Post author or comment post do not match"},
         )
-    if comment is None:#comment doesn't exist
-        return utils.json_response(
-            httpStatus.NOT_FOUND,
-            {"message": f"comment {comment_id} does not exist."}
-        )
-    if (post.author != author_id) or (post.id != comment.post):#post author or comment post do not match
-        return utils.json_response(
-            httpStatus.NOT_FOUND,
-            {"message": "Post author or comment post do not match"}
-        )
-    
+
     if (current_user.id == author_id) or (post.private == False):
-        if request.method == "GET":#Get all likes for a given comment
+        if request.method == "GET":  # Get all likes for a given comment
             comment_likes = Like.query.filter_by(comment=comment_id).all()
-            return (make_response(jsonify(
-                likes=[like.json() for like in comment_likes]
-                )), httpStatus.OK)        
-        elif request.method == "PUT":#Get all likes for a given comment
-            if Like.query.filter_by(comment=comment_id,author=current_user.id).first() is not None:#user has already liked comment
+            return (
+                make_response(jsonify(likes=[like.json() for like in comment_likes])),
+                httpStatus.OK,
+            )
+        elif request.method == "PUT":  # Get all likes for a given comment
+            if (
+                Like.query.filter_by(comment=comment_id, author=current_user.id).first()
+                is not None
+            ):  # user has already liked comment
                 return utils.json_response(
-                    httpStatus.CONFLICT,
-                    {"message": res_msg.AUTHOR_LIKE_CONFLICT}
+                    httpStatus.CONFLICT, {"message": res_msg.AUTHOR_LIKE_CONFLICT}
                 )
             author = current_user.id
             comment = comment_id
@@ -503,35 +540,47 @@ def comment_like_methods(author_id: str, post_id: str, comment_id: str):
             db.session.commit()
             like.push()
             return Response(status=httpStatus.CREATED)
-        elif request.method == "DELETE":#Get all likes for a given comment
-            like = Like.query.filter_by(comment=comment_id, author=current_user.id).first()
-            if like is None:#user has not liked comment
+        elif request.method == "DELETE":  # Get all likes for a given comment
+            like = Like.query.filter_by(
+                comment=comment_id, author=current_user.id
+            ).first()
+            if like is None:  # user has not liked comment
                 return utils.json_response(
-                    httpStatus.NOT_FOUND,
-                    {"message": res_msg.AUTHOR_LIKE_NOT_EXIST}
+                    httpStatus.NOT_FOUND, {"message": res_msg.AUTHOR_LIKE_NOT_EXIST}
                 )
             like.delete()
             return Response(status=httpStatus.NO_CONTENT)
     else:
         return (
             make_response(jsonify(error=res_msg.NO_PERMISSION)),
-            httpStatus.UNAUTHORIZED)
-
+            httpStatus.UNAUTHORIZED,
+        )
 
 
 @bp.route("/authors/<string:author_id>/liked", methods=["GET"])
 def get_author_liked(author_id: str):
-    if Author.query.filter_by(id=author_id).first() is None:#author doesn't exist
+    if Author.query.filter_by(id=author_id).first() is None:  # author doesn't exist
         return utils.json_response(
             httpStatus.NOT_FOUND, {"message": res_msg.AUTHOR_NOT_EXISTS}
         )
-    author_post_likes = Like.query.filter_by(author=author_id).join(Post).filter_by(private=False).all()
-    author_comment_likes = Like.query.filter_by(author=author_id).join(Comment).join(Post).filter_by(private=False).all()
+    author_post_likes = (
+        Like.query.filter_by(author=author_id).join(Post).filter_by(private=False).all()
+    )
+    author_comment_likes = (
+        Like.query.filter_by(author=author_id)
+        .join(Comment)
+        .join(Post)
+        .filter_by(private=False)
+        .all()
+    )
     author_likes = author_comment_likes + author_post_likes
-    return (make_response(jsonify(
-        type="liked",
-        items=[like.json() for like in author_likes]
-    )), httpStatus.OK)
+    return (
+        make_response(
+            jsonify(type="liked", items=[like.json() for like in author_likes])
+        ),
+        httpStatus.OK,
+    )
+
 
 @bp.route("/signup", methods=["POST"])
 def signup() -> Response:
@@ -556,7 +605,7 @@ def signup() -> Response:
         else:
             return utils.json_response(
                 httpStatus.BAD_REQUEST,
-                {"message": res_msg.USER_ALREADY_EXISTS },
+                {"message": res_msg.USER_ALREADY_EXISTS},
             )
     except Exception as e:
         return utils.json_response(
@@ -601,7 +650,9 @@ def login_unit_test() -> Response:
         author_id = request.json.get("author_id")
         author = Author.query.filter_by(id=author_id).first()
         if author == None:
-            raise Exception(f"Requested unit test author {author_id} is empty on query return!")
+            raise Exception(
+                f"Requested unit test author {author_id} is empty on query return!"
+            )
         login_user(author)
         return make_response(jsonify({"message": "login ok"})), httpStatus.OK
     return (
@@ -615,7 +666,7 @@ def login_unit_test() -> Response:
 
 
 @bp.route("/logout", methods=["POST"])
-@login_required
+@require_authentication
 def logout() -> Response:
     try:
         logout_user()
@@ -627,13 +678,13 @@ def logout() -> Response:
 
 
 @bp.route("/login_test", methods=["GET"])
-@login_required
+@require_authentication
 def login_test() -> Response:
     return make_response(jsonify(message="Successful log in")), httpStatus.OK
 
 
 @bp.route("/user_me")
-@login_required
+@require_authentication
 def get_user_me() -> Response:
     try:
         return utils.json_response(
@@ -648,7 +699,7 @@ def get_user_me() -> Response:
 
 
 @bp.route("/admin/author/<string:author_id>", methods=["POST"])
-@login_required
+@require_authentication
 def modify_author(author_id: str) -> Response:
     if not current_user.isAdmin:
         return (
@@ -671,7 +722,7 @@ def modify_author(author_id: str) -> Response:
 
 
 @bp.route("/admin/author", methods=["PUT"])
-@login_required
+@require_authentication
 def create_author() -> Response:
     if not current_user.isAdmin:
         return (
@@ -681,8 +732,7 @@ def create_author() -> Response:
     try:
         displayName = request.json["displayName"]
         github_username = request.json["github"]
-        resp = urlopen(f"https://api.github.com/users/{github_username}")
-        github_info = json.loads(resp.read().decode("utf-8"))
+        github_info = get_github_by_id(github_username)
         githubId = github_info["id"]
         profileImageId = github_info["avatar_url"]
         isAdmin = False
@@ -712,7 +762,7 @@ def create_author() -> Response:
 
 
 @bp.route("/admin/author/<string:author_id>", methods=["DELETE"])
-@login_required
+@require_authentication
 def delete_author(author_id: str) -> Response:
     if not current_user.isAdmin:
         return (
@@ -734,7 +784,7 @@ def delete_author(author_id: str) -> Response:
 
 
 @bp.route("/admin/settings", methods=["GET"])
-@login_required
+@require_authentication
 def get_settings() -> Response:
     if not current_user.isAdmin:
         return (
@@ -754,7 +804,7 @@ def get_settings() -> Response:
 
 
 @bp.route("/admin/settings", methods=["POST"])
-@login_required
+@require_authentication
 def set_settings() -> Response:
     if not current_user.isAdmin:
         return (
@@ -776,3 +826,77 @@ def set_settings() -> Response:
             httpStatus.INTERNAL_SERVER_ERROR,
             {"message": res_msg.GENERAL_ERROR + str(e)},
         )
+
+
+@bp.route("/remotes", methods=["GET"])
+def get_remote() -> Response:
+    if not http_basic_authentication():
+        return utils.json_response(
+            httpStatus.UNAUTHORIZED,
+            {
+                "message": "Basic auth failed. Give the correct user/password combination"
+            },
+        )
+    remotes = Remote_Node.query.all()
+    remote_list = [remote.json() for remote in remotes]
+    return (
+        make_response(
+            jsonify(
+                type="remotes",
+                items=remote_list,
+            )
+        ),
+        httpStatus.OK,
+    )
+
+
+@bp.route("/remotes", methods=["PUT"])
+def add_remote() -> Response:
+    if not http_basic_authentication():
+        return utils.json_response(
+            httpStatus.UNAUTHORIZED,
+            {
+                "message": "Basic auth failed. Give the correct user/password combination"
+            },
+        )
+    try:
+        remote_id = request.json.get("url")
+        remote_username = request.json.get("username")
+        remote_password = request.json.get("password")
+    except Exception as e:
+        return utils.json_response(
+            httpStatus.BAD_REQUEST,
+            {"message": res_msg.GENERAL_ERROR + str(e)},
+        )
+    remote_node = Remote_Node.query.filter_by(id=remote_id).first()
+    if remote_node:
+        return utils.json_response(
+            httpStatus.BAD_REQUEST,
+            {"message": "Remote node already exists."},
+        )
+    remote_node = Remote_Node(remote_id, remote_username, remote_password)
+    db.session.add(remote_node)
+    db.session.commit()
+    return utils.json_response(
+        httpStatus.OK,
+        {"message": "Remote node added"},
+    )
+
+
+@bp.route("/remotes/<string:remote_id>", methods=["DELETE"])
+def delete_remote(remote_id: str) -> Response:
+    if not http_basic_authentication():
+        print(request.authorization.username, request.authorization.password)
+        return utils.json_response(
+            httpStatus.UNAUTHORIZED,
+            {
+                "message": "Basic auth failed. Give the correct user/password combination"
+            },
+        )
+    remote_node = Remote_Node.query.filter_by(id=remote_id).first_or_404()
+    db.session.delete(remote_node)
+    db.session.commit()
+    return utils.json_response(
+        httpStatus.OK,
+        {"message": "Remote node deleted"},
+    )

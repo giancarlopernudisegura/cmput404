@@ -3,7 +3,7 @@ var webpack = require('webpack');
 var dotenv = require('dotenv');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 
-dotenv.config({ path: './.env' }); 
+dotenv.config({ path: './.env' });
 
 module.exports = {
   mode: 'production',
@@ -51,7 +51,9 @@ module.exports = {
       'FIREBASE_MESSAGING_SDR_ID',
       'FIREBASE_APP_ID',
       'FIREBASE_MEASUREMENT_ID',
-      'FLASK_HOST'
+      'FLASK_HOST',
+      'LOCAL_AUTH_PASSWORD',
+      'LOCAL_AUTH_USER'
     ])
   ]
 }

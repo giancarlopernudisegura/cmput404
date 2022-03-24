@@ -31,7 +31,7 @@ class InboxItem(object):
     """
 
     @staticmethod
-    def get_subscribers(author_id: int) -> Sequence[int]:
+    def get_subscribers(author_id: str) -> Sequence[str]:
         subscribers = Requests.query.filter_by(to=author_id).all()
         return [s.initiated for s in subscribers]
 
@@ -97,7 +97,7 @@ class Post(db.Model, JSONSerializable, InboxItem):
 
     def __init__(
         self,
-        author: int,
+        author: str,
         title: str,
         category: str,
         content: str,
@@ -181,10 +181,9 @@ class Comment(db.Model, JSONSerializable):
     timestamp = db.Column(db.DateTime())
     likes = db.Column(db.ForeignKey("author.id"))  # NEEDS TO CHANGE TO LIST
 
-    def __init__(self, author: int, post: int, title: str, contentType, content: str):
+    def __init__(self, author: str, post: str, contentType, content: str):
         self.author = author
         self.post = post
-        self.title = title
         self.contentType = contentType
         self.content = content
         self.timestamp = datetime.datetime.now()
@@ -201,7 +200,7 @@ class Comment(db.Model, JSONSerializable):
         return {
             "type": "comment",
             "author": author.json(),
-            "comment": self.content,
+            "content": self.content,
             "contentType": str(self.contentType),
             "published": self.timestamp.isoformat(),
             "id": f"{HOST}/authors/{author.id}/posts/{self.post}/comments/{self.id}",
@@ -274,8 +273,8 @@ class Requests(db.Model, JSONSerializable):  # follow requests
 
     def __init__(
         self,
-        initiated: int,
-        to: int,
+        initiated: str,
+        to: str,
     ):
         self.timestamp = datetime.datetime.now()
         self.initiated = initiated
@@ -291,7 +290,7 @@ class Requests(db.Model, JSONSerializable):  # follow requests
         return follower.json()
 
     @staticmethod
-    def are_friends(author_id1: int, author_id2: int) -> bool:
+    def are_friends(author_id1: str, author_id2: str) -> bool:
         r1 = Requests.query.filter_by(initiated=author_id1, to=author_id2).first()
         r2 = Requests.query.filter_by(initiated=author_id2, to=author_id1).first()
         return r1 and r2
@@ -358,3 +357,24 @@ class Inbox(db.Model, JSONSerializable):
         elif self.follow:
             follow = Requests.query.filter_by(id=self.follow).first()
             return follow.json()
+
+
+class Remote_Node(db.Model, JSONSerializable):  # contains auth info for remote nodes
+    __tablename__ = "remote_node"
+    id = db.Column(db.String(), primary_key=True)  # host name
+    user = db.Column(db.String())
+    password = db.Column(db.String())
+
+    def __init__(self, id, user, password):
+        # Should create/write to db from outside our application
+        self.id = id
+        self.user = user
+        self.password = password
+
+    def json(self) -> Dict[str, Any]:
+        return {
+            "type": "remote",
+            "id": self.id,
+            "username": self.user,
+            "password": self.password,
+        }
