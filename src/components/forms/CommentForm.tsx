@@ -68,7 +68,7 @@ class CommentForm extends Component<Props, State> {
   setAuthorDetails() {
     get_author_id().then((data) => {
       this.setState({
-        authorId: data,
+        authorId: data.toString(),
       });
       console.log(data);
     });
@@ -83,8 +83,8 @@ class CommentForm extends Component<Props, State> {
     let date = new Date().toISOString();
 
     const commentData = {
-      title: this.state.title,
-      comment: this.state.body,
+      // title: this.state.title,
+      content: this.state.body,
       contentType: contentType,
       published: date,
     };

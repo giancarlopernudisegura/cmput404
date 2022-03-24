@@ -97,7 +97,7 @@ class Post(db.Model, JSONSerializable, InboxItem):
 
     def __init__(
         self,
-        author: int,
+        author: str,
         title: str,
         category: str,
         content: str,
@@ -180,11 +180,12 @@ class Comment(db.Model, JSONSerializable):
     contentType = db.Column(db.Enum(ContentType))
     timestamp = db.Column(db.DateTime())
     likes = db.Column(db.ForeignKey("author.id"))  # NEEDS TO CHANGE TO LIST
+    # title=db.Column(db.String())
 
-    def __init__(self, author: int, post: int, title: str, contentType, content: str):
+    def __init__(self, author: str, post: str, contentType: str, content: str):
         self.author = author
         self.post = post
-        self.title = title
+        # self.title = title
         self.contentType = contentType
         self.content = content
         self.timestamp = datetime.datetime.now()
@@ -201,9 +202,10 @@ class Comment(db.Model, JSONSerializable):
         return {
             "type": "comment",
             "author": author.json(),
-            "comment": self.content,
+            "content": self.content,
             "contentType": str(self.contentType),
             "published": self.timestamp.isoformat(),
+            # "title": self.title,
             "id": f"{HOST}/authors/{author.id}/posts/{self.post}/comments/{self.id}",
         }
 
