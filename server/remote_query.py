@@ -41,8 +41,36 @@ def get_remote_author_posts(author_id: str):
     items.extend(r.json()["items"])
     return r.json()["items"]
 
+#below untested
+
 def get_remote_post(author_id: str, post_id: str):
+
+    #auth?
     remote_node_2 = Remote_Node.query.filter_by(id=REMOTE_NODE2_HOST).first()
     r = requests.get(f"{remote_node_2.id}authors/{author_id}/posts/{post_id}")
     return r.json()
 
+def get_remote_comments(author_id: str, post_id: str):
+    items = []
+
+    remote_node_2 = Remote_Node.query.filter_by(id=REMOTE_NODE2_HOST).first()
+    r = requests.get(f"{remote_node_2.id}authors/{author_id}/posts/{post_id}/comments?size=30&page=1")
+    items.extend(r.json()["items"])
+    return r.json()["items"]
+
+def get_remote_comments(author_id: str, post_id: str, comment_id: str):
+    remote_node_2 = Remote_Node.query.filter_by(id=REMOTE_NODE2_HOST).first()
+    r = requests.get(f"{remote_node_2.id}authors/{author_id}/posts/{post_id}/comments/{comment_id}")
+    return r.json()["items"]
+
+def get_remote_post_likes(author_id: str, post_id: str):    
+
+    remote_node_2 = Remote_Node.query.filter_by(id=REMOTE_NODE2_HOST).first()
+    r = requests.get(f"{remote_node_2.id}authors/{author_id}/posts/{post_id}/likes?size=30&page=1")
+    return r.json()["items"]
+
+def get_remote_comment_likes(author_id: str, post_id: str, comment_id: str):
+
+    remote_node_2 = Remote_Node.query.filter_by(id=REMOTE_NODE2_HOST).first()
+    r = requests.get(f"{remote_node_2.id}authors/{author_id}/posts/{post_id}/comments/{comment_id}/likes?size=30&page=1")
+    return r.json()["items"]

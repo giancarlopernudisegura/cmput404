@@ -67,8 +67,7 @@ def multiple_authors() -> Response:
     """
     page, size = pagination(request.args)
     authors = Author.query.paginate(page=page, per_page=size).items
-    remote_authors =get_all_remote_authors()
-    print(f"Remote authors {remote_authors}")
+
     return (
         make_response(
             jsonify(
