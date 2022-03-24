@@ -60,7 +60,7 @@ def get_remote_post_likes(author_id: str, post_id: str):
     nodes = Remote_Node.query.all()
     for node in nodes:
         r = requests.get(f"{node.id}authors/{author_id}/posts/{post_id}/likes?size=30&page=1")
-        if r.status_code == 200 and r.json()["type"] == "likes":
+        if r.status_code == 200 and (r.json()["type"] == "likes" or r.json()["type"] == "liked"):
             return r.json()["items"]
     return []
 
@@ -68,7 +68,7 @@ def get_remote_comment_likes(author_id: str, post_id: str, comment_id: str):
     nodes = Remote_Node.query.all()
     for node in nodes:
         r = requests.get(f"{node.id}authors/{author_id}/posts/{post_id}/comments/{comment_id}/likes?size=30&page=1")
-        if r.status_code == 200 and r.json()["type"] == "likes":
+        if r.status_code == 200 and (r.json()["type"] == "likes" or r.json()["type"] == "liked"):
             return r.json()["items"]
     return []
 
@@ -79,11 +79,31 @@ def get_remote_author_liked(author_id: str):
         r = requests.get(f"{node.id}authors/{author_id}/liked?size=30&page=1")
         if r.status_code == 200 and r.json()["type"] == "liked":  
             return r.json()["items"]
-        return []
+    return []
 
-def get_remote_followers():
-    pass
+def get_remote_followers(author_id: str):
+    nodes = Remote_Node.query.all()
+    for node in nodes:
+        r = requests.get(f"{node.id}authors/{author_id}/followers", auth=(node.username, node.password))
+        if r.status_code == 200 and (r.json()["type"] == "following" or r.json()["type"] == "followers" ):
+            return r.json()["items"]
+    return []
 
+def check_remote_is_following(author_id: str, follower_id: str):
+    nodes = Remote_Node.query.all()
+    for node in nodes:
+        r = requests.get(f"{node.id}authors/{author_id}/followers/{follower_id}", auth=(node.username, node.password))
+        if r.status_code == 200 and r.json()["type"] == "Follow": #remote node 1
+            if r.json()["accepted"] == "true":
+                return True
+        if r.status_code == 200: #remote node 2
+            pass
+            #r.
+            
+    return False
+
+
+        
 def get_remote_inbox(author_id: str):
     nodes = Remote_Node.query.all()
     for node in nodes:
