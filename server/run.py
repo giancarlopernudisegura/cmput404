@@ -68,7 +68,7 @@ def create_app(config_filename=None):
     def after_request(response):
         allowed_origins = [f"{FRONT_END_HOST}", "https://frontend404.herokuapp.com", "https://website404.herokuapp.com", "https://backend-404.herokuapp.com"]
 
-        if request.headers["Origin"] in allowed_origins:
+        if request.environ.get('HTTP_ORIGIN', f"{FRONT_END_HOST}") in allowed_origins:
             response.headers.add("Access-Control-Allow-Origin", f"{FRONT_END_HOST}")
             response.headers.add(
                 "Access-Control-Allow-Headers", "Content-Type,Authorization,Set-Cookie"
