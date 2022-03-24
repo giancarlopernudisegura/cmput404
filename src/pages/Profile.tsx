@@ -7,8 +7,6 @@ import {
   getCurrentAuthor, 
   getPosts, 
   deletePost,
-  getFollowers,
-  followerCall
 } from "../utils/apiCalls";
 
 import PostList from "../components/PostList";
@@ -35,7 +33,6 @@ function Profile({path}: profileProps) {
     // Set the author's posts
     var postsPromise = authorPromise.then(authorId => { return getPosts(authorId); });
     postsPromise.then(posts => {  setMyPosts(posts); });
-
 
     Promise.all([authorPromise, postsPromise])
       .then(() => {
