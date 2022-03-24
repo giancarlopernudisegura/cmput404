@@ -33,22 +33,38 @@ function AuthorInfo({ author }: AuthorProps) {
         async function fetchFriends() {
             
             try {
-                // let followers = await fetchFollowers();
-                let result = await getFollowers(author.id);
-                let followers = result.items;
-                setMyFollowers(followers);
-                
+                let followers = await fetchFollowers();
                 var friends = new Array();
 
-                followers.forEach( async (follower: any) => {
-                    let result = await followerCall(follower.id, author.id, "GET")
-                    let data = result.items;
-                    if (data.length > 0) {
-                        friends.push(follower);
+                // APPROACH 1
+                let promises: any = [];
+                followers.forEach((follower: any) => {
+                    promises.push(followerCall(follower.id, author.id, "GET"));
+                });
+
+                let followerResponse = await Promise.all(promises);
+
+                // Get the friends
+                followerResponse.forEach((res: any) => {
+                    if (res.status === 200) {
+                        let data = res.items;
+                        if (data.length > 0) {
+                            // TODO: DELLA Check if the user is following the author or not
+                            friends.push(data[0]);
+                        }
+                    } else {
+                        throw Error();
                     }
                 });
+
                 console.log('FRIENDS', friends);
                 setMyFriends(friends);
+            
+
+                // // APPROACH 2
+                // for (let follower of followers) {
+
+                // }
 
             } catch (err) {
                 console.log('Error fetching friends:', err);
@@ -81,7 +97,7 @@ function AuthorInfo({ author }: AuthorProps) {
 
         }
         fetchFriends();
-      
+    
     }, [])
 
 
