@@ -1,7 +1,6 @@
 import { h } from 'preact';
 import { useState, useEffect } from 'preact/hooks';
 import { getFollowers, followerCall } from '../../utils/apiCalls';
-import useFollowersAndFriends from './useFollowersAndFriends';
 
 
 type AuthorProps = {
@@ -39,11 +38,14 @@ function AuthorInfo({ author }: AuthorProps) {
 
                     var friends = new Array();
 
+                    // Iterate through the followers and check if the author is following any of their followers 
                     followers.forEach( (follower: any) => {
+                        // Make an API call to check if the author is following the follower
                         let result = followerCall(follower.id, author.id, "GET")
                         result.then(data => { 
-                            // if the array is non-empty, then the author is following their follower
+                            // if the array is non-empty, it is a follow
                             if (data.items.length > 0) {
+                                console.log('FOLLOWER', follower);
                                 friends.push(follower);
                             }
                         });
@@ -52,11 +54,7 @@ function AuthorInfo({ author }: AuthorProps) {
                     return friends;
                 })
                 .then( (friends) => { 
-                    console.log('TYPE:', typeof(friends), 'LENGTH:', friends.length);
-                    console.log(friends);
-                    if (friends.length > 0) {
-                        setMyFriends(friends);
-                    }
+                    setMyFriends(friends); //FIXME i don't have friends 😭
                 })
                 .catch(err => { console.log('Error in fetchFriends:', err) });
 
