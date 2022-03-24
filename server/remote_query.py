@@ -103,11 +103,22 @@ def check_remote_is_following(author_id: str, follower_id: str):
     return False
 
 
-        
-def get_remote_inbox(author_id: str):
+def post_remote_inbox(author_id: str, obj):#posts a given model to inbox
     nodes = Remote_Node.query.all()
     for node in nodes:
-        r = requests.get(f"{node.id}authors/{author_id}/inbox", auth=(node.username, node.password))
-        if r.status_code == 200 and r.json()["type"] == "inbox":
-            pass
-    pass
+        r = requests.get(f"{node.id}authors/{author_id}")
+        if r.status_code == 200 and r.json()["type"] == "author":
+            obj_json = obj.json()
+            r = requests.post(f"{node.id}authors/{author_id}/inbox", auth=(node.username, node.password), json=obj_json)
+            
+
+        
+# def get_remote_inbox(author_id: str):
+#     nodes = Remote_Node.query.all()
+#     for node in nodes:
+#         r = requests.get(f"{node.id}authors/{author_id}/inbox", auth=(node.username, node.password))
+#         if r.status_code == 200 and r.json()["type"] == "inbox":#node 1
+#             return r.json()#type seems to match ours
+#         elif r.status_code == 200 and r.json()["type"] == "inbox":#node 2
+#             pass
+#     return None
