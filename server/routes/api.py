@@ -1055,8 +1055,10 @@ def add_remote() -> Response:
     )
 
 
-@bp.route("/remotes/<string:remote_id>", methods=["DELETE"])
+@bp.route("/remotes/<path:remote_id>", methods=["DELETE"])
 def delete_remote(remote_id: str) -> Response:
+    if remote_id[-1] != "/":
+        remote_id += "/"
     if not http_basic_authentication():
         print(request.authorization.username, request.authorization.password)
         return utils.json_response(

@@ -1,10 +1,12 @@
 from threading import local
 from server.models import Author, Inbox, Post, Comment, Requests, Like, Remote_Node
 import requests
+import requests_cache
 import os
 
 
-#utils
+author_cache = requests_cache.CachedSession('author_cache')
+
 
 def convert_id_to_remote(id: str, url: str):#
     if "://" in id:
@@ -14,7 +16,7 @@ def convert_id_to_remote(id: str, url: str):#
 def find_remote_author(author_id: str):
     nodes = Remote_Node.query.all()
     for node in nodes:
-        r = requests.get(f"{node.id}authors/{author_id}")
+        r = author_cache.get(f"{node.id}authors/{author_id}")
         if r.status_code == 200 and r.json()["type"] == "author":
             return node.id
     return None
@@ -119,7 +121,7 @@ def get_all_remote_authors(pagesize, page=1):
 def get_remote_author(author_id: str):
     nodes = Remote_Node.query.all()
     for node in nodes:
-        r = requests.get(f"{node.id}authors/{author_id}")
+        r = author_cache.get(f"{node.id}authors/{author_id}")
         if r.status_code == 200 and r.json()["type"] == "author":
             node_items = [r.json()]
             fix_remote_url(node_items, node)
