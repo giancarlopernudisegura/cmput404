@@ -69,8 +69,9 @@ def create_app(config_filename=None):
         #TODO: get URLs from Remote_Node table
         allowed_origins = [f"{FRONT_END_HOST}", "https://frontend404.herokuapp.com", "https://website404.herokuapp.com", "https://backend-404.herokuapp.com"]
 
-        if request.environ.get('HTTP_ORIGIN', f"{FRONT_END_HOST}") in allowed_origins:
-            response.headers.add("Access-Control-Allow-Origin", f"{FRONT_END_HOST}")
+        ORIGIN = request.environ.get('HTTP_ORIGIN', f"{FRONT_END_HOST}")
+        if ORIGIN in allowed_origins:
+            response.headers.add("Access-Control-Allow-Origin", f"{ORIGIN}")
             response.headers.add(
                 "Access-Control-Allow-Headers", "Content-Type,Authorization,Set-Cookie"
             )
