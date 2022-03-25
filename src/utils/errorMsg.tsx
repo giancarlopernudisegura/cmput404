@@ -5,3 +5,4 @@ export const FETCH_IMG_ERROR = "There was an error retrieving the image requeste
 export const FAILED_EDIT_POST = "There was an error editing the post. Try again.";
 export const FAILED_CREATE_COMMENT = "Unable to create a new comment for this post";
 export const FAILED_ADD_LIKE = "There was an error adding a like to this post";
+export const FAILED_DELETE_LIKE = "There was an error deleting a like for this post";

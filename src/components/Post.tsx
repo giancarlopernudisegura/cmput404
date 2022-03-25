@@ -77,16 +77,20 @@ function Post({
     setOpen(false);
   };
 
-  function addLikesForPosts(authorId: string, postId: string){ // TODO: Work in progress at the moment
+  const addLike = () => {
+    function addLikesForPosts(authorId: string, postId: string){ // TODO: Work in progress at the moment
 
-    const likeData = {
-      author: authorId,
-      post_id: postId,
+      const likeData = {
+        author: authorId,
+        post: postId,
+      }
+  
+      addPostLike(authorId.toString(), postId, likeData)
+  
     }
-
-    addPostLike(authorId.toString(), postId, likeData).then((data => setPostLikes(data)))
-
+    addLikesForPosts(authorId, postId);
   }
+  
 
   useEffect(() => {
     // Fetch all the comments of the post from the API
@@ -100,13 +104,13 @@ function Post({
 
     function getAllLikes(authorId: string, postId: string) {
       getPostLikes(authorId.toString(), postId)
-        .then((data) => setPostLikes(data))
+        .then((data) => setPostLikes(data.likes))
         .catch((err) => setErrMsg(err.message));
     }
 
     fetchComments(authorId, postId);
     getAllLikes(authorId, postId);
-    addLikesForPosts(authorId, postId);
+    
   }, []);
 
   const toggleFunction = () => {
@@ -185,7 +189,7 @@ function Post({
         <div className="flex flex-row gap-x-4 justify-evenly">
           <div id="like" className="flex flex-row ">
             <p>{postLikes.length === undefined ? 0 : postLikes.length}</p>
-            <IconButton color="primary" onClick={() => toggleFunction()}>
+            <IconButton color="primary" onClick={() => addLike()}>
               {likeToggle ? (
                 <FavoriteBorderOutlinedIcon fontSize="large" />
               ) : (

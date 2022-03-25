@@ -405,6 +405,7 @@ export async function getPostLikes(author_id: string, post_id: string) {
   );
 
   let data = res.json();
+  data.then(likeList => console.log(likeList.likes))
   return data;
 }
 /**
@@ -476,4 +477,23 @@ export async function addPostLike(
   } catch (err) {
     throw Error(FAILED_ADD_LIKE);
   }
+}
+
+export function deletePostLike(author_id: string, post_id: string) {
+  const response = fetch(
+    `${BACKEND_HOST}/authors/${author_id}/posts/${post_id}/likes`,
+    {
+      mode: "cors",
+      credentials: "include",
+      method: "DELETE",
+    }
+  )
+    .then((res) => {
+      return res.status;
+    })
+    .catch((err) => {
+      throw Error("Unable to delete post");
+    });
+
+  return response;
 }
