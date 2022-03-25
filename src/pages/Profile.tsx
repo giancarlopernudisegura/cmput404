@@ -1,9 +1,15 @@
 import { h } from "preact";
 import { useState, useEffect } from "preact/hooks";
-import DrawerMenu from '../components/sidemenu-components/Drawer'
+import DrawerMenu from "../components/sidemenu-components/Drawer";
 import { Alert, CircularProgress } from "@mui/material";
 
-import { getCurrentAuthor, getPosts, deletePost, editPost } from "../utils/apiCalls";
+import {
+  getCurrentAuthor,
+  getPosts,
+  deletePost,
+  editPost,
+  getAllComments,
+} from "../utils/apiCalls";
 
 import PostList from "../components/PostList";
 import AuthorInfo from "../components/profile/AuthorInfo";
@@ -12,9 +18,9 @@ import DialogTemplate from '../components/DialogTemplate';
 import { MARKDOWN } from '../utils/constants';
 
 
-type profileProps = {path: string}
+type profileProps = { path: string };
 
-function Profile({path}: profileProps) {
+function Profile({ path }: profileProps) {
   const [errMsg, setErrMsg] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   // Dialog
@@ -33,49 +39,48 @@ function Profile({path}: profileProps) {
 
   useEffect(() => {
     function getAuthorAndPosts() {
-      getCurrentAuthor() 
-        .then(data => { setAuthor(data); 
+      getCurrentAuthor()
+        .then((data) => {
+          setAuthor(data);
           return data.id;
         })
-        .then(authorId => {
+        .then((authorId) => {
           return getPosts(authorId);
         })
-        .then(posts => {
+        .then((posts) => {
           setMyPosts(posts);
         })
-        .catch(err => { setErrMsg(err.message); });
-      
+        .catch((err) => {
+          setErrMsg(err.message);
+        });
     }
     setIsLoading(false);
     getAuthorAndPosts();
-
   }, []);
 
   function handleRemove(postId: string) {
-
     // open the modal to make sure
     // var message = "Are you sure you want to delete this post?";
     // <SimpleModal message={message} onOpen={true} />
 
-    const newList = myPosts.filter(post => post.id !== postId);
+    const newList = myPosts.filter((post) => post.id !== postId);
     setMyPosts(newList);
 
     function removePost(postId: string, authorId: string) {
       // call api to delete post
-      deletePost(postId, authorId)
-      .catch(err => {setErrMsg(err.message);});
+      deletePost(postId, authorId).catch((err) => {
+        setErrMsg(err.message);
+      });
     }
 
     removePost(author.id, postId);
   }
 
-
-
   async function handleEdit(newPostBody: any) {
     console.log("BODY", newPostBody);
 
     // initialize values
-    setIdEditPost(newPostBody.id);
+    setIdEditPost(newPostBody.postId);
     setEditPostBody(newPostBody.description);
     setEditPostCat("");
     setEditPostTitle(newPostBody.title);
@@ -102,12 +107,9 @@ function Profile({path}: profileProps) {
     setMyPosts(newList);
   }
 
-
   return (
     <div id="profile">
-      <DrawerMenu
-        pageName="My Profile"
-      >
+      <DrawerMenu pageName="My Profile">
         {errMsg && <Alert severity="error">{errMsg}</Alert>}
 
         {isLoading === true ? 

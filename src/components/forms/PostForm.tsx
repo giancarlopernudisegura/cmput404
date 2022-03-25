@@ -21,9 +21,9 @@ type PostFormProps = {
 };
 
 type Image = {
-    file: File,
-    base64: string,
-    imgUrl: string
+    file: File;
+    base64: string;
+    imgUrl: string;
 };
 
 const placeholderContent = {
@@ -43,7 +43,6 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, isMar
         setAuthorDetails();
     }, []);
 
-
     const handleBody = (event: Event) => { 
         if (event) {
             setBody((event.target as HTMLTextAreaElement).value);
@@ -51,13 +50,13 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, isMar
     }
 
     const handleTitle = (event: Event) => { 
-        if (event){
+        if (event) {
             setTitle((event.target as HTMLInputElement).value);
         }
     }
 
     const handleCategory = (event: Event) => { 
-        if (event){
+        if (event) {
             setCategory((event.target as HTMLInputElement).value);
         }
     }
@@ -107,6 +106,7 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, isMar
                         "visibility": "PUBLIC",
                         "contentType": `${img.file.type}`
                     };
+
                     try {
                         if (authorId === null) {
                             throw Error("Author Id is null");
@@ -130,7 +130,7 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, isMar
             "contentType": contentType, 
             "visibility": "PUBLIC",
             "unlisted": false,
-        }
+        };
 
         if (authorId === null) {
             throw Error("Author Id is null");
@@ -138,7 +138,6 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, isMar
 
         await submitAction(authorId, postData);
 
-        
         alert('You have successfully posted to your public page!');
         event.preventDefault();
     };
@@ -149,7 +148,7 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, isMar
 
     const createImgMkd = (allImg : Array<Image>) => {
         let mkd = "";
-
+        
         for (let img in Object.keys(allImg)) {
             mkd += `![](${allImg[img].imgUrl})\n`;
         }
@@ -185,6 +184,7 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, isMar
         setImages(allImgs);
         setImageMkd(imgMkd);
     }
+
 
     return (
         <div class="create-post"
@@ -262,7 +262,6 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, isMar
 
         </div>
     );
-
 }
 
 export default PostForm;

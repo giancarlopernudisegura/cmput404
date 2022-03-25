@@ -1,6 +1,6 @@
-import { h } from 'preact';
-import Post from './Post';
-import { MARKDOWN, PLAIN } from '../utils/constants'
+import { h } from "preact";
+import Post from "./Post";
+import { MARKDOWN, PLAIN } from "../utils/constants";
 
 type PostListProps = {
     initialPosts: Array<any>,
@@ -23,10 +23,11 @@ function PostList({ initialPosts, currentAuthor, onRemove, handleEdit } : PostLi
             .filter(post => post.contentType === MARKDOWN || post.contentType === PLAIN)
             .map(post => (
               <Post
-                id={post.id}
+                postId={post.postId}
                 title={post.title}
                 body={post.description}
-                author={post.author} 
+                authorName={post.authorName}
+                authorId={post.authorId}
                 currentAuthor={currentAuthor}
                 onRemove={onRemove}
                 handleEdit={handleEdit}

@@ -280,7 +280,6 @@ def get_comment(author_id: str, post_id: str, comment_id: str) -> Response:
 @require_authentication
 def post_comment(author_id: str, post_id: str) -> Response:
     try:
-        title = request.json["title"]
         content = request.json["content"]
         contentType = ContentType(request.json.get("contentType"))
     except KeyError:
@@ -289,7 +288,7 @@ def post_comment(author_id: str, post_id: str) -> Response:
         return Response(status=httpStatus.BAD_REQUEST)
     except TypeError:
         return Response(status=httpStatus.BAD_REQUEST)
-    comment = Comment(current_user.id, post_id, title, contentType, content)
+    comment = Comment(current_user.id, post_id, contentType, content)
     db.session.add(comment)
     db.session.commit()
     return Response(status=httpStatus.OK)
