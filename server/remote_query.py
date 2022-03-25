@@ -144,11 +144,11 @@ def get_remote_followers(author_id: str):
     nodes = Remote_Node.query.all()
     for node in nodes:
         #node 1
-        r = requests.get(f"{node.id}authors/{author_id}/following", auth=(node.username, node.password))
+        r = requests.get(f"{node.id}authors/{author_id}/following", auth=(node.user, node.password))
         if r.status_code == 200 and r.json()["type"] == "following":
             return r.json()["items"]
         #node 2
-        r = requests.get(f"{node.id}authors/{author_id}/followers", auth=(node.username, node.password))
+        r = requests.get(f"{node.id}authors/{author_id}/followers", auth=(node.user, node.password))
         if r.status_code == 200 and r.json()["type"] == "followers":
             return r.json()["items"]#this team had some different format stuff originally, may have issues
     return []
@@ -156,7 +156,7 @@ def get_remote_followers(author_id: str):
 def check_remote_is_following(author_id: str, follower_id: str):#These enpoints are VERY different, should use followers and do a bit of querying ourselves
     nodes = Remote_Node.query.all()
     for node in nodes:
-        r = requests.get(f"{node.id}authors/{author_id}/followers/{follower_id}", auth=(node.username, node.password))
+        r = requests.get(f"{node.id}authors/{author_id}/followers/{follower_id}", auth=(node.user, node.password))
         if r.status_code == 200 and r.json()["type"] == "Follow": #remote node 1
             if r.json()["accepted"] == "true":
                 return True
@@ -174,7 +174,7 @@ def post_remote_inbox(author_id: str, obj):#posts a given model to inbox
         r = requests.get(f"{node.id}authors/{author_id}")
         if r.status_code == 200 and r.json()["type"] == "author":
             obj_json = obj.json()
-            r = requests.post(f"{node.id}authors/{author_id}/inbox", auth=(node.username, node.password), json=obj_json)
+            r = requests.post(f"{node.id}authors/{author_id}/inbox", auth=(node.user, node.password), json=obj_json)
         
 
 def put_remote_like_inbox(remote_author_id: str, like_author_id: str, comment_id = None, post_id = None):
@@ -205,7 +205,7 @@ def put_remote_like_inbox(remote_author_id: str, like_author_id: str, comment_id
 # def get_remote_inbox(author_id: str):
 #     nodes = Remote_Node.query.all()
 #     for node in nodes:
-#         r = requests.get(f"{node.id}authors/{author_id}/inbox", auth=(node.username, node.password))
+#         r = requests.get(f"{node.id}authors/{author_id}/inbox", auth=(node.user, node.password))
 #         if r.status_code == 200 and r.json()["type"] == "inbox":#node 1
 #             return r.json()#type seems to match ours
 #         elif r.status_code == 200 and r.json()["type"] == "inbox":#node 2
