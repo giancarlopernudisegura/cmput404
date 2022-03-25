@@ -52,6 +52,15 @@ def calculate_remote_page(objType, page, size):#calculate the remote page based 
     #objType should be the model Type
     return page - len(objType.query.all()) // size
 
+def fix_remote_url(node_items: list, node):#fix url bug in some remote nodes data
+    for author in node_items:
+        if author["url"] == None or author["url"][:5] != "http":
+            id = author["id"].split("/")[-1]
+            author["url"] = f"{node.id}authors/{id}"
+        if author["host"] == None or author["host"][:5] != "http":
+            author["host"] = node.id
+        if author["github"] == None or author["github"][:5] != "http":
+            author["github"] = "http://www.github.com"
 
 
 #endpoint interactions
@@ -62,7 +71,10 @@ def get_all_remote_authors(pagesize, page=1):
     for node in nodes:
         r = requests.get(f"{node.id}authors?size={pagesize}&page={page}")
         if r.status_code == 200 and len(r.json()["items"]) > 0:
-            items.extend(r.json()["items"])
+            node_items = r.json()["items"]
+            fix_remote_url(node_items, node)
+            items.extend(node_items)
+
     items = items[:pagesize]
     return items
 
@@ -71,7 +83,9 @@ def get_remote_author(author_id: str):
     for node in nodes:
         r = requests.get(f"{node.id}authors/{author_id}")
         if r.status_code == 200 and r.json()["type"] == "author":
-            return r.json() 
+            node_items = [r.json()]
+            fix_remote_url(node_items, node)
+            return node_items[0]
     return None#Author not found in any remotes
 
 def get_remote_author_posts(author_id: str, size :int, page=1):
@@ -174,7 +188,7 @@ def submit_remote_follow_request(author_id: str, follower_id: str):
         return#we dont have a case for no author currently...
     local_follower = Author.query.filter_by(id=follower_id).first()
     if not local_follower:
-        return#bad local follower somehow?
+        return #bad local follower somehow?
     local_host = os.getenv("FLASK_HOST")
     remote_follow_node1 ={
         "type": "follow",
