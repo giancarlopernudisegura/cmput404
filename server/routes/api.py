@@ -327,8 +327,8 @@ def get_comments(author_id: str, post_id: str) -> Response:
 )
 def get_comment(author_id: str, post_id: str, comment_id: str) -> Response:
     comment = Comment.query.filter_by(id=comment_id).first()
-    is_local = current_user.is_authenticated
     if comment != None:#is local comment
+        is_local = current_user.is_authenticated
         return make_response(jsonify(comment.json(is_local))), httpStatus.OK
     else:#look in remotes
         remote_comment_dict = get_remote_comment(author_id, post_id, comment_id)
@@ -336,6 +336,8 @@ def get_comment(author_id: str, post_id: str, comment_id: str) -> Response:
             return make_response(jsonify(remote_comment_dict)), httpStatus.OK
         else:#not found in remotes
             return Response(status=httpStatus.NOT_FOUND)
+
+
 
 
 
@@ -449,11 +451,18 @@ def remove_follower(author_id: str, follower_id: str) -> Response:
 @bp.route("/authors/<string:author_id>/followers/<string:follower_id>", methods=["PUT"])
 @require_authentication
 def add_follower(author_id: str, follower_id: str) -> Response:
-    if current_user.id != follower_id:
-        return (
-            make_response(jsonify(error=res_msg.NO_PERMISSION)),
-            httpStatus.FORBIDDEN,
-        )
+    if current_user.is_authenticated:
+        if current_user.id != follower_id:
+            return (
+                make_response(jsonify(error=res_msg.NO_PERMISSION)),
+                httpStatus.FORBIDDEN,
+            )
+    ##remote
+    if find_remote_author(author_id):
+        response = submit_remote_follow_request(author_id, follower_id)
+        if response:
+            return Response(status=httpStatus.OK)
+    ##local
     follower = Requests.query.filter_by(to=author_id, initiated=current_user.id).first()
     if follower:
         return (

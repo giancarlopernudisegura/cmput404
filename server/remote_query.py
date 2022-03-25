@@ -1,3 +1,4 @@
+from threading import local
 from server.models import Author, Inbox, Post, Comment, Requests, Like, Remote_Node
 import requests
 import os
@@ -165,6 +166,25 @@ def check_remote_is_following(author_id: str, follower_id: str):#These enpoints 
             #r.
             
     return False
+
+def submit_remote_follow_request(author_id: str, follower_id: str):
+    remote_host = find_remote_author(author_id)
+    node = Remote_Node.query.filter_by(id=remote_host).first()
+    if not node:
+        return#we dont have a case for no author currently...
+    local_follower = Author.query.filter_by(id=follower_id).first()
+    if not local_follower:
+        return#bad local follower somehow?
+    local_host = os.getenv("FLASK_HOST")
+    remote_follow_node1 ={
+        "type": "follow",
+        "summary": f"{local_follower.displayName} wants to follow you.",
+        "actor": f"{local_host}/authors/{follower_id}",
+        "object": f"{node.id}/authors/{author_id}"
+    }
+    r = requests.post(f"{node.id}authors/{author_id}/inbox", json=remote_follow_node1, auth=(node.user, node.password))
+    return True
+    
 
 #inbox wrappers
 
