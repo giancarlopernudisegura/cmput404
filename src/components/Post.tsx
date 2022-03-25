@@ -10,9 +10,10 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CommentList from "../components/comment-components/CommentList";
 import CommentForm from "../components/forms/CommentForm";
-import { addPostLike, getAllComments, getPostLikes } from "../utils/apiCalls";
+import { addPostLike, deletePostLike, getAllComments, getPostLikes } from "../utils/apiCalls";
 import ReactMarkdown from "react-markdown";
 import { MARKDOWN, PLAIN } from "../utils/constants";
+import ThumbDown from '@mui/icons-material/ThumbDown'
 
 /*
     Post component
@@ -78,17 +79,11 @@ function Post({
   };
 
   const addLike = () => {
-    function addLikesForPosts(authorId: string, postId: string){ // TODO: Work in progress at the moment
+    addPostLike(authorId.toString(), postId)
+  }
 
-      const likeData = {
-        author: authorId,
-        post: postId,
-      }
-  
-      addPostLike(authorId.toString(), postId, likeData)
-  
-    }
-    addLikesForPosts(authorId, postId);
+  const deleteLike = () => {
+    deletePostLike(authorId.toString(), postId)
   }
   
 
@@ -195,6 +190,9 @@ function Post({
               ) : (
                 <Favorite fontSize="large" />
               )}
+            </IconButton>
+            <IconButton color="primary" onClick={() => deleteLike()}>
+              <ThumbDown fontSize="large"/>
             </IconButton>
           </div>
 

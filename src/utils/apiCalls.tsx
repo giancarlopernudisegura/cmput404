@@ -452,9 +452,9 @@ export function isLocal(node: string) {
 export async function addPostLike(
   author_id: string,
   post_id: string,
-  likeData: any
+  // likeData: any
 ) {
-  const encodedLikeData = JSON.stringify(likeData);
+  // const encodedLikeData = JSON.stringify(likeData);
   try {
     const res = await fetch(
       `${BACKEND_HOST}/authors/${author_id}/posts/${post_id}/likes`,
@@ -465,7 +465,7 @@ export async function addPostLike(
         headers: {
           "Content-Type": "application/json; charset=utf-8",
         },
-        body: encodedLikeData,
+        // body: encodedLikeData,
       }
     );
 
