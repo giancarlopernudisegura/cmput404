@@ -233,7 +233,7 @@ def specific_post(author_id: str, post_id: str) -> Response:
         # TODO: update documentation for this
         return (
             make_response(jsonify(post.json())),
-            httpStatus.OK,
+            httpStatus.CREATED,
         )
         # return Response(status=httpStatus.OK)
     elif request.method == "DELETE":
