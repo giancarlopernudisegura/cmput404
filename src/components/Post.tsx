@@ -19,6 +19,7 @@ import {
 import ReactMarkdown from "react-markdown";
 import { MARKDOWN, PLAIN } from "../utils/constants";
 import ThumbDown from "@mui/icons-material/ThumbDown";
+import { ThumbUp } from "@mui/icons-material";
 
 /*
     Post component
@@ -185,18 +186,18 @@ function Post({
 
       <div id="buttons" className="grid grid-cols-1 divide-y py-4">
         <div className="flex flex-row gap-x-4 justify-evenly">
-          <div id="like" className="flex flex-row ">
-            <p>{postLikes.length === undefined ? 0 : postLikes.length}</p>
-            <IconButton color="primary" onClick={() => addLike()}>
-              {likeToggle ? (
-                <FavoriteBorderOutlinedIcon fontSize="large" />
-              ) : (
-                <Favorite fontSize="large" />
-              )}
-            </IconButton>
-            <IconButton color="primary" onClick={() => deleteLike()}>
-              <ThumbDown fontSize="large" />
-            </IconButton>
+          <p>Likes: {postLikes.length === undefined ? 0 : postLikes.length}</p>
+          <div id="like" className="flex flex-row space-x-4">
+            <Button
+              variant="contained"
+              onClick={() => addLike()}
+              disableElevation={true}
+            >
+              Add Like
+            </Button>
+            <Button variant="outlined" onClick={() => deleteLike()}>
+              Delete Like
+            </Button>
           </div>
 
           <div>
