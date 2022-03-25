@@ -25,6 +25,27 @@ def find_remote_post(author_id: str ,post_id: str):
             return node.id
     return None
 
+def find_remote_comment(author_id: str, post_id: str, comment_id: str):
+    nodes = Remote_Node.query.all()
+    for node in nodes:
+        r = requests.get(f"{node.id}authors/{author_id}/posts/{post_id}/comments/{comment_id}")
+        if r.status_code == 200 and r.json()["type"] == "comment":
+            return node.id
+    return None
+
+def format_remote_post(author_id, post_id, node_id, return_dict):#format remote posts like ours
+    comments = get_remote_comments(author_id, post_id)
+    return_dict["comments"] = f"{node_id}authors/{author_id}/posts/{post_id}/comments"
+    return_dict["commentsSrc"] = {
+        "type": "comments",
+        "id": return_dict["comments"],
+        "page": 1,
+        "size": len(comments),
+        "post": f"{node_id}/authors/{author_id}/posts/{post_id}",
+        "comments": comments,
+    }
+    return return_dict
+
 #endpoint interactions
     
 def get_all_remote_authors(pagesize, page=1):
@@ -51,7 +72,11 @@ def get_remote_author_posts(author_id: str, pagesize :int):
     for node in nodes:
         r = requests.get(f"{node.id}authors/{author_id}/posts?size=30&page=1")
         if r.status_code == 200 and r.json()["type"] == "posts":
-            items.extend(r.json()["items"])
+            remote_posts = []
+            for post in r.json()["items"]:#format posts
+                post_id = post["id"].split("/")[-1]
+                remote_posts.append(format_remote_post(author_id, post_id, node.id, r.json()))
+            items.extend(remote_posts)
     items = items[:pagesize]#do this better
     return items
 
@@ -63,7 +88,7 @@ def get_remote_post(author_id: str, post_id: str):#tested for https://backend-40
     for node in nodes:
         r = requests.get(f"{node.id}authors/{author_id}/posts/{post_id}")
         if r.status_code == 200 and r.json()["type"] == "post":
-            return r.json() 
+            return format_remote_post(author_id, post_id, node.id, r.json())
     return None#post not found
 
 

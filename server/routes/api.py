@@ -510,10 +510,9 @@ def clear_inbox(author_id: str) -> Response:
 )
 def post_like_methods(author_id: str, post_id: str) -> Response:
     post = Post.query.filter_by(id=post_id).first()
-    remote_post = find_remote_post(author_id, post_id)
     ##remote
-    if remote_post and request.method == "GET":
-        remote_likes = get_remote_post_likes(author_id, post_id)
+    remote_likes = get_remote_post_likes(author_id, post_id)
+    if len(remote_likes) != 0 and request.method == "GET":
         if len(remote_likes) == 0:#not found in remote
             return utils.json_response(
                 httpStatus.NOT_FOUND, {"message": f"post {post_id} does not exist."}
@@ -522,7 +521,6 @@ def post_like_methods(author_id: str, post_id: str) -> Response:
             make_response(jsonify(likes=[like for like in remote_likes])),
             httpStatus.OK,
             )       
-        
     ##local
     if post is None:  # post does not exist
         return utils.json_response(
@@ -574,6 +572,18 @@ def post_like_methods(author_id: str, post_id: str) -> Response:
 def comment_like_methods(author_id: str, post_id: str, comment_id: str):
     comment = Comment.query.filter_by(id=comment_id).first()
     post = Post.query.filter_by(id=post_id).first()
+    ##remote
+    remote_likes = get_remote_comment_likes(author_id, post_id, comment_id)
+    if len(remote_likes) != 0 and request.method == "GET":
+        if len(remote_likes) == 0:#not found in remote
+            return utils.json_response(
+                httpStatus.NOT_FOUND, {"message": f"comment {post_id} does not exist."}
+            )
+        return (
+            make_response(jsonify(likes=[like for like in remote_likes])),
+            httpStatus.OK,
+            )    
+    ##local
     if post is None:  # post does not exist
         return utils.json_response(
             httpStatus.NOT_FOUND, {"message": f"post {post_id} does not exist."}
@@ -631,6 +641,17 @@ def comment_like_methods(author_id: str, post_id: str, comment_id: str):
 
 @bp.route("/authors/<string:author_id>/liked", methods=["GET"])
 def get_author_liked(author_id: str):
+    ##remote
+    if find_remote_author(author_id):
+        remote_liked = get_remote_author_liked(author_id)
+        return (
+            make_response(
+                jsonify(type="liked", items=remote_liked)
+            ),
+            httpStatus.OK,
+        )
+
+    ##local
     if Author.query.filter_by(id=author_id).first() is None:  # author doesn't exist
         return utils.json_response(
             httpStatus.NOT_FOUND, {"message": res_msg.AUTHOR_NOT_EXISTS}
