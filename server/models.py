@@ -148,7 +148,7 @@ class Post(db.Model, JSONSerializable, InboxItem):
             "origin": f"{HOST}/authors/{self.author}/posts/{self.id}",
             "description": self.content,
             "contentType": str(self.contentType),
-            "author": author.json(),
+            "author": author.json(local),
             "categories": self.category.split(","),
             "count": len(self.comments),
             "comments": f"{HOST}/authors/{self.author}/posts/{self.id}/comments",
@@ -158,7 +158,7 @@ class Post(db.Model, JSONSerializable, InboxItem):
                 "page": page,
                 "size": len(first_comments),
                 "post": f"{HOST}/authors/{self.author}/posts/{self.id}",
-                "comments": [comment.json() for comment in first_comments],
+                "comments": [comment.json(local) for comment in first_comments],
             },
             "published": self.timestamp.isoformat(),
             "visibility": "PUBLIC" if not self.private else "FRIENDS",
@@ -202,7 +202,7 @@ class Comment(db.Model, JSONSerializable):
         id = self.id if local else f"{HOST}/authors/{self.author}/post/{self.post}/comments/{self.id}"
         return {
             "type": "comment",
-            "author": author.json(),
+            "author": author.json(local),
             "content": self.content,
             "contentType": str(self.contentType),
             "published": self.timestamp.isoformat(),
@@ -244,7 +244,7 @@ class Like(db.Model, JSONSerializable, InboxItem):
             "@context": "https://www.w3.org/ns/activitystreams",
             "summary": f"{author.displayName} Liked your {liked_object_type}",
             "type": "Like",
-            "author": author.json(),
+            "author": author.json(local),
             "object": liked_object,
         }
 
@@ -301,7 +301,7 @@ class Requests(db.Model, JSONSerializable):  # follow requests
     def json(self, local=True) -> Dict[str, Any]:
         return {
             "type": "followers",
-            "items": [self.get_follower_json()],
+            "items": [self.get_follower_json(local)],
         }
 
 
@@ -353,13 +353,13 @@ class Inbox(db.Model, JSONSerializable):
     def json(self, local=True) -> Dict[str, Any]:
         if self.post:
             post = Post.query.filter_by(id=self.post).first()
-            return post.json()
+            return post.json(local)
         elif self.like:
             like = Like.query.filter_by(id=self.like).first()
-            return like.json()
+            return like.json(local)
         elif self.follow:
             follow = Requests.query.filter_by(id=self.follow).first()
-            return follow.json()
+            return follow.json(local)
 
 
 class Remote_Node(db.Model, JSONSerializable):  # contains auth info for remote nodes
@@ -374,7 +374,7 @@ class Remote_Node(db.Model, JSONSerializable):  # contains auth info for remote 
         self.user = user
         self.password = password
 
-    def json(self, local=True) -> Dict[str, Any]:
+    def json(self) -> Dict[str, Any]:
         return {
             "type": "remote",
             "id": self.id,
