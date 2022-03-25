@@ -125,15 +125,14 @@ def single_author(author_id: str) -> Response:
         pass
 
 
-@bp.route("/authors/<path:author_id>/posts/<path:post_id>", methods=["GET"])
+@bp.route("/authors/<path:author_id>/posts/<string:post_id>", methods=["GET"])
 def get_post(author_id: str, post_id: str) -> Response:
     post = Post.query.filter_by(id=post_id, private=False).first()
     is_local = current_user.is_authenticated
     if post == None:
-        regex = r"https?:\/\/.*\/authors\/(.+)\/posts\/(.+)"
+        regex = r"https?:\/\/.*\/authors\/(.+)"
         if (match := re.match(regex, author_id)):
             author_id = match.group(1)
-            post_id = match.group(2)
         post_dict = get_remote_post(author_id, post_id)
     else:
         post_dict = post.json(is_local)
@@ -298,7 +297,7 @@ def specific_post(author_id: str, post_id: str) -> Response:
 )
 def get_comments(author_id: str, post_id: str) -> Response:
     host_name = HOST
-    regex = r"https?:\/\/.*\/authors\/(.+)\/posts"
+    regex = r"https?:\/\/.*\/authors\/(.+)"
     if (match := re.match(regex, author_id)):
         author_id = match.group(1)
     remote_comment_host = find_remote_post(author_id, post_id)
@@ -399,7 +398,7 @@ def serve_image(author_id: str, post_id: str):
 def get_followers(author_id: str) -> Response:
     ##remote
     if not Author.query.filter_by(id=author_id).first():
-        regex = r"https?:\/\/.*\/authors\/(.+)\/followers"
+        regex = r"https?:\/\/.*\/authors\/(.+)"
         if (match := re.match(regex, author_id)):
             author_id = match.group(1)
         follower_items = get_remote_followers(author_id)
@@ -418,12 +417,11 @@ def get_followers(author_id: str) -> Response:
 @bp.route("/authors/<path:author_id>/followers/<path:follower_id>", methods=["GET"])
 def is_follower(author_id: str, follower_id: str) -> Response:
     if not Author.query.filter_by(id=author_id).first():#remote
-        regex = r"https?:\/\/.*\/authors\/(.+)\/followers/(.*)"
-        if (match := re.match(regex, author_id)):
-            author_id = match.group(1)
-            follower_id = match.group(2)
         regex = r"https?:\/\/.*\/authors\/(.+)"
         if (match := re.match(regex, author_id)):
+            author_id = match.group(1)
+        regex = r"https?:\/\/.*\/authors\/(.+)"
+        if (match := re.match(regex, follower_id)):
             follower_id = match.group(1)
         follower_items = get_remote_followers(author_id)
         all_followers = get_remote_followers(author_id)#the remote endpoints for checking a follow are very different inbetween the 3 node
@@ -577,7 +575,7 @@ def clear_inbox(author_id: str) -> Response:
 def post_like_methods(author_id: str, post_id: str) -> Response:
     post = Post.query.filter_by(id=post_id).first()
     ##remote
-    regex = r"https?:\/\/.*\/authors\/(.+)\/posts\/(.+)/likes"
+    regex = r"https?:\/\/.*\/authors\/(.+)"
     if (match := re.match(regex, author_id)):
         author_id = match.group(1)
     remote_likes = get_remote_post_likes(author_id, post_id)
@@ -642,7 +640,7 @@ def post_like_methods(author_id: str, post_id: str) -> Response:
 def comment_like_methods(author_id: str, post_id: str, comment_id: str):
     comment = Comment.query.filter_by(id=comment_id).first()
     post = Post.query.filter_by(id=post_id).first()
-    regex = r"https?:\/\/.*\/authors\/(.+)\/posts"
+    regex = r"https?:\/\/.*\/authors\/(.+)"
     if (match := re.match(regex, author_id)):
         author_id = match.group(1)
     ##remote
@@ -716,7 +714,7 @@ def comment_like_methods(author_id: str, post_id: str, comment_id: str):
 @bp.route("/authors/<path:author_id>/liked", methods=["GET"])
 def get_author_liked(author_id: str):
     ##remote
-    regex = r"https?:\/\/.*\/authors\/(.+)\/liked"
+    regex = r"https?:\/\/.*\/authors\/(.+)"
     if (match := re.match(regex, author_id)):
         author_id = match.group(1)
     if find_remote_author(author_id):
