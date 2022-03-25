@@ -48,8 +48,8 @@ function Post({
   var currentUser: string = currentAuthor as string;
 
   //Toggle for like button
-  const [likeToggle, setLikeToggle] = useState(true);
-  const [isLiked, setIsLiked] = useState(0);
+  const [ isLiked, setIsLiked ] = useState(false);
+  const [ numLikes, setNumLikes ] = useState(0);
   const [postLikes, setPostLikes] = useState(Array());
 
   const [comments, setComments] = useState(Array());
@@ -77,35 +77,38 @@ function Post({
     setOpen(false);
   };
 
-  const addLike = () => {
-    function addLikesForPosts(authorId: string, postId: string){ // TODO: Work in progress at the moment
-
-      const likeData = {
-        author: authorId,
-        post: postId,
-      }
-  
-      addPostLike(authorId.toString(), postId, likeData)
-  
+  const addLike = async () => {
+    // TODO: check status
+    // TODO: check error
+    try {
+      await addPostLike(authorId, postId);
+      setIsLiked(true);
+    } catch (err) {
+      
     }
-    addLikesForPosts(authorId, postId);
   }
   
 
   useEffect(() => {
     // Fetch all the comments of the post from the API
-    function fetchComments(authorId: string, postId: string) {
-      getAllComments(authorId.toString(), postId)
-        .then((data) => setComments(data))
-        .catch((err) => {
-          setErrMsg(err.message);
-        });
+    async function fetchComments(authorId: string, postId: string) {
+      let data;
+      try {
+        data = await getAllComments(authorId.toString(), postId);
+        setComments(data);
+      } catch (err) {
+        setErrMsg((err as Error).message);
+      }
     }
 
-    function getAllLikes(authorId: string, postId: string) {
-      getPostLikes(authorId.toString(), postId)
-        .then((data) => setPostLikes(data.likes))
-        .catch((err) => setErrMsg(err.message));
+    async function getAllLikes(authorId: string, postId: string) {
+      let response;
+      try {
+        response = await getPostLikes(authorId, postId);
+        setPostLikes(response.likes);
+      } catch(err) {
+        setErrMsg((err as Error).message);
+      }
     }
 
     fetchComments(authorId, postId);
@@ -113,13 +116,13 @@ function Post({
     
   }, []);
 
-  const toggleFunction = () => {
-    setLikeToggle(!likeToggle);
-    if (likeToggle) {
-      setIsLiked(isLiked + 1);
+  const toggleLike = () => {
+    setIsLiked(!isLiked);
+    if (isLiked) {
+      setNumLikes(numLikes + 1);
     }
-    if (!likeToggle) {
-      setIsLiked(isLiked - 1);
+    if (!isLiked) {
+      setNumLikes(numLikes - 1);
     }
   };
 
@@ -189,11 +192,11 @@ function Post({
         <div className="flex flex-row gap-x-4 justify-evenly">
           <div id="like" className="flex flex-row ">
             <p>{postLikes.length === undefined ? 0 : postLikes.length}</p>
-            <IconButton color="primary" onClick={() => addLike()}>
-              {likeToggle ? (
-                <FavoriteBorderOutlinedIcon fontSize="large" />
-              ) : (
+            <IconButton color="primary" onClick={() => toggleLike()}>
+              {isLiked ? (
                 <Favorite fontSize="large" />
+              ) : (
+                <FavoriteBorderOutlinedIcon fontSize="large" />
               )}
             </IconButton>
           </div>
