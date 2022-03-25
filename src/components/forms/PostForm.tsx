@@ -1,6 +1,6 @@
 import { h, Component } from 'preact';
 import { Button, Switch, FormControlLabel } from '@mui/material';
-import { newPublicPost, getCurrentAuthor } from '../../utils/apiCalls';
+import { newPublicPost, getSpecAuthor, get_author_id } from '../../utils/apiCalls';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import ReactMarkdown from 'react-markdown';
@@ -62,9 +62,11 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, isMar
     }
 
     const setAuthorDetails = () => {
-        getCurrentAuthor().then(data => {
-            setAuthorId(data.id);
-            setAuthorDisplayName(data.displayName);
+        get_author_id().then((author_id : any) => {
+            setAuthorId(author_id);
+            getSpecAuthor(author_id).then(author => {
+                setAuthorDisplayName(author.displayName);
+            });
         });
     }
 
