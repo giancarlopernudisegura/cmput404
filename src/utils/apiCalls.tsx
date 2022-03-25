@@ -94,6 +94,7 @@ export const getAllAuthors = async (page: number) => {
   try {
     const res = await fetch(`${BACKEND_HOST}/authors/?size=10&page=${page}`, {
       mode: "cors",
+      credentials: "include",
       method: "GET",
     });
 
@@ -174,6 +175,7 @@ export async function clearInbox(author_id: string): Promise<boolean> {
   try {
     const res = await fetch(`${BACKEND_HOST}/authors/${author_id}/inbox/`, {
       method: "DELETE",
+      credentials: "include"
     });
 
     // TODO: change return value
@@ -349,6 +351,7 @@ export async function editPost(author_id: string, post_id: string, postInfo: any
   try {
     const response = await fetch(`${BACKEND_HOST}/authors/${author_id}/posts/${post_id}`, {
       method: 'POST',
+      credentials: "include",
       body: JSON.stringify(postInfo),
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
