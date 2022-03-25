@@ -10,7 +10,7 @@ from server.models import Author, Post
 from server.enums import ContentType
 import os
 from dotenv import load_dotenv
-
+from flask import request
 
 load_dotenv()
 
@@ -65,7 +65,7 @@ def create_app(config_filename=None):
     # add CORS
     @app.after_request
     def after_request(response):
-        response.headers.add("Access-Control-Allow-Origin", f"{FRONT_END_HOST}")
+        response.headers.add("Access-Control-Allow-Origin", f"{request.origin}")
         response.headers.add(
             "Access-Control-Allow-Headers", "Content-Type,Authorization,Set-Cookie"
         )
