@@ -20,7 +20,7 @@ def generate_uuid():
 
 
 class JSONSerializable(object):
-    def json(self) -> Dict[str, str]:
+    def json(self, local=True) -> Dict[str, str]:
         raise NotImplementedError()
 
 
@@ -66,13 +66,14 @@ class Author(db.Model, UserMixin, JSONSerializable):
     def __repr__(self):
         return f"<id {self.id}>"
 
-    def json(self) -> Dict[str, str]:
+    def json(self, local=True) -> Dict[str, str]:
         # get username from github id
         data = get_github_info(self.githubId)
+        id = self.id if local else f"{HOST}/authors/{self.id}"
 
         return {
             "type": "author",
-            "id": self.id,
+            "id": id,
             "host": f"{HOST}/",
             "displayName": self.displayName,
             "url": f"{HOST}/authors/{self.id}",
@@ -132,21 +133,22 @@ class Post(db.Model, JSONSerializable, InboxItem):
     def __repr__(self):
         return f"<id {self.id}>"
 
-    def json(self) -> Dict[str, Any]:
+    def json(self, local=True) -> Dict[str, Any]:
         author = Author.query.filter_by(id=self.author).first()
         page = 1
         per_page = 10
         first_comments = Comment.query.paginate(page=page, per_page=per_page).items
+        id = self.id if local else f"{HOST}/authors/{self.author}/post/{self.id}"
         return {
             "type": "post",
             "title": self.title,
-            "id": self.id,
+            "id": id,
             # TODO: going to hardcode source and origin to be only our node for now, must be changed later
             "source": f"{HOST}/authors/{self.author}/posts/{self.id}",
             "origin": f"{HOST}/authors/{self.author}/posts/{self.id}",
             "description": self.content,
             "contentType": str(self.contentType),
-            "author": author.json(),
+            "author": author.json(local),
             "categories": self.category.split(","),
             "count": len(self.comments),
             "comments": f"{HOST}/authors/{self.author}/posts/{self.id}/comments",
@@ -156,7 +158,7 @@ class Post(db.Model, JSONSerializable, InboxItem):
                 "page": page,
                 "size": len(first_comments),
                 "post": f"{HOST}/authors/{self.author}/posts/{self.id}",
-                "comments": [comment.json() for comment in first_comments],
+                "comments": [comment.json(local) for comment in first_comments],
             },
             "published": self.timestamp.isoformat(),
             "visibility": "PUBLIC" if not self.private else "FRIENDS",
@@ -195,15 +197,16 @@ class Comment(db.Model, JSONSerializable):
     def __repr__(self):
         return f"<id {self.id}>"
 
-    def json(self) -> Dict[str, Any]:
+    def json(self, local=True) -> Dict[str, Any]:
         author = Author.query.filter_by(id=self.author).first()
+        id = self.id if local else f"{HOST}/authors/{self.author}/post/{self.post}/comments/{self.id}"
         return {
             "type": "comment",
-            "author": author.json(),
+            "author": author.json(local),
             "content": self.content,
             "contentType": str(self.contentType),
             "published": self.timestamp.isoformat(),
-            "id": f"{HOST}/authors/{author.id}/posts/{self.post}/comments/{self.id}",
+            "id": id,
         }
 
 
@@ -227,7 +230,7 @@ class Like(db.Model, JSONSerializable, InboxItem):
     def __repr__(self):
         return f"<id {self.id}>"
 
-    def json(self) -> Dict[str, Any]:
+    def json(self, local=True) -> Dict[str, Any]:
         author = Author.query.filter_by(id=self.author).first()
         liked_object_type = "post" if self.post else "comment"
         if self.post:
@@ -241,7 +244,7 @@ class Like(db.Model, JSONSerializable, InboxItem):
             "@context": "https://www.w3.org/ns/activitystreams",
             "summary": f"{author.displayName} Liked your {liked_object_type}",
             "type": "Like",
-            "author": author.json(),
+            "author": author.json(local),
             "object": liked_object,
         }
 
@@ -285,9 +288,9 @@ class Requests(db.Model, JSONSerializable):  # follow requests
     def __repr__(self):
         return f"<id {self.id}>"
 
-    def get_follower_json(self) -> Dict[str, Any]:
+    def get_follower_json(self, local=True) -> Dict[str, Any]:
         follower = Author.query.filter_by(id=self.initiated).first()
-        return follower.json()
+        return follower.json(local)
 
     @staticmethod
     def are_friends(author_id1: str, author_id2: str) -> bool:
@@ -295,10 +298,10 @@ class Requests(db.Model, JSONSerializable):  # follow requests
         r2 = Requests.query.filter_by(initiated=author_id2, to=author_id1).first()
         return r1 and r2
 
-    def json(self) -> Dict[str, Any]:
+    def json(self, local=True) -> Dict[str, Any]:
         return {
             "type": "followers",
-            "items": [self.get_follower_json()],
+            "items": [self.get_follower_json(local)],
         }
 
 
@@ -347,16 +350,16 @@ class Inbox(db.Model, JSONSerializable):
     def __repr__(self):
         return f"<id {self.id} {self.post} {self.like} {self.follow}>"
 
-    def json(self) -> Dict[str, Any]:
+    def json(self, local=True) -> Dict[str, Any]:
         if self.post:
             post = Post.query.filter_by(id=self.post).first()
-            return post.json()
+            return post.json(local)
         elif self.like:
             like = Like.query.filter_by(id=self.like).first()
-            return like.json()
+            return like.json(local)
         elif self.follow:
             follow = Requests.query.filter_by(id=self.follow).first()
-            return follow.json()
+            return follow.json(local)
 
 
 class Remote_Node(db.Model, JSONSerializable):  # contains auth info for remote nodes
