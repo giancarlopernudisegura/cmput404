@@ -10,7 +10,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CommentList from "../components/comment-components/CommentList";
 import CommentForm from "../components/forms/CommentForm";
-import { addPostLike, getAllComments, getPostLikes } from "../utils/apiCalls";
+import { addPostLike, getAllComments, getPostLikes, deletePostLike, get_author_id } from "../utils/apiCalls";
 import ReactMarkdown from "react-markdown";
 import { MARKDOWN, PLAIN } from "../utils/constants";
 
@@ -48,6 +48,7 @@ function Post({
   var currentUser: string = currentAuthor as string;
 
   //Toggle for like button
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const [ isLiked, setIsLiked ] = useState(false);
   const [ numLikes, setNumLikes ] = useState(0);
   const [postLikes, setPostLikes] = useState(Array());
@@ -77,18 +78,6 @@ function Post({
     setOpen(false);
   };
 
-  const addLike = async () => {
-    // TODO: check status
-    // TODO: check error
-    try {
-      await addPostLike(authorId, postId);
-      setIsLiked(true);
-    } catch (err) {
-      
-    }
-  }
-  
-
   useEffect(() => {
     // Fetch all the comments of the post from the API
     async function fetchComments(authorId: string, postId: string) {
@@ -104,8 +93,19 @@ function Post({
     async function getAllLikes(authorId: string, postId: string) {
       let response;
       try {
-        response = await getPostLikes(authorId, postId);
+        const currentUserIdTemp = await get_author_id();
+        setCurrentUserId(currentUserIdTemp);
+        response = await getPostLikes(currentUserIdTemp, postId);
         setPostLikes(response.likes);
+        setNumLikes(response.likes.length);
+
+        // check if user liked the post
+        response.likes.forEach((like : any) => {
+          if (like.author.id === currentUserIdTemp) {
+            setIsLiked(true);
+          }
+        });
+        console.log("LIKES", response);
       } catch(err) {
         setErrMsg((err as Error).message);
       }
@@ -116,14 +116,17 @@ function Post({
     
   }, []);
 
-  const toggleLike = () => {
-    setIsLiked(!isLiked);
+  const toggleLike = async () => {
     if (isLiked) {
-      setNumLikes(numLikes + 1);
-    }
-    if (!isLiked) {
+      await deletePostLike(authorId, postId);
       setNumLikes(numLikes - 1);
+      setIsLiked(false);
+    } else {
+      await addPostLike(authorId, postId);
+      setNumLikes(numLikes + 1);
+      setIsLiked(true);
     }
+    // setIsLiked(!isLiked);
   };
 
   const renderBody = () => {
@@ -191,7 +194,7 @@ function Post({
       <div id="buttons" className="grid grid-cols-1 divide-y py-4">
         <div className="flex flex-row gap-x-4 justify-evenly">
           <div id="like" className="flex flex-row ">
-            <p>{postLikes.length === undefined ? 0 : postLikes.length}</p>
+            <p>{numLikes === undefined ? 0 : numLikes}</p>
             <IconButton color="primary" onClick={() => toggleLike()}>
               {isLiked ? (
                 <Favorite fontSize="large" />

@@ -466,7 +466,7 @@ export async function addPostLike(
 
     // let json = await res.json();
 
-    if (res.status !== 200) {
+    if (res.status !== 201) {
       throw Error();
     }
 
