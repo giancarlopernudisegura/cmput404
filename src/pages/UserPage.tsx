@@ -14,7 +14,7 @@ type UserProps = {
 };
 
 const UserPage = ({ path, followId }: UserProps) => {
-    const [ errMsg, setErrMsg] = useState("");
+    const [ errMsg, setErrMsg ] = useState("");
     const [ doesFollow, setDoesFollow ] = useState(false);
     const [ isLoading, setIsLoading ] = useState(true);
     const [ isPostLoading, setIsPostLoading ] = useState(true);

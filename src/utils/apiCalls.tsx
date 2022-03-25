@@ -347,6 +347,21 @@ export function deletePost(author_id: string, post_id: string) {
   return response;
 }
 
+export function getFollowers(author_id: string) : Promise<any> {
+  const response = fetch(`${BACKEND_HOST}/authors/${author_id}/followers/`, {
+    mode: 'cors',
+    method: 'GET',
+  })
+  .then(res => {
+    return res.json();
+  })
+  .catch(err => {
+    throw Error('Unable to get followers:' + err);
+  });
+
+  return response;
+}
+
 export async function editPost(author_id: string, post_id: string, postInfo: any) {
   try {
     const response = await fetch(`${BACKEND_HOST}/authors/${author_id}/posts/${post_id}`, {
