@@ -118,6 +118,10 @@ const Settings = ({ path }: SettingsProps) => {
         }
         const data = await res.json();
         const u: User[] = data.items;
+        if (u.length == 0) {
+            setIsLoading(false);
+            return [];
+        }
         return u.concat(await loadUsers(page + 1));
     }
 
