@@ -161,7 +161,7 @@ def post(author_id: str) -> Response:
             .items
         )
         remote_posts = []
-        if len(posts) < size:
+        if len(posts) < size and not Author.query.filter_by(id=author_id).first():
             remote_size = size - len(posts) 
             remote_page = calculate_remote_page(Post, page, size)
             remote_posts = get_remote_author_posts(author_id, remote_size, page=remote_page)

@@ -54,7 +54,6 @@ def calculate_remote_page(objType, page, size):#calculate the remote page based 
     #     remote_page = page - len(objType.query.all()) // size
     #     print(f"remote_page: {remote_page}\nobjlen {len(objType.query.all())}")
     all_items = len(objType.query.all())
-    print("NUMBER OF ITEMS", all_items)
     return page - all_items // size #TODO FIX THIS STUFF!!
 
 def fix_remote_url(node_items: list, node):#fix url bug in some remote nodes data
@@ -196,14 +195,9 @@ def get_remote_author_liked(author_id: str):
 def get_remote_followers(author_id: str):
     nodes = Remote_Node.query.all()
     for node in nodes:
-        #node 1
-        r = requests.get(f"{node.id}authors/{author_id}/following", auth=(node.user, node.password))
-        if r.status_code == 200 and r.json()["type"] == "following":
-            return r.json()["items"]
-        #node 2
         r = requests.get(f"{node.id}authors/{author_id}/followers", auth=(node.user, node.password))
-        if r.status_code == 200 and r.json()["type"] == "followers":
-            return r.json()["items"]#this team had some different format stuff originally, may have issues
+        if r.status_code == 200 and len(r.json()) != 0:
+            return r.json()["items"]
     return []
 
 def check_remote_is_following(author_id: str, follower_id: str):#These enpoints are VERY different, should use followers and do a bit of querying ourselves
