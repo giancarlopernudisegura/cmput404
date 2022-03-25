@@ -149,7 +149,7 @@ class Post(db.Model, JSONSerializable, InboxItem):
             "description": self.content,
             "contentType": str(self.contentType),
             "author": author.json(local),
-            "categories": self.category.split(","),
+            "categories": str(self.category).split(","),
             "count": len(self.comments),
             "comments": f"{HOST}/authors/{self.author}/posts/{self.id}/comments",
             "commentsSrc": {

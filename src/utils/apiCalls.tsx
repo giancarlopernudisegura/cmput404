@@ -55,6 +55,8 @@ export async function getPosts(author_id: string): Promise<any> {
 
     return listOfPosts;
   } catch (err) {
+    console.error(err);
+    
     throw Error("There was an error fetching the posts");
   }
 }
