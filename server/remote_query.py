@@ -17,15 +17,24 @@ def find_remote_author(author_id: str):
             return node.id
     return None
 
+def find_remote_post(author_id: str ,post_id: str):
+    nodes = Remote_Node.query.all()
+    for node in nodes:
+        r = requests.get(f"{node.id}authors/{author_id}/posts/{post_id}")
+        if r.status_code == 200 and r.json()["type"] == "post":
+            return node.id
+    return None
+
 #endpoint interactions
     
-def get_all_remote_authors():
+def get_all_remote_authors(pagesize, page=1):
     nodes = Remote_Node.query.all()
-    items = []   
+    items = []
     for node in nodes:
-        r = requests.get(f"{node.id}authors?size=30&page=1")
-        if r.status_code == 200: 
+        r = requests.get(f"{node.id}authors?size={pagesize}&page={page}")
+        if r.status_code == 200 and len(r.json()["items"]) > 0:
             items.extend(r.json()["items"])
+    items = items[:pagesize]
     return items
 
 def get_remote_author(author_id: str):
@@ -36,13 +45,14 @@ def get_remote_author(author_id: str):
             return r.json() 
     return None#Author not found in any remotes
 
-def get_remote_author_posts(author_id: str):
+def get_remote_author_posts(author_id: str, pagesize :int):
     items = []
     nodes = Remote_Node.query.all()
     for node in nodes:
         r = requests.get(f"{node.id}authors/{author_id}/posts?size=30&page=1")
-        if r.status_code == 200 and r.json()["type"] == "author":
+        if r.status_code == 200 and r.json()["type"] == "posts":
             items.extend(r.json()["items"])
+    items = items[:pagesize]#do this better
     return items
 
 

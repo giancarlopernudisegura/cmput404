@@ -55,6 +55,7 @@ def pagination(
     return page_number, size
 
 
+
 @bp.route("/authors", methods=["GET"])
 def multiple_authors() -> Response:
     """Get multiple author.
@@ -66,15 +67,25 @@ def multiple_authors() -> Response:
         Response: Flask.Response object containing the json of the author.
     """
     page, size = pagination(request.args)
-    authors = Author.query.paginate(page=page, per_page=size).items
-
+    authors = Author.query.paginate(page=page, per_page=size, error_out=False).items
+    remote_authors = []
+    if len(authors) < size:
+        remote_size = size - len(authors) 
+        remote_authors = get_all_remote_authors(remote_size)
+        # total_prev_pages = len(Author.query.all())
+        # q_page = page - total_prev_pages
+        # remote_authors = get_all_remote_authors(remote_size, q_page)
+        # r1: {type: "author", id: "1", attributes: {name: "author1", ...}, page: 1, size: 10}
+        # r1.page = r1.page + total_prev_pages
+    author_items = [a.json() for a in authors]
+    author_items.extend(remote_authors)
     return (
         make_response(
             jsonify(
                 type="authors",
-                items=[a.json() for a in authors],
+                items=author_items,
                 page=page,
-                size=len(authors),
+                size=len(author_items),
             )
         ),
         httpStatus.OK,
@@ -109,25 +120,42 @@ def single_author(author_id: str) -> Response:
 
 @bp.route("/authors/<string:author_id>/posts/<string:post_id>", methods=["GET"])
 def get_post(author_id: str, post_id: str) -> Response:
-    post = Post.query.filter_by(id=post_id, private=False).first_or_404()
-    return make_response(jsonify(post.json())), httpStatus.OK
+    post = Post.query.filter_by(id=post_id, private=False).first()
+    if post == None:
+        post_dict = get_remote_post(author_id, post_id)
+    else:
+        post_dict = post.json()
+    if post_dict == None:#not found in remotes
+        return Response(status=httpStatus.NOT_FOUND)
+    return make_response(jsonify(post_dict)), httpStatus.OK
 
 
 @bp.route("/authors/<string:author_id>/posts/", methods=["GET", "POST"])
 def post(author_id: str) -> Response:
+    if not Author.query.filter_by(id=author_id).first() and not find_remote_author(author_id):
+        return utils.json_response(
+                    httpStatus.NOT_FOUND,
+                    {"message": "Author not found"},
+                )
     if request.method == "GET":
         page, size = pagination(request.args)
         posts = (
             Post.query.filter_by(author=author_id, private=False)
-            .paginate(page=page, per_page=size)
+            .paginate(page=page, per_page=size, error_out=False)
             .items
         )
+        remote_posts = []
+        if len(posts) < size:
+            remote_size = size - len(posts) 
+            remote_posts = get_remote_author_posts(author_id, remote_size)
+        posts_items = [post.json() for post in posts]
+        posts_items.extend(remote_posts)
         return (
             make_response(
                 jsonify(
                     type="posts",
-                    items=[post.json() for post in posts],
-                    size=len(posts),
+                    items=posts_items,
+                    size=len(posts_items),
                     page=page,
                 )
             ),
@@ -244,19 +272,34 @@ def specific_post(author_id: str, post_id: str) -> Response:
     "/authors/<string:author_id>/posts/<string:post_id>/comments", methods=["GET"]
 )
 def get_comments(author_id: str, post_id: str) -> Response:
+    host_name = HOST
+    remote_comment_host = find_remote_post(author_id, post_id)
+    if not Post.query.filter_by(id=post_id).first() and not remote_comment_host:
+        return utils.json_response(
+                    httpStatus.NOT_FOUND,
+                    {"message": f"Parent post {post_id} not found"},
+                )
+    if remote_comment_host:
+        host_name = remote_comment_host
     page, size = pagination(request.args)
     comments = (
-        Comment.query.filter_by(post=post_id).paginate(page=page, per_page=size).items
+        Comment.query.filter_by(post=post_id).paginate(page=page, per_page=size, error_out=False).items
     )
+    remote_comments = []
+    if len(comments) < size:
+        remote_size = size - len(comments) 
+        remote_comments = get_remote_comments(author_id, post_id)
+    comments_items = [comment.json() for comment in comments]
+    comments_items.extend(remote_comments)
     return (
         make_response(
             jsonify(
                 type="comments",
                 page=page,
-                size=len(comments),
-                post=f"{HOST}/authors/{author_id}/posts/{post_id}",
-                id=f"{HOST}/authors/{author_id}/posts/{post_id}/comments",
-                comments=[comment.json() for comment in comments],
+                size=len(comments_items),
+                post=f"{host_name}/authors/{author_id}/posts/{post_id}",
+                id=f"{host_name}/authors/{author_id}/posts/{post_id}/comments",
+                comments=comments_items,
             )
         ),
         httpStatus.OK,
@@ -268,8 +311,18 @@ def get_comments(author_id: str, post_id: str) -> Response:
     methods=["GET"],
 )
 def get_comment(author_id: str, post_id: str, comment_id: str) -> Response:
-    comment = Comment.query.filter_by(id=comment_id).first_or_404()
-    return make_response(jsonify(comment.json())), httpStatus.OK
+    comment = Comment.query.filter_by(id=comment_id).first()
+    if comment != None:#is local comment
+        return make_response(jsonify(comment.json())), httpStatus.OK
+    else:#look in remotes
+        remote_comment_dict = get_remote_comment(author_id, post_id, comment_id)
+        if remote_comment_dict != None or len(remote_comment_dict) != 0:
+            return make_response(jsonify(remote_comment_dict)), httpStatus.OK
+        else:#not found in remotes
+            return Response(status=httpStatus.NOT_FOUND)
+
+
+
 
 
 @bp.route(
@@ -395,7 +448,7 @@ def get_inbox(author_id: str) -> Response:
         )
     page, size = pagination(request.args)
     inbox_items = (
-        Inbox.query.filter_by(owner=author_id).paginate(page=page, per_page=size).items
+        Inbox.query.filter_by(owner=author_id).paginate(page=page, per_page=size, error_out=False).items
     )
     return (
         make_response(
@@ -457,6 +510,20 @@ def clear_inbox(author_id: str) -> Response:
 )
 def post_like_methods(author_id: str, post_id: str) -> Response:
     post = Post.query.filter_by(id=post_id).first()
+    remote_post = find_remote_post(author_id, post_id)
+    ##remote
+    if remote_post and request.method == "GET":
+        remote_likes = get_remote_post_likes(author_id, post_id)
+        if len(remote_likes) == 0:#not found in remote
+            return utils.json_response(
+                httpStatus.NOT_FOUND, {"message": f"post {post_id} does not exist."}
+            )
+        return (
+            make_response(jsonify(likes=[like for like in remote_likes])),
+            httpStatus.OK,
+            )       
+        
+    ##local
     if post is None:  # post does not exist
         return utils.json_response(
             httpStatus.NOT_FOUND, {"message": f"post {post_id} does not exist."}
@@ -916,4 +983,13 @@ def delete_remote(remote_id: str) -> Response:
     return utils.json_response(
         httpStatus.OK,
         {"message": "Remote node deleted"},
+    )
+
+
+@bp.route("/remotes_debug/<string:author_id>", methods=["GET"])#debug
+def remote_debug(author_id) -> Response:
+    p = get_remote_author_posts(author_id,5)
+    return utils.json_response(
+        httpStatus.OK,
+        {"message": f"returned: {p}"},
     )
