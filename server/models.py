@@ -116,7 +116,8 @@ class Post(db.Model, JSONSerializable, InboxItem):
         self.private = private
         self.unlisted = unlisted
         self.title = title
-        self.category = category
+        if self.category != None:
+            self.category = category.split(",")
         self.content = content
         if contentType == None:
             raise Exception("Posts require content type")
@@ -149,7 +150,7 @@ class Post(db.Model, JSONSerializable, InboxItem):
             "description": self.content,
             "contentType": str(self.contentType),
             "author": author.json(local),
-            "categories": self.category.split(","),
+            "categories": self.category,
             "count": len(self.comments),
             "comments": f"{HOST}/authors/{self.author}/posts/{self.id}/comments",
             "commentsSrc": {

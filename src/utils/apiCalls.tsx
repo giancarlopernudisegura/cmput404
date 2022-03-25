@@ -436,3 +436,19 @@ export function isLocal(node: string) {
   const regex = `^${BACKEND_HOST}`;
   return Boolean(node.match(regex));
 }
+
+export function getAllAuthorsWithoutPag() {
+  const response = fetch(`${BACKEND_HOST}/authors`, {
+    mode: "cors",
+    credentials: "include",
+    method: "GET",
+  })
+    .then((res) => {
+      return res.json();
+    })
+    .catch((err) => {
+      throw Error("Unable to get authors");
+    });
+
+  return response;
+}

@@ -1,7 +1,14 @@
 import { h } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import GitHubActivity from '../components/GitHubActivity';
-import { getPosts, get_author_id, inboxCall, getGithubStream, newPublicPost } from '../utils/apiCalls';
+import { 
+    getPosts, 
+    get_author_id, 
+    inboxCall, 
+    getGithubStream, 
+    newPublicPost,
+    getAllAuthorsWithoutPag
+ } from '../utils/apiCalls';
 
 import PostForm from '../components/forms/PostForm';
 import DrawerMenu from '../components/sidemenu-components/Drawer';
@@ -24,9 +31,60 @@ function ExplorePage({ path }: ExplorePageProps) {
     const [ githubActivity, setGithubActivity ] = useState(Array());
     const [ errMsg, setErrMsg ] = useState("");
 
+    // Effect to get all posts
+    useEffect( () => {
+        async function getPostsFromAllAuthors() {
+            // get all authors 
+            try {
+                let results = await getAllAuthorsWithoutPag();
+                let authors = results.items;
+                let allPosts : Array<any> = [];
+                let postPromises : Array<Promise<any>> = [];
 
+                for (let author of authors) {
+                    let post = getPosts(author.id);
+                    post.then(
+                        (data) => {
+                            if (data.length > 0) {
+                                allPosts.push(...data);
+                                console.log(data);
+                                console.log('pushed to promises')
+                            }
+                        }
+                    )
+                }
+
+                console.log('ALLPOSTS' , allPosts);
+
+                
+            } catch (err) {
+                setErrMsg('Unable to get all posts: ' + (err as Error).message);
+            }
+            // get all posts 
+        }
+        getPostsFromAllAuthors();
+    }, []);
+
+    // Effect to get github activity
+    useEffect( () => {
+        function fetchGithubStream() {
+            console.log("Getting github activity from API...");
+            get_author_id()
+                .then(author_id => {
+                    getGithubStream(author_id)
+                        .then(setGithubActivity)
+                        .catch(err => {
+                            setErrMsg(err.message);
+                        });
+                })
+                .catch(console.error);
+        };
+        fetchGithubStream();
+    }, []);
+
+    // Effect to get inbox 
     useEffect(() => {
-        function getPostsFromAPI() {
+        function getInbox() {
             console.log("Getting posts from API...");
             get_author_id()
                 .then(author_id => {
@@ -42,19 +100,8 @@ function ExplorePage({ path }: ExplorePageProps) {
                 })
                 .catch(console.error);
         }
-        getPostsFromAPI();
-        (() => {
-            console.log("Getting github activity from API...");
-            get_author_id()
-                .then(author_id => {
-                    getGithubStream(author_id)
-                        .then(setGithubActivity)
-                        .catch(err => {
-                            setErrMsg(err.message);
-                        });
-                })
-                .catch(console.error);
-        })();
+        getInbox();
+
     }, []);
 
     
@@ -65,6 +112,7 @@ function ExplorePage({ path }: ExplorePageProps) {
             {errMsg && (
                 <Alert severity="error">{errMsg}</Alert>
             )}
+            
             <PostForm
                 body={newPostBody}
                 setBody={setNewPostBody}
