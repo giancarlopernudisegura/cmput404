@@ -50,28 +50,46 @@ def format_remote_post(author_id, post_id, node_id, return_dict):#format remote 
 
 def calculate_remote_page(objType, page, size):#calculate the remote page based on our page
     #objType should be the model Type
-    return page - len(objType.query.all()) // size
+    # if page == 2:
+    #     remote_page = page - len(objType.query.all()) // size
+    #     print(f"remote_page: {remote_page}\nobjlen {len(objType.query.all())}")
+    return page - len(objType.query.all()) // size #TODO FIX THIS STUFF!!
 
 def fix_remote_url(node_items: list, node):#fix url bug in some remote nodes data
     for author in node_items:
-        if author["url"] == None or author["url"][:5] != "http":
+
+        if  author["id"][:4] == "http":
+            id = author["id"].split("/")[-1]
+            author["id"] = id
+        
+        if "url" not in author.keys():
             id = author["id"].split("/")[-1]
             author["url"] = f"{node.id}authors/{id}"
-        if author["host"] == None or author["host"][:5] != "http":
+        if author["url"] == None or author["url"][:4] != "http":
+            id = author["id"].split("/")[-1]
+            author["url"] = f"{node.id}authors/{id}"
+
+        if "host" not in author.keys():
+             author["host"] = node.id           
+        if author["host"] == None or author["host"][:4] != "http":
             author["host"] = node.id
-        if author["github"] == None or author["github"][:5] != "http":
+        if author["github"] == None or author["github"][:4] != "http":
             author["github"] = "http://www.github.com"
 
 
 #endpoint interactions
     
 def get_all_remote_authors(pagesize, page=1):
+
     nodes = Remote_Node.query.all()
     items = []
     for node in nodes:
+        if node.id == "https://website404.herokuapp.com/":#TODO remove this conditional to allow group 2
+            continue
         r = requests.get(f"{node.id}authors?size={pagesize}&page={page}")
         if r.status_code == 200 and len(r.json()["items"]) > 0:
             node_items = r.json()["items"]
+            print(f"Node items: {node_items[0]}")
             fix_remote_url(node_items, node)
             items.extend(node_items)
 
@@ -97,7 +115,9 @@ def get_remote_author_posts(author_id: str, size :int, page=1):
             remote_posts = []
             for post in r.json()["items"]:#format posts
                 post_id = post["id"].split("/")[-1]
-                remote_posts.append(format_remote_post(author_id, post_id, node.id, r.json()))
+                # remote_posts.append(format_remote_post(author_id, post_id, node.id, r.json()))
+                remote_posts.append(post)
+
             items.extend(remote_posts)
     items = items[:size]#do this better
     return items
