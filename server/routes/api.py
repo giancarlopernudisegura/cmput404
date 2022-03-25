@@ -427,7 +427,7 @@ def is_follower(author_id: str, follower_id: str) -> Response:
         all_followers = get_remote_followers(author_id)#the remote endpoints for checking a follow are very different inbetween the 3 node
         follower_items = []
         for item in all_followers:
-            if item["url"].split("/")[-1] == follower_id:
+            if str(item["url"]).split("/")[-1] == follower_id:
                 follower_items.append(item)
         
     else:#local
