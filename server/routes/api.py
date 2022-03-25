@@ -852,23 +852,6 @@ def logout() -> Response:
 def login_test() -> Response:
     return make_response(jsonify(message="Successful log in")), httpStatus.OK
 
-
-@bp.route("/user_me")
-@require_authentication
-def get_user_me() -> Response:
-    is_local = current_user.is_authenticated
-    try:
-        return utils.json_response(
-            httpStatus.OK,
-            {"message": res_msg.SUCCESS_VERIFY_USER, "data": current_user.json(is_local)},
-        )
-    except Exception as e:
-        return utils.json_response(
-            httpStatus.INTERNAL_SERVER_ERROR,
-            {"message": res_msg.GENERAL_ERROR + str(e)},
-        )
-
-
 @bp.route("/admin/author/<string:author_id>", methods=["POST"])
 @require_authentication
 def modify_author(author_id: str) -> Response:
