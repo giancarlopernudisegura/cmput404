@@ -2,6 +2,7 @@ from server.models import Author, Inbox, Post, Comment, Requests, Like, Remote_N
 import requests
 import os
 
+
 #utils
 
 def convert_id_to_remote(id: str, url: str):#
@@ -46,6 +47,12 @@ def format_remote_post(author_id, post_id, node_id, return_dict):#format remote 
     }
     return return_dict
 
+def calculate_remote_page(objType, page, size):#calculate the remote page based on our page
+    #objType should be the model Type
+    return page - len(objType.query.all()) // size
+
+
+
 #endpoint interactions
     
 def get_all_remote_authors(pagesize, page=1):
@@ -66,18 +73,18 @@ def get_remote_author(author_id: str):
             return r.json() 
     return None#Author not found in any remotes
 
-def get_remote_author_posts(author_id: str, pagesize :int):
+def get_remote_author_posts(author_id: str, size :int, page=1):
     items = []
     nodes = Remote_Node.query.all()
     for node in nodes:
-        r = requests.get(f"{node.id}authors/{author_id}/posts?size=30&page=1")
+        r = requests.get(f"{node.id}authors/{author_id}/posts?size={size}&page={page}")
         if r.status_code == 200 and r.json()["type"] == "posts":
             remote_posts = []
             for post in r.json()["items"]:#format posts
                 post_id = post["id"].split("/")[-1]
                 remote_posts.append(format_remote_post(author_id, post_id, node.id, r.json()))
             items.extend(remote_posts)
-    items = items[:pagesize]#do this better
+    items = items[:size]#do this better
     return items
 
 
@@ -92,12 +99,12 @@ def get_remote_post(author_id: str, post_id: str):#tested for https://backend-40
     return None#post not found
 
 
-def get_remote_comments(author_id: str, post_id: str):#get all posts comments
+def get_remote_comments(author_id: str, post_id: str, size=30, page=1):#get all posts comments
     nodes = Remote_Node.query.all()
     for node in nodes:
-        r = requests.get(f"{node.id}authors/{author_id}/posts/{post_id}/comments?size=30&page=1")
+        r = requests.get(f"{node.id}authors/{author_id}/posts/{post_id}/comments?size={size}&page={page}")
         if r.status_code == 200 and r.json()["type"] == "comments":
-            return r.json()["items"]
+            return r.json()["items"][:size]
     return []
 
 def get_remote_comment(author_id: str, post_id: str, comment_id: str):#get single comment
@@ -143,10 +150,10 @@ def get_remote_followers(author_id: str):
         #node 2
         r = requests.get(f"{node.id}authors/{author_id}/followers", auth=(node.username, node.password))
         if r.status_code == 200 and r.json()["type"] == "followers":
-            pass#too much headache to integrate right now
+            return r.json()["items"]#this team had some different format stuff originally, may have issues
     return []
 
-def check_remote_is_following(author_id: str, follower_id: str):
+def check_remote_is_following(author_id: str, follower_id: str):#These enpoints are VERY different, should use followers and do a bit of querying ourselves
     nodes = Remote_Node.query.all()
     for node in nodes:
         r = requests.get(f"{node.id}authors/{author_id}/followers/{follower_id}", auth=(node.username, node.password))

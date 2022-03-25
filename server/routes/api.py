@@ -55,7 +55,6 @@ def pagination(
     return page_number, size
 
 
-
 @bp.route("/authors", methods=["GET"])
 def multiple_authors() -> Response:
     """Get multiple author.
@@ -71,12 +70,9 @@ def multiple_authors() -> Response:
     remote_authors = []
     if len(authors) < size:
         remote_size = size - len(authors) 
-        remote_authors = get_all_remote_authors(remote_size)
-        # total_prev_pages = len(Author.query.all())
-        # q_page = page - total_prev_pages
-        # remote_authors = get_all_remote_authors(remote_size, q_page)
-        # r1: {type: "author", id: "1", attributes: {name: "author1", ...}, page: 1, size: 10}
-        # r1.page = r1.page + total_prev_pages
+        #remote_authors = get_all_remote_authors(remote_size)
+        remote_page = calculate_remote_page(Author, page, size)
+        remote_authors = get_all_remote_authors(remote_size, page=remote_page)
     author_items = [a.json() for a in authors]
     author_items.extend(remote_authors)
     return (
@@ -147,7 +143,8 @@ def post(author_id: str) -> Response:
         remote_posts = []
         if len(posts) < size:
             remote_size = size - len(posts) 
-            remote_posts = get_remote_author_posts(author_id, remote_size)
+            remote_page = calculate_remote_page(Post, page, size)
+            remote_posts = get_remote_author_posts(author_id, remote_size, page=remote_page)
         posts_items = [post.json() for post in posts]
         posts_items.extend(remote_posts)
         return (
@@ -288,7 +285,8 @@ def get_comments(author_id: str, post_id: str) -> Response:
     remote_comments = []
     if len(comments) < size:
         remote_size = size - len(comments) 
-        remote_comments = get_remote_comments(author_id, post_id)
+        remote_page = calculate_remote_page(Comment, page, size)
+        remote_comments = get_remote_comments(author_id, post_id, size=remote_size, page=remote_page)
     comments_items = [comment.json() for comment in comments]
     comments_items.extend(remote_comments)
     return (
@@ -367,10 +365,15 @@ def serve_image(author_id: str, post_id: str):
 
 @bp.route("/authors/<string:author_id>/followers", methods=["GET"])
 def get_followers(author_id: str) -> Response:
-    followers = Requests.query.filter_by(to=author_id).all()
+    ##remote
+    if not Author.query.filter_by(id=author_id).first():
+        follower_items = get_remote_followers(author_id)
+    else:##local
+        followers = Requests.query.filter_by(to=author_id).all()
+        follower_items = [f.get_follower_json() for f in followers]
     return (
         make_response(
-            jsonify(type="followers", items=[f.get_follower_json() for f in followers])
+            jsonify(type="followers", items=follower_items)
         ),
         httpStatus.OK,
     )
@@ -378,12 +381,21 @@ def get_followers(author_id: str) -> Response:
 
 @bp.route("/authors/<string:author_id>/followers/<string:follower_id>", methods=["GET"])
 def is_follower(author_id: str, follower_id: str) -> Response:
-    follower = Requests.query.filter_by(to=author_id, initiated=follower_id).first()
+    if not Author.query.filter_by(id=author_id).first():#remote
+        all_followers = get_remote_followers(author_id)#the remote endpoints for checking a follow are very different inbetween the 3 node
+        follower_items = []
+        for item in all_followers:
+            if item["url"].split("/")[-1] == follower_id:
+                follower_items.append(item)
+        
+    else:#local
+        follower = Requests.query.filter_by(to=author_id, initiated=follower_id).first()
+        follower_items = ([follower.get_follower_json()] if follower else [])
     return (
         make_response(
             jsonify(
                 type="followers",
-                items=([follower.get_follower_json()] if follower else []),
+                items=follower_items,
             )
         ),
         httpStatus.OK,
