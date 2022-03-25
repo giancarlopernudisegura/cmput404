@@ -81,23 +81,40 @@ def fix_remote_url(node_items: list, node):#fix url bug in some remote nodes dat
 
 #endpoint interactions
     
+global PREVIOUS_PAGE
+global TOTAL_PAGE
+TOTAL_PAGE = 0
+PREVIOUS_PAGE = 0
+
+
 def get_all_remote_authors(pagesize, page=1):
+    global PREVIOUS_PAGE
+    global TOTAL_PAGE
+    # print("Previous page", PREVIOUS_PAGE)
+    # print("Total page", TOTAL_PAGE)
 
     nodes = Remote_Node.query.all()
     items = []
-    for node in nodes:
-        r = requests.get(f"{node.id}authors?size={pagesize}&page={page}")
-        if r.status_code == 200 and len(r.json()["items"]) > 0:
-            node_items = r.json()["items"]
-            print(f"Node items: {node_items[0]}")
-            fix_remote_url(node_items, node)
-            items.extend(node_items)
 
-    print("ALL ITEMS", len(items))
+    if len(nodes) == 0:
+        return items
 
-    # actual = items[:pagesize]
-    # remaining = items[pagesize:]
-    print("NEW ITEMS", len(items))
+    r = requests.get(f"{nodes[0].id}authors?size={pagesize}&page={page}")
+    if r.status_code == 200 and len(r.json()["items"]) != 0:
+        nodes_items = r.json()["items"]
+        fix_remote_url(nodes_items, nodes[0])
+        items.extend(nodes_items)
+    elif len(r.json()["items"]) == 0:
+        if TOTAL_PAGE == 0:
+            TOTAL_PAGE = PREVIOUS_PAGE
+        if len(nodes) == 1:
+            return items
+        r = requests.get(f"{nodes[1].id}authors?size={pagesize}&page={page - TOTAL_PAGE}")
+        if r.status_code == 200 and len(r.json()["items"]) != 0:
+            nodes_items = r.json()["items"]
+            fix_remote_url(nodes_items, nodes[1])
+            items.extend(nodes_items)
+    PREVIOUS_PAGE = page
     return items
 
 def get_remote_author(author_id: str):
