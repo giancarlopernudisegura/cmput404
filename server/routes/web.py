@@ -34,7 +34,7 @@ def login():
         return frontend_page(True)
 
 
-@bp.route("/user/<string:user_id>", methods=["GET"])
+@bp.route("/user/<path:user_id>", methods=["GET"])
 def user(user_id):
     return frontend_page(current_user.is_authenticated)
 

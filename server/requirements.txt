@@ -1,5 +1,7 @@
 flask
 gunicorn
+requests
+requests-cache
 pytest
 pytest-cov
 pytest-order
