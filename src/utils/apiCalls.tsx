@@ -9,32 +9,6 @@ import {
 } from "../utils/errorMsg";
 
 const BACKEND_HOST = process.env.FLASK_HOST;
-/**
- * Returns the current user's information.
- *
- * Reference: https://dev.to/ramonak/javascript-how-to-access-the-return-value-of-a-promise-object-1bck
- */
-export function getCurrentAuthor() {
-  const currentAuthor = fetch(`${BACKEND_HOST}/user_me`, {
-    mode: "cors",
-    credentials: "include",
-    method: "GET",
-  })
-    .then((res) => res.json())
-    .then((user_data) => {
-      return user_data.data;
-    })
-    .catch((err) => {
-      console.log("ERROR:", err);
-    });
-
-  const getAuthor = async () => {
-    const author = await currentAuthor;
-    return author;
-  };
-
-  return getAuthor();
-}
 
 export const get_author_id = async () => {
   const res = await fetch(`${BACKEND_HOST}/login_test`, {
@@ -43,7 +17,7 @@ export const get_author_id = async () => {
     method: "GET",
   });
   if (res.status === 200) {
-    const currentUserId = res.headers.get("X-User-Id") as string;
+    const currentUserId : string = res.headers.get("X-User-Id") as string;
     if (currentUserId === null) {
       throw new Error("Could not get user id");
     }

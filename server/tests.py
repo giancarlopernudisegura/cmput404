@@ -70,12 +70,6 @@ def test_login(test_client: FlaskClient):
     login(test_client, T_USER1_UUID)
     r = test_client.get("/login_test")
     assert r.status_code == 200
-    r = test_client.get("/user_me")
-    assert r.status_code == 200
-    data = json.loads(r.data.decode("utf-8"))["data"]
-    assert data["type"] == "author"
-    assert data["id"] == T_USER1_UUID
-    assert data["displayName"] == "Giancarlo"
 
 
 @pytest.mark.order(4)
