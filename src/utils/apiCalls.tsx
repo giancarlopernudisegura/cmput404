@@ -4,6 +4,7 @@ import {
   FETCH_IMG_ERROR,
   FAILED_EDIT_POST,
   FAILED_CREATE_COMMENT,
+  FAILED_ADD_LIKE,
 } from "../utils/errorMsg";
 
 const BACKEND_HOST = process.env.FLASK_HOST;
@@ -74,7 +75,7 @@ export async function getPosts(author_id: string): Promise<any> {
         description: data.items[i].description,
         contentType: data.items[i].contentType,
         visibility: data.items[i].visibility,
-        unlisted: data.items[i].unlisted
+        unlisted: data.items[i].unlisted,
       };
       listOfPosts.push(post);
     }
@@ -145,7 +146,6 @@ export async function newPublicPost(authorId: string, postData: any) {
   }
 }
 
-
 export async function inboxCall(author_id: string, method: string, data?: any) {
   try {
     let metadata = {};
@@ -175,7 +175,7 @@ export async function clearInbox(author_id: string): Promise<boolean> {
   try {
     const res = await fetch(`${BACKEND_HOST}/authors/${author_id}/inbox/`, {
       method: "DELETE",
-      credentials: "include"
+      credentials: "include",
     });
 
     // TODO: change return value
@@ -287,7 +287,7 @@ export async function getAllComments(author_id: string, post_id: string) {
     );
 
     let data = await res.json();
-    console.log(data)
+    console.log(data);
     let listOfComments = Array();
 
     for (let i = 0; i < data.comments.length; i++) {
@@ -302,7 +302,7 @@ export async function getAllComments(author_id: string, post_id: string) {
       listOfComments.push(comment);
     }
 
-    return listOfComments
+    return listOfComments;
     // return { ...listOfComments, status: res.status };
   } catch (err) {
     throw Error("Unable to retrieve comments for this post");
@@ -347,31 +347,38 @@ export function deletePost(author_id: string, post_id: string) {
   return response;
 }
 
-export function getFollowers(author_id: string) : Promise<any> {
+export function getFollowers(author_id: string): Promise<any> {
   const response = fetch(`${BACKEND_HOST}/authors/${author_id}/followers/`, {
-    mode: 'cors',
-    method: 'GET',
+    mode: "cors",
+    method: "GET",
   })
-  .then(res => {
-    return res.json();
-  })
-  .catch(err => {
-    throw Error('Unable to get followers:' + err);
-  });
+    .then((res) => {
+      return res.json();
+    })
+    .catch((err) => {
+      throw Error("Unable to get followers:" + err);
+    });
 
   return response;
 }
 
-export async function editPost(author_id: string, post_id: string, postInfo: any) {
+export async function editPost(
+  author_id: string,
+  post_id: string,
+  postInfo: any
+) {
   try {
-    const response = await fetch(`${BACKEND_HOST}/authors/${author_id}/posts/${post_id}`, {
-      method: 'POST',
-      credentials: "include",
-      body: JSON.stringify(postInfo),
-      headers: {
-        'Content-Type': 'application/json; charset=utf-8',
+    const response = await fetch(
+      `${BACKEND_HOST}/authors/${author_id}/posts/${post_id}`,
+      {
+        method: "POST",
+        credentials: "include",
+        body: JSON.stringify(postInfo),
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+        },
       }
-    });
+    );
 
     let json = await response.json();
 
@@ -383,7 +390,6 @@ export async function editPost(author_id: string, post_id: string, postInfo: any
   } catch (err) {
     throw Error(FAILED_EDIT_POST);
   }
-
 }
 /**
  * Get likes for a specific post TODO
@@ -426,7 +432,6 @@ export async function newPublicComment(
     );
 
     console.log(encodedCommentData);
-    
   } catch (err) {
     throw Error(FAILED_CREATE_COMMENT);
   }
@@ -435,4 +440,40 @@ export async function newPublicComment(
 export function isLocal(node: string) {
   const regex = `^${BACKEND_HOST}`;
   return Boolean(node.match(regex));
+}
+
+/**
+ * Add like to post
+ */
+
+export async function addPostLike(
+  author_id: string,
+  post_id: string,
+  likeData: any
+) {
+  const encodedLikeData = JSON.stringify(likeData);
+  try {
+    const res = await fetch(
+      `${BACKEND_HOST}/authors/${author_id}/posts/${post_id}/likes`,
+      {
+        mode: "cors",
+        method: "PUT",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+        },
+        body: encodedLikeData,
+      }
+    );
+
+    let json = await res.json();
+
+    if (res.status !== 200) {
+      throw Error();
+    }
+
+    return { status: res.status, ...json };
+  } catch (err) {
+    throw Error(FAILED_ADD_LIKE);
+  }
 }
