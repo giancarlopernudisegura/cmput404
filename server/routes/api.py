@@ -63,6 +63,7 @@ def pagination(
 
 
 @bp.route("/authors", methods=["GET"])
+@require_authentication
 def multiple_authors() -> Response:
     """Get multiple author.
 
@@ -97,6 +98,7 @@ def multiple_authors() -> Response:
 
 
 @bp.route("/authors/<path:author_id>", methods=["GET", "POST"])
+@require_authentication
 def single_author(author_id: str) -> Response:
     """Get or update a single author.
 
@@ -126,6 +128,7 @@ def single_author(author_id: str) -> Response:
 
 
 @bp.route("/authors/<path:author_id>/posts/<string:post_id>", methods=["GET"])
+@require_authentication
 def get_post(author_id: str, post_id: str) -> Response:
     post = Post.query.filter_by(id=post_id, private=False).first()
     is_local = current_user.is_authenticated
@@ -142,6 +145,7 @@ def get_post(author_id: str, post_id: str) -> Response:
 
 
 @bp.route("/authors/<path:author_id>/posts/", methods=["GET", "POST"])
+@require_authentication
 def post(author_id: str) -> Response:
     regex = r"https?:\/\/.*\/authors\/(.+)"
     if (match := re.match(regex, author_id)):
@@ -295,6 +299,7 @@ def specific_post(author_id: str, post_id: str) -> Response:
 @bp.route(
     "/authors/<path:author_id>/posts/<string:post_id>/comments", methods=["GET"]
 )
+@require_authentication
 def get_comments(author_id: str, post_id: str) -> Response:
     host_name = HOST
     regex = r"https?:\/\/.*\/authors\/(.+)"
@@ -376,6 +381,7 @@ def post_comment(author_id: str, post_id: str) -> Response:
 
 
 @bp.route("/authors/<string:author_id>/posts/<string:post_id>/image", methods=["GET"])
+@require_authentication
 def serve_image(author_id: str, post_id: str):
     image_post = Post.query.filter_by(id=post_id).first()
 
@@ -395,6 +401,7 @@ def serve_image(author_id: str, post_id: str):
 
 
 @bp.route("/authors/<path:author_id>/followers", methods=["GET"])
+@require_authentication
 def get_followers(author_id: str) -> Response:
     ##remote
     if not Author.query.filter_by(id=author_id).first():
@@ -415,6 +422,7 @@ def get_followers(author_id: str) -> Response:
 
 
 @bp.route("/authors/<path:author_id>/followers/<path:follower_id>", methods=["GET"])
+@require_authentication
 def is_follower(author_id: str, follower_id: str) -> Response:
     if not Author.query.filter_by(id=author_id).first():#remote
         regex = r"https?:\/\/.*\/authors\/(.+)"
@@ -472,7 +480,7 @@ def remove_follower(author_id: str, follower_id: str) -> Response:
     return Response(status=httpStatus.NO_CONTENT)
 
 
-@bp.route("/authors/<string:author_id>/followers/<string:follower_id>", methods=["PUT"])
+@bp.route("/authors/<string:author_id>/followers/<path:follower_id>", methods=["PUT"])
 @require_authentication
 def add_follower(author_id: str, follower_id: str) -> Response:
     if current_user.is_authenticated:
@@ -481,6 +489,9 @@ def add_follower(author_id: str, follower_id: str) -> Response:
                 make_response(jsonify(error=res_msg.NO_PERMISSION)),
                 httpStatus.FORBIDDEN,
             )
+    regex = r"https?:\/\/.*\/authors\/(.+)"
+    if (match := re.match(regex, follower_id)):
+        follower_id = match.group(1)
     ##remote
     if find_remote_author(author_id):
         response = submit_remote_follow_request(author_id, follower_id)
@@ -572,6 +583,7 @@ def clear_inbox(author_id: str) -> Response:
     "/authors/<path:author_id>/posts/<string:post_id>/likes",
     methods=["PUT", "GET", "DELETE"],
 )
+@require_authentication
 def post_like_methods(author_id: str, post_id: str) -> Response:
     post = Post.query.filter_by(id=post_id).first()
     ##remote
@@ -637,6 +649,7 @@ def post_like_methods(author_id: str, post_id: str) -> Response:
     "/authors/<path:author_id>/posts/<string:post_id>/comments/<string:comment_id>/likes",
     methods=["PUT", "GET", "DELETE"],
 )
+@require_authentication
 def comment_like_methods(author_id: str, post_id: str, comment_id: str):
     comment = Comment.query.filter_by(id=comment_id).first()
     post = Post.query.filter_by(id=post_id).first()
@@ -712,6 +725,7 @@ def comment_like_methods(author_id: str, post_id: str, comment_id: str):
 
 
 @bp.route("/authors/<path:author_id>/liked", methods=["GET"])
+@require_authentication
 def get_author_liked(author_id: str):
     ##remote
     regex = r"https?:\/\/.*\/authors\/(.+)"
