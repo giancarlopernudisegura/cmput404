@@ -1,4 +1,5 @@
 import json
+import re
 from urllib.request import urlopen
 from flask import (
     Blueprint,
@@ -95,7 +96,7 @@ def multiple_authors() -> Response:
     )
 
 
-@bp.route("/authors/<string:author_id>", methods=["GET", "POST"])
+@bp.route("/authors/<path:author_id>", methods=["GET", "POST"])
 def single_author(author_id: str) -> Response:
     """Get or update a single author.
 
@@ -111,6 +112,9 @@ def single_author(author_id: str) -> Response:
         if author != None:#local author
             return make_response(jsonify(author.json(is_local))), httpStatus.OK
         else:#try remote author
+            regex = r"https?:\/\/.*\/authors\/(.+)"
+            if (match := re.match(regex, author_id)):
+                author_id = match.group(1)
             remote_author_dict = get_remote_author(author_id)
             if remote_author_dict != None:
                 return make_response(jsonify(remote_author_dict)), httpStatus.OK
@@ -121,11 +125,15 @@ def single_author(author_id: str) -> Response:
         pass
 
 
-@bp.route("/authors/<string:author_id>/posts/<string:post_id>", methods=["GET"])
+@bp.route("/authors/<path:author_id>/posts/<path:post_id>", methods=["GET"])
 def get_post(author_id: str, post_id: str) -> Response:
     post = Post.query.filter_by(id=post_id, private=False).first()
     is_local = current_user.is_authenticated
     if post == None:
+        regex = r"https?:\/\/.*\/authors\/(.+)\/posts\/(.+)"
+        if (match := re.match(regex, author_id)):
+            author_id = match.group(1)
+            post_id = match.group(2)
         post_dict = get_remote_post(author_id, post_id)
     else:
         post_dict = post.json(is_local)
@@ -134,8 +142,12 @@ def get_post(author_id: str, post_id: str) -> Response:
     return make_response(jsonify(post_dict)), httpStatus.OK
 
 
-@bp.route("/authors/<string:author_id>/posts/", methods=["GET", "POST"])
+@bp.route("/authors/<path:author_id>/posts/", methods=["GET", "POST"])
 def post(author_id: str) -> Response:
+    regex = r"https?:\/\/.*\/authors\/(.+)"
+    if (match := re.match(regex, author_id)):
+        author_id = match.group(1)
+    print(author_id)
     if not Author.query.filter_by(id=author_id).first() and not find_remote_author(author_id):
         return utils.json_response(
                     httpStatus.NOT_FOUND,
@@ -282,10 +294,13 @@ def specific_post(author_id: str, post_id: str) -> Response:
 
 
 @bp.route(
-    "/authors/<string:author_id>/posts/<string:post_id>/comments", methods=["GET"]
+    "/authors/<path:author_id>/posts/<string:post_id>/comments", methods=["GET"]
 )
 def get_comments(author_id: str, post_id: str) -> Response:
     host_name = HOST
+    regex = r"https?:\/\/.*\/authors\/(.+)\/posts"
+    if (match := re.match(regex, author_id)):
+        author_id = match.group(1)
     remote_comment_host = find_remote_post(author_id, post_id)
     if not Post.query.filter_by(id=post_id).first() and not remote_comment_host:
         return utils.json_response(
@@ -380,10 +395,13 @@ def serve_image(author_id: str, post_id: str):
     )
 
 
-@bp.route("/authors/<string:author_id>/followers", methods=["GET"])
+@bp.route("/authors/<path:author_id>/followers", methods=["GET"])
 def get_followers(author_id: str) -> Response:
     ##remote
     if not Author.query.filter_by(id=author_id).first():
+        regex = r"https?:\/\/.*\/authors\/(.+)\/followers"
+        if (match := re.match(regex, author_id)):
+            author_id = match.group(1)
         follower_items = get_remote_followers(author_id)
     else:##local
         followers = Requests.query.filter_by(to=author_id).all()
@@ -397,9 +415,17 @@ def get_followers(author_id: str) -> Response:
     )
 
 
-@bp.route("/authors/<string:author_id>/followers/<string:follower_id>", methods=["GET"])
+@bp.route("/authors/<path:author_id>/followers/<path:follower_id>", methods=["GET"])
 def is_follower(author_id: str, follower_id: str) -> Response:
     if not Author.query.filter_by(id=author_id).first():#remote
+        regex = r"https?:\/\/.*\/authors\/(.+)\/followers/(.*)"
+        if (match := re.match(regex, author_id)):
+            author_id = match.group(1)
+            follower_id = match.group(2)
+        regex = r"https?:\/\/.*\/authors\/(.+)"
+        if (match := re.match(regex, author_id)):
+            follower_id = match.group(1)
+        follower_items = get_remote_followers(author_id)
         all_followers = get_remote_followers(author_id)#the remote endpoints for checking a follow are very different inbetween the 3 node
         follower_items = []
         for item in all_followers:
@@ -545,12 +571,15 @@ def clear_inbox(author_id: str) -> Response:
 
 
 @bp.route(
-    "/authors/<string:author_id>/posts/<string:post_id>/likes",
+    "/authors/<path:author_id>/posts/<string:post_id>/likes",
     methods=["PUT", "GET", "DELETE"],
 )
 def post_like_methods(author_id: str, post_id: str) -> Response:
     post = Post.query.filter_by(id=post_id).first()
     ##remote
+    regex = r"https?:\/\/.*\/authors\/(.+)\/posts\/(.+)/likes"
+    if (match := re.match(regex, author_id)):
+        author_id = match.group(1)
     remote_likes = get_remote_post_likes(author_id, post_id)
     if len(remote_likes) != 0 and request.method == "GET":
         if len(remote_likes) == 0:#not found in remote
@@ -560,7 +589,7 @@ def post_like_methods(author_id: str, post_id: str) -> Response:
         return (
             make_response(jsonify(likes=[like for like in remote_likes])),
             httpStatus.OK,
-            )       
+            )
     ##local
     if post is None:  # post does not exist
         return utils.json_response(
@@ -607,12 +636,15 @@ def post_like_methods(author_id: str, post_id: str) -> Response:
 
 
 @bp.route(
-    "/authors/<string:author_id>/posts/<string:post_id>/comments/<string:comment_id>/likes",
+    "/authors/<path:author_id>/posts/<string:post_id>/comments/<string:comment_id>/likes",
     methods=["PUT", "GET", "DELETE"],
 )
 def comment_like_methods(author_id: str, post_id: str, comment_id: str):
     comment = Comment.query.filter_by(id=comment_id).first()
     post = Post.query.filter_by(id=post_id).first()
+    regex = r"https?:\/\/.*\/authors\/(.+)\/posts"
+    if (match := re.match(regex, author_id)):
+        author_id = match.group(1)
     ##remote
     remote_likes = get_remote_comment_likes(author_id, post_id, comment_id)
     if len(remote_likes) != 0 and request.method == "GET":
@@ -681,9 +713,12 @@ def comment_like_methods(author_id: str, post_id: str, comment_id: str):
         )
 
 
-@bp.route("/authors/<string:author_id>/liked", methods=["GET"])
+@bp.route("/authors/<path:author_id>/liked", methods=["GET"])
 def get_author_liked(author_id: str):
     ##remote
+    regex = r"https?:\/\/.*\/authors\/(.+)\/liked"
+    if (match := re.match(regex, author_id)):
+        author_id = match.group(1)
     if find_remote_author(author_id):
         remote_liked = get_remote_author_liked(author_id)
         return (
