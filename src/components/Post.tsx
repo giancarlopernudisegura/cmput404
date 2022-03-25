@@ -10,10 +10,15 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CommentList from "../components/comment-components/CommentList";
 import CommentForm from "../components/forms/CommentForm";
-import { addPostLike, deletePostLike, getAllComments, getPostLikes } from "../utils/apiCalls";
+import {
+  addPostLike,
+  deletePostLike,
+  getAllComments,
+  getPostLikes,
+} from "../utils/apiCalls";
 import ReactMarkdown from "react-markdown";
 import { MARKDOWN, PLAIN } from "../utils/constants";
-import ThumbDown from '@mui/icons-material/ThumbDown'
+import ThumbDown from "@mui/icons-material/ThumbDown";
 
 /*
     Post component
@@ -79,13 +84,12 @@ function Post({
   };
 
   const addLike = () => {
-    addPostLike(authorId.toString(), postId)
-  }
+    addPostLike(authorId.toString(), postId);
+  };
 
   const deleteLike = () => {
-    deletePostLike(authorId.toString(), postId)
-  }
-  
+    deletePostLike(authorId.toString(), postId);
+  };
 
   useEffect(() => {
     // Fetch all the comments of the post from the API
@@ -105,7 +109,6 @@ function Post({
 
     fetchComments(authorId, postId);
     getAllLikes(authorId, postId);
-    
   }, []);
 
   const toggleFunction = () => {
@@ -192,7 +195,7 @@ function Post({
               )}
             </IconButton>
             <IconButton color="primary" onClick={() => deleteLike()}>
-              <ThumbDown fontSize="large"/>
+              <ThumbDown fontSize="large" />
             </IconButton>
           </div>
 

@@ -5,6 +5,7 @@ import {
   FAILED_EDIT_POST,
   FAILED_CREATE_COMMENT,
   FAILED_ADD_LIKE,
+  FAILED_DELETE_LIKE,
 } from "../utils/errorMsg";
 
 const BACKEND_HOST = process.env.FLASK_HOST;
@@ -83,7 +84,7 @@ export async function getPosts(author_id: string): Promise<any> {
     return listOfPosts;
   } catch (err) {
     console.error(err);
-    
+
     throw Error("There was an error fetching the posts");
   }
 }
@@ -407,7 +408,7 @@ export async function getPostLikes(author_id: string, post_id: string) {
   );
 
   let data = res.json();
-  data.then(likeList => console.log(likeList.likes))
+  data.then((likeList) => console.log(likeList.likes));
   return data;
 }
 /**
@@ -449,12 +450,7 @@ export function isLocal(node: string) {
  * Add like to post
  */
 
-export async function addPostLike(
-  author_id: string,
-  post_id: string,
-  // likeData: any
-) {
-  // const encodedLikeData = JSON.stringify(likeData);
+export async function addPostLike(author_id: string, post_id: string) {
   try {
     const res = await fetch(
       `${BACKEND_HOST}/authors/${author_id}/posts/${post_id}/likes`,
@@ -465,7 +461,6 @@ export async function addPostLike(
         headers: {
           "Content-Type": "application/json; charset=utf-8",
         },
-        // body: encodedLikeData,
       }
     );
 
@@ -494,7 +489,7 @@ export function deletePostLike(author_id: string, post_id: string) {
       return res.status;
     })
     .catch((err) => {
-      throw Error("Unable to delete post");
+      throw Error(FAILED_DELETE_LIKE);
     });
 
   return response;
