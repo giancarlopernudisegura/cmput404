@@ -325,41 +325,22 @@ class Inbox(db.Model, JSONSerializable):
     __tablename__ = "inbox"
     id = db.Column(db.String(), primary_key=True, default=generate_uuid)
     owner = db.Column(db.ForeignKey("author.id"))
-    post = db.Column(db.ForeignKey("post.id"))
-    like = db.Column(db.ForeignKey("like.id"))
-    follow = db.Column(db.ForeignKey("requests.id"))
+    data = db.Column(db.String())
 
     def __init__(
         self,
-        owner: int,
-        post: Union[int, None] = None,
-        like: Union[int, None] = None,
-        follow: Union[int, None] = None,
+        owner: str,
+        data: str,
+
     ):
         self.owner = owner
-        argNoneCount = (like, post, follow).count(None)
-        if argNoneCount < 2:
-            raise Exception("Inbox can't relate multiple objects")
-        elif argNoneCount == 3:
-            print(like, post, follow)
-            raise Exception("Inbox must relate one object")
-        self.post = post
-        self.like = like
-        self.follow = follow
+        self.data = data
 
     def __repr__(self):
         return f"<id {self.id} {self.post} {self.like} {self.follow}>"
 
     def json(self, local=True) -> Dict[str, Any]:
-        if self.post:
-            post = Post.query.filter_by(id=self.post).first()
-            return post.json(local)
-        elif self.like:
-            like = Like.query.filter_by(id=self.like).first()
-            return like.json(local)
-        elif self.follow:
-            follow = Requests.query.filter_by(id=self.follow).first()
-            return follow.json(local)
+        return json.loads(self.data)
 
 
 class Remote_Node(db.Model, JSONSerializable):  # contains auth info for remote nodes

@@ -230,7 +230,8 @@ def submit_remote_follow_request(author_id: str, follower_id: str):
         "actor": f"{local_host}/authors/{follower_id}",
         "object": f"{node.id}/authors/{author_id}"
     }
-    r = requests.post(f"{node.id}authors/{author_id}/inbox", json=remote_follow_node1, auth=(node.user, node.password))
+    r = requests.post(f"{node.id}authors/{author_id}/inbox/", json=remote_follow_node1, auth=(node.user, node.password))
+    print(r.status_code , r.text)
     return True
     
 
@@ -241,8 +242,7 @@ def post_remote_inbox(author_id: str, obj):#posts a given model to inbox
     for node in nodes:
         r = requests.get(f"{node.id}authors/{author_id}")
         if r.status_code == 200 and r.json()["type"] == "author":
-            obj_json = obj.json()
-            r = requests.post(f"{node.id}authors/{author_id}/inbox", auth=(node.user, node.password), json=obj_json)
+            r = requests.post(f"{node.id}authors/{author_id}/inbox", auth=(node.user, node.password), json=obj)
         
 
 def put_remote_like_inbox(remote_author_id: str, like_author_id: str, comment_id = None, post_id = None):
