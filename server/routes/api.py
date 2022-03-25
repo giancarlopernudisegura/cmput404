@@ -472,7 +472,7 @@ def remove_follower(author_id: str, follower_id: str) -> Response:
     return Response(status=httpStatus.NO_CONTENT)
 
 
-@bp.route("/authors/<string:author_id>/followers/<string:follower_id>", methods=["PUT"])
+@bp.route("/authors/<string:author_id>/followers/<path:follower_id>", methods=["PUT"])
 @require_authentication
 def add_follower(author_id: str, follower_id: str) -> Response:
     if current_user.is_authenticated:
@@ -481,6 +481,9 @@ def add_follower(author_id: str, follower_id: str) -> Response:
                 make_response(jsonify(error=res_msg.NO_PERMISSION)),
                 httpStatus.FORBIDDEN,
             )
+    regex = r"https?:\/\/.*\/authors\/(.+)"
+    if (match := re.match(regex, follower_id)):
+        follower_id = match.group(1)
     ##remote
     if find_remote_author(author_id):
         response = submit_remote_follow_request(author_id, follower_id)
