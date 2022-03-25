@@ -498,7 +498,7 @@ def add_follower(author_id: str, follower_id: str) -> Response:
         if response:
             return Response(status=httpStatus.OK)
     ##local
-    follower = Requests.query.filter_by(to=author_id, initiated=current_user.id).first()
+    follower = Requests.query.filter_by(to=author_id, initiated=follower_id).first()
     if follower:
         return (
             make_response(jsonify(error=res_msg.CREATE_CONFLICT)),
