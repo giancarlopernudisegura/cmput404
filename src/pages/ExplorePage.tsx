@@ -1,7 +1,7 @@
 import { h } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import GitHubActivity from '../components/GitHubActivity';
-import { getPosts, get_author_id, inboxCall, getGithubStream } from '../utils/apiCalls';
+import { getPosts, get_author_id, inboxCall, getGithubStream, newPublicPost } from '../utils/apiCalls';
 
 import PostForm from '../components/forms/PostForm';
 import DrawerMenu from '../components/sidemenu-components/Drawer';
@@ -13,7 +13,13 @@ import { Alert } from '@mui/material';
 type ExplorePageProps = { path: string };
 
 function ExplorePage({ path }: ExplorePageProps) {
+    // postForm states
+    const [ newPostBody, setNewPostBody ] = useState<string>("");
+    const [ newPostCat, setNewPostCat ] = useState<string>("");
+    const [ newPostTitle, setNewPostTitle ] = useState<string>("");
+    const [ newPostIsMkd, setNewIsPostMkd ] = useState<boolean>(false);
 
+    // getPosts states
     const [ posts, setPosts ] = useState(Array());
     const [ githubActivity, setGithubActivity ] = useState(Array());
     const [ errMsg, setErrMsg ] = useState("");
@@ -59,7 +65,18 @@ function ExplorePage({ path }: ExplorePageProps) {
             {errMsg && (
                 <Alert severity="error">{errMsg}</Alert>
             )}
-            <PostForm />
+            <PostForm
+                body={newPostBody}
+                setBody={setNewPostBody}
+                category={newPostCat}
+                setCategory={setNewPostCat}
+                title={newPostTitle}
+                setTitle={setNewPostTitle}
+                isMarkdown={newPostIsMkd}
+                setIsMarkdown={setNewIsPostMkd}
+                buttonName={"Share Post"}
+                submitAction={newPublicPost}
+            />
             
             {posts.length > 0 &&
                 <PostList 

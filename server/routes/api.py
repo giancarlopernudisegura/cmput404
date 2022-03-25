@@ -187,6 +187,7 @@ def specific_post(author_id: str, post_id: str) -> Response:
         )
     if request.method != "PUT":
         post = Post.query.filter_by(id=post_id).first_or_404()
+
     if request.method != "DELETE":
         try:
             author = author_id
@@ -229,7 +230,12 @@ def specific_post(author_id: str, post_id: str) -> Response:
         db.session.add(post)
         db.session.commit()
         post.push()
-        return Response(status=httpStatus.CREATED)
+        # TODO: update documentation for this
+        return (
+            make_response(jsonify(post.json())),
+            httpStatus.CREATED,
+        )
+        # return Response(status=httpStatus.OK)
     elif request.method == "DELETE":
         db.session.delete(post)
         db.session.commit()
@@ -598,6 +604,7 @@ def signup() -> Response:
         if not author:
             # create an author
             new_author = utils.create_author(decoded_token)
+            login_user(new_author)
             return utils.json_response(
                 httpStatus.OK,
                 {"message": res_msg.SUCCESS_USER_CREATED, "data": new_author.json()},

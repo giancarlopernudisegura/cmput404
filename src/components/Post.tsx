@@ -1,105 +1,111 @@
-import { h } from "preact";
-import FavoriteBorderOutlinedIcon from "@mui/icons-material/FavoriteBorderOutlined";
-import ChatBubbleOutlineOutlinedIcon from "@mui/icons-material/ChatBubbleOutlineOutlined";
-import ShareOutlinedIcon from "@mui/icons-material/ShareOutlined";
+import { h } from 'preact';
+import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
+import ChatBubbleOutlineOutlinedIcon from '@mui/icons-material/ChatBubbleOutlineOutlined';
+import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
 import { IconButton } from "@mui/material";
 import Button from "@mui/material/Button";
 import { useState, useEffect } from "preact/hooks";
 import Favorite from "@mui/icons-material/Favorite";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import CommentList from "../components/comment-components/CommentList";
 import CommentForm from "../components/forms/CommentForm";
 import { getAllComments } from "../utils/apiCalls";
-import ReactMarkdown from "react-markdown";
-import { MARKDOWN, PLAIN } from "../utils/constants";
+import ReactMarkdown from 'react-markdown';
+import { MARKDOWN, PLAIN } from '../utils/constants';
 
 /*
     Post component
 */
 
 type PostProps = {
-  postId: string;
-  title: string;
-  body: string;
-  authorName: string;
-  authorId: string;
-  currentAuthor?: string;
-  contentType: string;
-  onRemove?: Function;
-};
+    postId: string,
+    title: string, 
+    body: string,
+    authorName: string,
+    authorId: string,
+    currentAuthor?: string
+    contentType: string;
+    onRemove?: Function,
+    handleEdit?: Function,
+    visibility: string,
+    unlisted: boolean
+}
 
 function Post({
-  postId,
-  title,
-  body,
+  postId, 
+  title, 
+  body, 
   authorName,
   authorId,
-  currentAuthor,
-  contentType,
-  onRemove,
+  currentAuthor, 
+  onRemove, 
+  contentType, 
+  handleEdit, 
+  visibility, 
+  unlisted 
 }: PostProps) {
-  var currentUser: string = currentAuthor as string;
-  const renderBody = () => {
-    switch (contentType) {
-      case MARKDOWN:
-        return <ReactMarkdown>{body}</ReactMarkdown>;
-      case PLAIN:
-        return <p className="text-lg">{body}</p>;
-    }
-  };
+    var currentUser: string = currentAuthor as string;
 
-  //Toggle for like button
-  const [likeToggle, setLikeToggle] = useState(true);
-  const [isLiked, setIsLiked] = useState(0);
+    //Toggle for like button
+    const [likeToggle, setLikeToggle] = useState(true);
+    const [isLiked, setIsLiked] = useState(0);
 
-  const [comments, setComments] = useState(Array());
-  const [errMsg, setErrMsg] = useState("");
+    const [comments, setComments] = useState(Array());
+    const [errMsg, setErrMsg] = useState("");
 
-  const toggleFunction = () => {
-    setLikeToggle(!likeToggle);
-    if (likeToggle) {
-      setIsLiked(isLiked + 1);
-    }
-    if (!likeToggle) {
-      setIsLiked(isLiked - 1);
-    }
-  };
+    //TOGGLE FOR SHOWING COMMENTS
+    const [showComments, setShowComments] = useState(false);
+    const toggleShowComments = () => {
+      setShowComments(!showComments);
+    };
 
-  //TOGGLE FOR SHOWING COMMENTS
-  const [showComments, setShowComments] = useState(false);
-  const toggleShowComments = () => {
-    setShowComments(!showComments);
-  };
+    //Conditionals for the View Comments Button
+    const commentButtonText = showComments === false ? "View Comments" : "Hide Comments";
+    const commentButtonType = showComments === false ? "outlined" : "contained";
 
-  //Conditionals for the View Comments Button
-  const commentButtonText =
-    showComments === false ? "View Comments" : "Hide Comments";
-  const commentButtonType = showComments === false ? "outlined" : "contained";
+    //TOGGLE FOR OPENING MAKE COMMENT DIALOG
+    const [open, setOpen] = useState(false);
 
-  //TOGGLE FOR OPENING MAKE COMMENT DIALOG
-  const [open, setOpen] = useState(false);
+    const openDialog = () => {
+      setOpen(true);
+    };
 
-  const openDialog = () => {
-    setOpen(true);
-  };
+    const closeDialog = () => {
+      setOpen(false);
+    };
 
-  const closeDialog = () => {
-    setOpen(false);
-  };
+    useEffect(() => {
+      // Fetch all the comments of the post from the API
+      function fetchComments(authorId: string, postId: string) {
+        getAllComments(authorId.toString(), postId)
+          .then((data) => setComments(data))
+          .catch((err) => {
+            setErrMsg(err.message);
+          });
+      }
+  
+      fetchComments(authorId, postId);
+    }, []);
 
-  useEffect(() => {
-    // Fetch all the comments of the post from the API
-    function fetchComments(authorId: string, postId: string) {
-      getAllComments(authorId.toString(), postId)
-        .then((data) => setComments(data))
-        .catch((err) => {
-          setErrMsg(err.message);
-        });
+    const toggleFunction = () => {
+      setLikeToggle(!likeToggle);
+      if (likeToggle) {
+        setIsLiked(isLiked + 1);
+      }
+      if (!likeToggle) {
+        setIsLiked(isLiked - 1);
+      }
     }
 
-    fetchComments(authorId, postId);
-  }, []);
+    const renderBody = () => {
+        switch (contentType) {
+            case MARKDOWN:
+                return <ReactMarkdown>{body}</ReactMarkdown>
+            case PLAIN:
+                return <p className='text-lg'>{body}</p>
+        }
+    }
 
   return (
     <li className="bg-zinc-100 border-solid border-1 border-slate-600 w-2/3 m-auto rounded-lg py-4 px-5  my-5">
@@ -113,11 +119,29 @@ function Post({
           {authorName === currentUser && (
             <span className="flex space-x-4">
               <IconButton>
-                <EditIcon style={{ fill: "black" }} />
+                <EditIcon
+                  cursor="pointer"
+                  style={{ fill: "black" }} 
+                  onClick={() => {
+                    const editPost = {
+                        postId,
+                        title,
+                        description: body,
+                        contentType,
+                        visibility,
+                        unlisted
+                    };
+
+                    if (handleEdit){
+                        handleEdit(editPost);
+                    }
+                }}
+                />
               </IconButton>
 
               <IconButton>
                 <DeleteIcon
+                  cursor="pointer"
                   style={{ fill: "black" }}
                   onClick={() => {
                     if (onRemove) {
