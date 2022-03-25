@@ -27,7 +27,7 @@ function ExplorePage({ path }: ExplorePageProps) {
     const [ newPostIsMkd, setNewIsPostMkd ] = useState<boolean>(false);
 
     // getPosts states
-    const [ posts, setPosts ] = useState(Array());
+    const [ publicPosts, setPublicPosts ] = useState(Array());
     const [ githubActivity, setGithubActivity ] = useState(Array());
     const [ errMsg, setErrMsg ] = useState("");
 
@@ -39,36 +39,43 @@ function ExplorePage({ path }: ExplorePageProps) {
                 let results = await getAllAuthorsWithoutPag();
                 let authors = results.items;
                 let allPosts : Array<any> = [];
-                let postPromises : Array<Promise<any>> = [];
 
                 for (let author of authors) {
-                    let post = getPosts(author.id);
-                    post.then(
-                        (data) => {
-                            if (data.length > 0) {
-                                allPosts.push(...data);
-                                console.log(data);
-                                console.log('pushed to promises')
+                    let authorsPosts = getPosts(author.id);
+                    authorsPosts.then( (data) => {
+
+                        // data is the list of posts from each author
+                        if (data.length > 0) {
+                            
+                            for (let post of data) {
+                                console.log('POST', post.postId);
+                                if (post.visibility === 'PUBLIC')   {
+                                    allPosts.push(post);
+                                    console.log('pushed to promises')
+                                }
+                                else {
+                                    console.log(post.id, 'is private');
+                                }
                             }
+ 
                         }
-                    )
+                    });
                 }
 
-                console.log('ALLPOSTS' , allPosts);
-
+                setPublicPosts(allPosts);
                 
             } catch (err) {
                 setErrMsg('Unable to get all posts: ' + (err as Error).message);
             }
-            // get all posts 
+
         }
+
         getPostsFromAllAuthors();
     }, []);
 
     // Effect to get github activity
     useEffect( () => {
         function fetchGithubStream() {
-            console.log("Getting github activity from API...");
             get_author_id()
                 .then(author_id => {
                     getGithubStream(author_id)
@@ -92,7 +99,7 @@ function ExplorePage({ path }: ExplorePageProps) {
                     response
                         .then(data => {
                             // TODO: temp, only use posts from inbox for now
-                            setPosts(data.items.filter((item: any) => item.type == "post"));
+                            setPublicPosts(data.items.filter((item: any) => item.type == "post"));
                         })
                         .catch(err => {
                             setErrMsg(err.message);
@@ -100,7 +107,7 @@ function ExplorePage({ path }: ExplorePageProps) {
                 })
                 .catch(console.error);
         }
-        getInbox();
+        // getInbox();
 
     }, []);
 
@@ -126,9 +133,9 @@ function ExplorePage({ path }: ExplorePageProps) {
                 submitAction={newPublicPost}
             />
             
-            {posts.length > 0 &&
+            {publicPosts.length > 0 &&
                 <PostList 
-                    initialPosts={posts} 
+                    initialPosts={publicPosts} 
                 /> 
             }
 

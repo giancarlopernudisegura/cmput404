@@ -287,7 +287,6 @@ export async function getAllComments(author_id: string, post_id: string) {
     );
 
     let data = await res.json();
-    console.log(data)
     let listOfComments = Array();
 
     for (let i = 0; i < data.comments.length; i++) {

@@ -57,7 +57,6 @@ function AuthorInfo({ author }: AuthorProps) {
 
         }
         fetchFriends();
-      
     }, []);
     
 

@@ -22,6 +22,7 @@ type profileProps = { path: string };
 function Profile({ path }: profileProps) {
   const [errMsg, setErrMsg] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  
   // Dialog
   const [ openDialog, setOnOpenDialog ] = useState<boolean>(false);
 
