@@ -326,11 +326,10 @@ def get_comments(author_id: str, post_id: str) -> Response:
     methods=["GET"],
 )
 def get_comment(author_id: str, post_id: str, comment_id: str) -> Response:
-<<<<<<< HEAD
     comment = Comment.query.filter_by(id=comment_id).first()
-    if comment != None:#is local comment
     is_local = current_user.is_authenticated
-    return make_response(jsonify(comment.json(is_local))), httpStatus.OK
+    if comment != None:#is local comment
+        return make_response(jsonify(comment.json(is_local))), httpStatus.OK
     else:#look in remotes
         remote_comment_dict = get_remote_comment(author_id, post_id, comment_id)
         if remote_comment_dict != None or len(remote_comment_dict) != 0:
@@ -338,13 +337,6 @@ def get_comment(author_id: str, post_id: str, comment_id: str) -> Response:
         else:#not found in remotes
             return Response(status=httpStatus.NOT_FOUND)
 
-
-
-=======
-    comment = Comment.query.filter_by(id=comment_id).first_or_404()
-    is_local = current_user.is_authenticated
-    return make_response(jsonify(comment.json(is_local))), httpStatus.OK
->>>>>>> master
 
 
 @bp.route(

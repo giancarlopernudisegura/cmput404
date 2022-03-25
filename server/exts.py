@@ -10,8 +10,6 @@ login_manager = LoginManager()
 
 LOCAL_AUTH_USER = os.getenv("LOCAL_AUTH_USER")
 LOCAL_AUTH_PASSWORD = os.getenv("LOCAL_AUTH_PASSWORD")
-<<<<<<< HEAD
-=======
 
 
 def http_basic_authentication():
@@ -34,4 +32,3 @@ def require_authentication(func):
         return func(*args, **kwargs)
 
     return wrapper
->>>>>>> master
