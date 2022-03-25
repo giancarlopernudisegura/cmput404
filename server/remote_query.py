@@ -53,7 +53,9 @@ def calculate_remote_page(objType, page, size):#calculate the remote page based 
     # if page == 2:
     #     remote_page = page - len(objType.query.all()) // size
     #     print(f"remote_page: {remote_page}\nobjlen {len(objType.query.all())}")
-    return page - len(objType.query.all()) // size #TODO FIX THIS STUFF!!
+    all_items = len(objType.query.all())
+    print("NUMBER OF ITEMS", all_items)
+    return page - all_items // size #TODO FIX THIS STUFF!!
 
 def fix_remote_url(node_items: list, node):#fix url bug in some remote nodes data
     for author in node_items:
@@ -84,8 +86,6 @@ def get_all_remote_authors(pagesize, page=1):
     nodes = Remote_Node.query.all()
     items = []
     for node in nodes:
-        if node.id == "https://website404.herokuapp.com/":#TODO remove this conditional to allow group 2
-            continue
         r = requests.get(f"{node.id}authors?size={pagesize}&page={page}")
         if r.status_code == 200 and len(r.json()["items"]) > 0:
             node_items = r.json()["items"]
@@ -93,7 +93,11 @@ def get_all_remote_authors(pagesize, page=1):
             fix_remote_url(node_items, node)
             items.extend(node_items)
 
-    items = items[:pagesize]
+    print("ALL ITEMS", len(items))
+
+    # actual = items[:pagesize]
+    # remaining = items[pagesize:]
+    print("NEW ITEMS", len(items))
     return items
 
 def get_remote_author(author_id: str):
@@ -121,9 +125,6 @@ def get_remote_author_posts(author_id: str, size :int, page=1):
             items.extend(remote_posts)
     items = items[:size]#do this better
     return items
-
-
-#below untested
 
 def get_remote_post(author_id: str, post_id: str):#tested for https://backend-404.herokuapp.com
     nodes = Remote_Node.query.all()

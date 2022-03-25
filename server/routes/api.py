@@ -77,12 +77,15 @@ def multiple_authors() -> Response:
     is_local = current_user.is_authenticated
     remote_authors = []
     if len(authors) < size:
-        remote_size = size - len(authors) 
+        remote_size = (size - len(authors))//2
         #remote_authors = get_all_remote_authors(remote_size)
         remote_page = calculate_remote_page(Author, page, size)
+        print("REMOTE PAGE", remote_page)
         remote_authors = get_all_remote_authors(remote_size, page=remote_page)
+
     author_items = [a.json(is_local) for a in authors]
     author_items.extend(remote_authors)
+    print("ALL AUTHORS COMBINED", author_items)
     return (
         make_response(
             jsonify(
