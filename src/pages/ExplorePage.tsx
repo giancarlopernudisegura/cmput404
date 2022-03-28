@@ -1,8 +1,7 @@
 import { h } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
-import { Alert, CircularProgress } from '@mui/material';
-import { Box, Tab, Tabs } from '@mui/material';
-import TabPanel from '../components/tabs/TabPanel';
+import { Alert, CircularProgress, Box, Tab, Tabs } from '@mui/material';
+
 
 import { 
     getPosts, 
@@ -16,6 +15,7 @@ import {
 import PostForm from '../components/forms/PostForm';
 import DrawerMenu from '../components/sidemenu-components/Drawer';
 import SearchBar from './SearchBar';
+import TabPanel from '../components/tabs/TabPanel';
 import PostList from '../components/PostList';
 import GitHubActivity from '../components/GitHubActivity';
 import SectionTabs from '../components/tabs/SectionTabs';
