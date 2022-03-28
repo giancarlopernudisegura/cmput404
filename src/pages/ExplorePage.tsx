@@ -1,6 +1,8 @@
 import { h } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import { Alert, CircularProgress } from '@mui/material';
+import { Box, Tab, Tabs } from '@mui/material';
+import TabPanel from '../components/tabs/TabPanel';
 
 import { 
     getPosts, 
@@ -39,6 +41,11 @@ function ExplorePage({ path }: ExplorePageProps) {
 
     // Labels and section content 
     const [ sectionContent, setSectionContent ] = useState(Object());
+
+    const [value, setValue] = useState(0);
+    const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+        setValue(newValue);
+    }
 
     // Effect to get all posts
     useEffect( () => {
@@ -129,58 +136,61 @@ function ExplorePage({ path }: ExplorePageProps) {
 
     return (
         <DrawerMenu pageName="Explore">
-            <SearchBar />
             {errMsg && (
                 <Alert severity="error">{errMsg}</Alert>
             )}
-            
-            <PostForm
-                body={newPostBody}
-                setBody={setNewPostBody}
-                category={newPostCat}
-                setCategory={setNewPostCat}
-                title={newPostTitle}
-                setTitle={setNewPostTitle}
-                isMarkdown={newPostIsMkd}
-                setIsMarkdown={setNewIsPostMkd}
-                buttonName={"Share Post"}
-                submitAction={newPublicPost}
-            />
-            
-            <SectionTabs 
-                sectionContent={sectionContent}
-            />
+            <SearchBar />
 
-            {postsLoading === true ? 
-                <CircularProgress /> : (
+            <Box sx={{ width: '100%' }}>
+                <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                    <Tabs value={value} onChange={handleChange} >
+                        <Tab label="Public Posts" />
+                        <Tab label="Github Activity" />
+                    </Tabs>
+                </Box>
 
-                <div id="public-posts">
-                    <h2>Public Posts</h2>
-                    <PostList
-                        initialPosts={publicPosts}
-                    /> 
-                </div>
-            ) }
+                <TabPanel value={value} index={0}>
+                    <PostForm
+                        body={newPostBody}
+                        setBody={setNewPostBody}
+                        category={newPostCat}
+                        setCategory={setNewPostCat}
+                        title={newPostTitle}
+                        setTitle={setNewPostTitle}
+                        isMarkdown={newPostIsMkd}
+                        setIsMarkdown={setNewIsPostMkd}
+                        buttonName={"Share Post"}
+                        submitAction={newPublicPost}
+                    />
+                    {postsLoading === true ?
+                        <CircularProgress /> : (
+                            <div id="public-posts">
+                                <PostList
+                                    initialPosts={publicPosts}
+                                />
+                            </div>
+                        )}
+                </TabPanel>
+                <TabPanel value={value} index={1}>
+                    {githubLoading === true ?
+                        <CircularProgress /> : (
+                            <div id="github-activity">
+                                <ul>
+                                    {githubActivity.map(event => (
+                                        <li>
+                                            <GitHubActivity
+                                                eventType={event.type}
+                                                repo={event.repo}
+                                                author={event.actor.login} />
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )
+                    }
+                </TabPanel>
+            </Box>
 
-
-            {githubLoading === true ?
-                <CircularProgress /> : (
-
-                <div id="github-activity">
-                    <h2>My Github Activity</h2>
-                    <ul>
-                        {githubActivity.map(event => (
-                            <li>
-                                <GitHubActivity
-                                    eventType={event.type}
-                                    repo={event.repo}
-                                    author={event.actor.login} />
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-                )
-            }
 
         </DrawerMenu>
     );

@@ -35,16 +35,13 @@ export default function SectionTabs({ sectionContent }: TabPanelProps) {
         <Box sx={{ width: '100%' }}>
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                 <Tabs value={value} onChange={handleChange} >
-                    {/* <Tab label="Item One" />
+                    <Tab label="Item One" />
                     <Tab label="Item Two" />
-                    <Tab label="Item Three" /> */}
-
-                    {tabLabels.map( (label) => {
-                        <Tab label={label} />
-                    })}
+                    <Tab label="Item Three" />
 
                 </Tabs>
             </Box>
+
             <TabPanel value={value} index={0}>
                 Item One
             </TabPanel>
