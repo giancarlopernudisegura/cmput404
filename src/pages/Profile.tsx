@@ -4,10 +4,11 @@ import DrawerMenu from "../components/sidemenu-components/Drawer";
 import { Alert, CircularProgress } from "@mui/material";
 
 import {
-  getCurrentAuthor,
   getPosts,
   deletePost,
   editPost,
+  getSpecAuthor,
+  get_author_id,
   getAllComments,
 } from "../utils/apiCalls";
 
@@ -37,12 +38,13 @@ function Profile({ path }: profileProps) {
   const [ author, setAuthor ] = useState(Object());
   const [ myPosts, setMyPosts ] = useState(Array());
 
-  useEffect(() => {    
-    const authorPromise = getCurrentAuthor()
-      .then(data => { 
-        setAuthor(data)
-        return data.id;
+  useEffect(() => {
+    const authorPromise = get_author_id().then((author_id : any) => {
+      getSpecAuthor(author_id).then(data => {
+        setAuthor(data);
       });
+      return author_id;
+    });
 
     // Set the author's posts
     var postsPromise = authorPromise.then(authorId => { return getPosts(authorId); });

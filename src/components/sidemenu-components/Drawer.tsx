@@ -24,7 +24,7 @@ import Person from "@mui/icons-material/Person";
 import Settings from "@mui/icons-material/Settings";
 import { route } from 'preact-router';
 import { useEffect, useState } from "preact/hooks";
-import { getCurrentAuthor, logOutCall } from '../../utils/apiCalls';
+import { logOutCall, get_author_id, getSpecAuthor } from '../../utils/apiCalls';
 import { OverridableComponent } from "@mui/material/OverridableComponent";
 
 // Drawer Implementation retrieved from MUI Official Documentation. (n.d.). React drawer component. MUI. Retrieved March 3, 2022, from https://mui.com/components/drawers/#responsive-drawer
@@ -67,11 +67,12 @@ function DrawerMenu(props: any) {
   }
 
   useEffect(() => {
-    getCurrentAuthor()
-      .then(({ isAdmin }) => {
+    get_author_id().then((author_id : string) => {
+      getSpecAuthor(author_id).then(({ isAdmin }) => {
         if (isAdmin)
           setLinks(links.concat([["Admin Settings", "/app/admin", Settings]]))
-      })
+      });
+    });
   }, [])
 
 
