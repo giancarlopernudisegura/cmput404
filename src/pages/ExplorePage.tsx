@@ -39,9 +39,7 @@ function ExplorePage({ path }: ExplorePageProps) {
     const [ githubActivity, setGithubActivity ] = useState(Array());
     const [ errMsg, setErrMsg ] = useState("");
 
-    // Labels and section content 
-    const [ sectionContent, setSectionContent ] = useState(Object());
-
+    // Handle tab changes 
     const [value, setValue] = useState(0);
     const handleChange = (event: React.SyntheticEvent, newValue: number) => {
         setValue(newValue);
@@ -124,16 +122,7 @@ function ExplorePage({ path }: ExplorePageProps) {
 
     }, []);
 
-    useEffect( () => {
-        setSectionContent({
-            'Public Posts': publicPosts,
-            'Github Activity': githubActivity,
-        });
-        console.log('Ran sectionContents effect');
-    }, [githubActivity, publicPosts]);
-
     
-
     return (
         <DrawerMenu pageName="Explore">
             {errMsg && (
