@@ -1,6 +1,7 @@
 import { h } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
-import GitHubActivity from '../components/GitHubActivity';
+import { Alert, CircularProgress } from '@mui/material';
+
 import { 
     getPosts, 
     get_author_id, 
@@ -14,12 +15,17 @@ import PostForm from '../components/forms/PostForm';
 import DrawerMenu from '../components/sidemenu-components/Drawer';
 import SearchBar from './SearchBar';
 import PostList from '../components/PostList';
-import { Alert } from '@mui/material';
+import GitHubActivity from '../components/GitHubActivity';
+import SectionTabs from '../components/tabs/SectionTabs';
 
 
 type ExplorePageProps = { path: string };
 
 function ExplorePage({ path }: ExplorePageProps) {
+    // Loaders 
+    const [postsLoading, setPostsLoading] = useState(true);
+    const [githubLoading, setGithubLoading] = useState(true);
+
     // postForm states
     const [ newPostBody, setNewPostBody ] = useState<string>("");
     const [ newPostCat, setNewPostCat ] = useState<string>("");
@@ -30,6 +36,9 @@ function ExplorePage({ path }: ExplorePageProps) {
     const [ publicPosts, setPublicPosts ] = useState(Array());
     const [ githubActivity, setGithubActivity ] = useState(Array());
     const [ errMsg, setErrMsg ] = useState("");
+
+    // Labels and section content 
+    const [ sectionContent, setSectionContent ] = useState(Object());
 
     // Effect to get all posts
     useEffect( () => {
@@ -48,13 +57,8 @@ function ExplorePage({ path }: ExplorePageProps) {
                         if (data.length > 0) {
                             
                             for (let post of data) {
-                                console.log('POST', post.postId);
                                 if (post.visibility === 'PUBLIC')   {
                                     allPosts.push(post);
-                                    console.log('pushed to promises')
-                                }
-                                else {
-                                    console.log(post.id, 'is private');
                                 }
                             }
  
@@ -63,6 +67,7 @@ function ExplorePage({ path }: ExplorePageProps) {
                 }
 
                 setPublicPosts(allPosts);
+
                 
             } catch (err) {
                 setErrMsg('Unable to get all posts: ' + (err as Error).message);
@@ -71,6 +76,7 @@ function ExplorePage({ path }: ExplorePageProps) {
         }
 
         getPostsFromAllAuthors();
+        setPostsLoading(false);
     }, []);
 
     // Effect to get github activity
@@ -87,12 +93,12 @@ function ExplorePage({ path }: ExplorePageProps) {
                 .catch(console.error);
         };
         fetchGithubStream();
+        setGithubLoading(false);
     }, []);
 
     // Effect to get inbox 
     useEffect(() => {
         function getInbox() {
-            console.log("Getting posts from API...");
             get_author_id()
                 .then(author_id => {
                     const response = inboxCall(author_id, "GET");
@@ -110,6 +116,14 @@ function ExplorePage({ path }: ExplorePageProps) {
         // getInbox();
 
     }, []);
+
+    useEffect( () => {
+        setSectionContent({
+            'Public Posts': publicPosts,
+            'Github Activity': githubActivity,
+        });
+        console.log('Ran sectionContents effect');
+    }, [githubActivity, publicPosts]);
 
     
 
@@ -133,15 +147,26 @@ function ExplorePage({ path }: ExplorePageProps) {
                 submitAction={newPublicPost}
             />
             
-            {publicPosts.length > 0 &&
-                <PostList 
-                    initialPosts={publicPosts} 
-                /> 
-            }
+            <SectionTabs 
+                sectionContent={sectionContent}
+            />
+
+            {postsLoading === true ? 
+                <CircularProgress /> : (
+
+                <div id="public-posts">
+                    <h2>Public Posts</h2>
+                    <PostList
+                        initialPosts={publicPosts}
+                    /> 
+                </div>
+            ) }
 
 
-            {githubActivity.length > 0 && 
-                <div>
+            {githubLoading === true ?
+                <CircularProgress /> : (
+
+                <div id="github-activity">
                     <h2>My Github Activity</h2>
                     <ul>
                         {githubActivity.map(event => (
@@ -154,6 +179,7 @@ function ExplorePage({ path }: ExplorePageProps) {
                         ))}
                     </ul>
                 </div>
+                )
             }
 
         </DrawerMenu>
