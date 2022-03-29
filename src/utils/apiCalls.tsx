@@ -29,9 +29,17 @@ export const get_author_id = async () => {
  * @param author_id
  * @returns Array<Post>
  */
-export async function getPosts(author_id: string): Promise<any> {
+export async function getPosts(author_id: string, page?:number): Promise<any> {
+  var baseUrl = `${BACKEND_HOST}/authors/${author_id}/posts/`
+
   try {
-    let res = await fetch(`${BACKEND_HOST}/authors/${author_id}/posts/`, {
+
+    if (page) {
+      let size = 10;
+      baseUrl += `?size=${size}&page=${page}`;
+    }
+
+    let res = await fetch(baseUrl, {
       mode: "cors",
       method: "GET",
     });
@@ -53,7 +61,7 @@ export async function getPosts(author_id: string): Promise<any> {
       listOfPosts.push(post);
     }
 
-    return listOfPosts;
+    return { status: res.status, items: listOfPosts };
   } catch (err) {
     console.error(err);
     

@@ -53,8 +53,17 @@ function ExplorePage({ path }: ExplorePageProps) {
                 let results = await getAllAuthorsWithoutPag();
                 let authors = results.items;
                 let allPosts : Array<any> = [];
+                let page = 1;
 
                 for (let author of authors) {
+                    let response = await getPosts(author.id, page);
+                    let status = response.status;
+                    if (status !== 200) {
+                        continue;
+                    }
+                    let data = response.items;
+
+
                     let authorsPosts = getPosts(author.id);
                     authorsPosts.then( (data) => {
 
