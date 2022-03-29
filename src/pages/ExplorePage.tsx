@@ -5,12 +5,15 @@ import { Alert, CircularProgress, Box, Tab, Tabs } from '@mui/material';
 
 import { 
     getPosts, 
+    getAllAuthors,
     get_author_id, 
     inboxCall, 
     getGithubStream, 
     newPublicPost,
     getAllAuthorsWithoutPag
  } from '../utils/apiCalls';
+
+import { PUBLIC, SUCCESS } from '../utils/constants';
 
 import PostForm from '../components/forms/PostForm';
 import DrawerMenu from '../components/sidemenu-components/Drawer';
@@ -50,38 +53,25 @@ function ExplorePage({ path }: ExplorePageProps) {
         async function getPostsFromAllAuthors() {
             // get all authors 
             try {
-                let results = await getAllAuthorsWithoutPag();
+                let results = await getAllAuthors();
                 let authors = results.items;
                 let allPosts : Array<any> = [];
-                let page = 1;
 
                 for (let author of authors) {
-                    let response = await getPosts(author.id, page);
-                    let status = response.status;
-                    if (status !== 200) {
+                    let postsRes = await getPosts(author.id);
+                    if (postsRes.status !== SUCCESS) {
                         continue;
                     }
-                    let data = response.items;
-
-
-                    let authorsPosts = getPosts(author.id);
-                    authorsPosts.then( (data) => {
-
-                        // data is the list of posts from each author
-                        if (data.length > 0) {
-                            
-                            for (let post of data) {
-                                if (post.visibility === 'PUBLIC')   {
-                                    allPosts.push(post);
-                                }
+                    let posts = postsRes.items;
+                    if (posts.length > 0) {
+                        for (let post of posts) {
+                            if (post.visibility === PUBLIC) {
+                                allPosts.push(post);
                             }
- 
                         }
-                    });
+                    }
                 }
-
                 setPublicPosts(allPosts);
-
                 
             } catch (err) {
                 setErrMsg('Unable to get all posts: ' + (err as Error).message);

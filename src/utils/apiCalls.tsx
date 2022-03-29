@@ -6,6 +6,8 @@ import {
   FAILED_CREATE_COMMENT,
 } from "../utils/errorMsg";
 
+import { SUCCESS, NOT_FOUND } from "../utils/constants";
+
 const BACKEND_HOST = process.env.FLASK_HOST;
 
 export const get_author_id = async () => {
@@ -14,7 +16,7 @@ export const get_author_id = async () => {
     credentials: "include",
     method: "GET",
   });
-  if (res.status === 200) {
+  if (res.status === SUCCESS) {
     const currentUserId : string = res.headers.get("X-User-Id") as string;
     if (currentUserId === null) {
       throw new Error("Could not get user id");
@@ -31,6 +33,7 @@ export const get_author_id = async () => {
  */
 export async function getPosts(author_id: string, page?:number): Promise<any> {
   var baseUrl = `${BACKEND_HOST}/authors/${author_id}/posts/`
+  var listOfPosts = Array();
 
   try {
 
@@ -39,14 +42,16 @@ export async function getPosts(author_id: string, page?:number): Promise<any> {
       baseUrl += `?size=${size}&page=${page}`;
     }
 
-    let res = await fetch(baseUrl, {
+    var res = await fetch(baseUrl, {
       mode: "cors",
       method: "GET",
     });
 
     let data = await res.json();
-    let listOfPosts = Array();
 
+    if (data.items === undefined) {
+      return { status: NOT_FOUND, items: [] };
+    }
     for (let i = 0; i < data.items.length; i++) {
       const post: any = {
         postId: data.items[i].id,
@@ -61,12 +66,13 @@ export async function getPosts(author_id: string, page?:number): Promise<any> {
       listOfPosts.push(post);
     }
 
-    return { status: res.status, items: listOfPosts };
   } catch (err) {
     console.error(err);
-    
     throw Error("There was an error fetching the posts");
   }
+
+  return { status: res.status, items: listOfPosts };
+
 }
 
 /**
@@ -74,15 +80,20 @@ export async function getPosts(author_id: string, page?:number): Promise<any> {
  * with their id and displayName
  * @returns Array<Author>
  */
-export const getAllAuthors = async (page: number) => {
+export const getAllAuthors = async (page?: number) => {
+  var baseUrl = `${BACKEND_HOST}/authors/`;
   try {
-    const res = await fetch(`${BACKEND_HOST}/authors/?size=10&page=${page}`, {
+    if (page) {
+      baseUrl += `?size=10&page=${page}`;
+    }
+
+    const res = await fetch(baseUrl, {
       mode: "cors",
       credentials: "include",
       method: "GET",
     });
 
-    if (res.status == 200) {
+    if (res.status == SUCCESS) {
       const currentUserId = res.headers.get("X-User-Id");
       let listOfAuthors = await res.json();
       return { ...listOfAuthors, currentUserId };
@@ -118,7 +129,7 @@ export async function newPublicPost(authorId: string, postData: any) {
 
     json = await res.json();
 
-    if (res.status === 200) {
+    if (res.status === SUCCESS) {
       return { status: res.status, ...json };
     } else {
       throw Error();
@@ -163,7 +174,7 @@ export async function clearInbox(author_id: string): Promise<boolean> {
     });
 
     // TODO: change return value
-    return res.status === 200;
+    return res.status === SUCCESS;
   } catch (err) {
     throw Error("Unable to clear inbox");
   }
@@ -197,7 +208,7 @@ export const logOutCall = async () => {
       method: "POST",
     });
 
-    if (res.status === 200) {
+    if (res.status === SUCCESS) {
       let json = await res.json();
       return { status: res.status, ...json };
     } else {
@@ -223,7 +234,7 @@ export const followerCall = async (
       }
     );
 
-    if (res.status === 200) {
+    if (res.status === SUCCESS) {
       let json = [];
 
       if (method === "GET") {
@@ -247,7 +258,7 @@ export const getSpecAuthor = async (author_id: string) => {
     });
 
     let json = [];
-    if (res.status === 200) {
+    if (res.status === SUCCESS) {
       json = await res.json();
     }
 
@@ -303,7 +314,7 @@ export const serveImage = async (authorId: string, postId: string) => {
 
     let json = res.json();
 
-    if (res.status === 200) {
+    if (res.status === SUCCESS) {
       return { status: res.status, ...json };
     }
   } catch (err) {
@@ -358,7 +369,7 @@ export async function editPost(author_id: string, post_id: string, postInfo: any
 
     let json = await response.json();
 
-    if (response.status !== 200) {
+    if (response.status !== SUCCESS) {
       throw Error();
     }
 
