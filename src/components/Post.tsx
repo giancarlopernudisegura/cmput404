@@ -48,16 +48,16 @@ function Post({
   var currentUser: string = currentAuthor as string;
 
   //Toggle for like button
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+  const [ currentUserId, setCurrentUserId ] = useState<string | null>(null)
   const [ isLiked, setIsLiked ] = useState(false);
   const [ numLikes, setNumLikes ] = useState(0);
-  const [postLikes, setPostLikes] = useState(Array());
+  const [ postLikes, setPostLikes ] = useState(Array());
 
   const [comments, setComments] = useState(Array());
-  const [errMsg, setErrMsg] = useState("");
+  const [ errMsg, setErrMsg ] = useState("");
 
   //TOGGLE FOR SHOWING COMMENTS
-  const [showComments, setShowComments] = useState(false);
+  const [ showComments, setShowComments ] = useState(false);
   const toggleShowComments = () => {
     setShowComments(!showComments);
   };
@@ -68,7 +68,7 @@ function Post({
   const commentButtonType = showComments === false ? "outlined" : "contained";
 
   //TOGGLE FOR OPENING MAKE COMMENT DIALOG
-  const [open, setOpen] = useState(false);
+  const [ open, setOpen ] = useState(false);
 
   const openDialog = () => {
     setOpen(true);
