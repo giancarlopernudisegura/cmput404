@@ -519,11 +519,13 @@ def add_follower(author_id: str, follower_id: str) -> Response:
 @bp.route("/authors/<string:author_id>/inbox", methods=["GET"])
 @require_authentication
 def get_inbox(author_id: str) -> Response:
-    if current_user.id != author_id:
-        return (
-            make_response(jsonify(error=res_msg.NO_PERMISSION)),
-            httpStatus.UNAUTHORIZED,
-        )
+    is_local = current_user.is_authenticated
+    if is_local:
+        if current_user.id != author_id:
+            return (
+                make_response(jsonify(error=res_msg.NO_PERMISSION)),
+                httpStatus.UNAUTHORIZED,
+            )
     page, size = pagination(request.args)
     inbox_items = (
         Inbox.query.filter_by(owner=author_id).paginate(page=page, per_page=size, error_out=False).items

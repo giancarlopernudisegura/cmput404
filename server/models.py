@@ -337,6 +337,7 @@ class Inbox(db.Model, JSONSerializable):
         self.data = data
 
     def __repr__(self):
+        
         return f"<id {self.id} {self.post} {self.like} {self.follow}>"
 
     def json(self, local=True) -> Dict[str, Any]:
