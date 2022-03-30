@@ -127,7 +127,7 @@ def single_author(author_id: str) -> Response:
         pass
 
 
-@bp.route("/authors/<path:author_id>/posts/<string:post_id>", methods=["GET"])
+@bp.route("/authors/<path:author_id>/posts/<path:post_id>", methods=["GET"])
 @require_authentication
 def get_post(author_id: str, post_id: str) -> Response:
     post = Post.query.filter_by(id=post_id, private=False).first()
