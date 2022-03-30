@@ -546,10 +546,11 @@ def get_inbox(author_id: str) -> Response:
 @bp.route("/authors/<string:author_id>/inbox", methods=["POST"])
 @require_authentication
 def post_inbox(author_id: str) -> Response:
+    is_local = current_user.is_authenticated
     if find_remote_author(author_id):
         post_remote_inbox(author_id, request.json)
     try:
-        inbox = Inbox(author_id, str(request.json()))
+        inbox = Inbox(author_id, str(request.json))
         db.session.add(inbox)
         db.session.commit()
     except KeyError:
@@ -559,6 +560,7 @@ def post_inbox(author_id: str) -> Response:
             jsonify(
                 type="inbox",
                 author=f"{HOST}/authors/{author_id}",
+
             )
         ),
         httpStatus.OK,
