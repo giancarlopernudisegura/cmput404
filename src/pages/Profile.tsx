@@ -101,8 +101,8 @@ function Profile({ path }: profileProps) {
     }
 
     const newList = myPosts.map(post => {
-      if (post.id === IdEditPost) {
-        return newPostBody;
+      if (post.postId === IdEditPost) {
+        return { ...newPostBody,  description: newPostBody.content, authorId: post.authorId, authorName: post.authorName, postId: post.postId };
       } else {
         return post;
       }
@@ -131,19 +131,21 @@ function Profile({ path }: profileProps) {
                 handleEdit={handleEdit}
               />
 
-              {openDialog && <DialogTemplate 
-                open={openDialog}
-                handleClose={() => setOnOpenDialog(false)}
-                updatePost={editPostCall}
-                postBody={editPostBody}
-                setPostBody={setEditPostBody}
-                postCat={editPostCat}
-                setPostCat={setEditPostCat}
-                postTitle={editPostTitle}
-                setPostTitle={setEditPostTitle}
-                isMarkdown={editIsPostMkd}
-                setIsMarkdown={setEditIsPostMkd}
-              />}
+              {openDialog && 
+                <DialogTemplate 
+                  open={openDialog}
+                  handleClose={() => setOnOpenDialog(false)}
+                  updatePost={editPostCall}
+                  postBody={editPostBody}
+                  setPostBody={setEditPostBody}
+                  postCat={editPostCat}
+                  setPostCat={setEditPostCat}
+                  postTitle={editPostTitle}
+                  setPostTitle={setEditPostTitle}
+                  isMarkdown={editIsPostMkd}
+                  setIsMarkdown={setEditIsPostMkd}
+                />
+              }
             </div>
         )
       }

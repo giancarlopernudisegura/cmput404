@@ -118,44 +118,44 @@ function Post({
           {/* Display these buttons if the author of the  post is the current author */}
           {authorName === currentUser && (
             <span className="flex space-x-4">
-              <IconButton>
-                <EditIcon
-                  cursor="pointer"
-                  style={{ fill: "black" }} 
-                  onClick={() => {
-                    const editPost = {
-                        postId,
-                        title,
-                        description: body,
-                        contentType,
-                        visibility,
-                        unlisted
-                    };
+              {handleEdit && (
+                <IconButton>
+                  <EditIcon
+                    cursor="pointer"
+                    style={{ fill: "black" }} 
+                    onClick={() => {
+                      const editPost = {
+                          postId,
+                          title,
+                          description: body,
+                          contentType,
+                          visibility,
+                          unlisted
+                      };
 
-                    if (handleEdit){
-                        handleEdit(editPost);
-                    }
-                }}
-                />
-              </IconButton>
-
-              <IconButton>
-                <DeleteIcon
-                  cursor="pointer"
-                  style={{ fill: "black" }}
-                  onClick={() => {
-                    if (onRemove) {
-                      onRemove(postId);
-                    }
+                      handleEdit(editPost);
                   }}
-                />
-              </IconButton>
+                  />
+                </IconButton>)
+              }
+
+              {onRemove && (
+                <IconButton>
+                  <DeleteIcon
+                    cursor="pointer"
+                    style={{ fill: "black" }}
+                    onClick={() => {
+                      onRemove(postId);
+                    }}
+                  />
+                </IconButton>)
+              }
             </span>
           )}
         </div>
 
         <div className="px-3 my-2">
-          <h3 className="font-semibold text-lg mb-2">{title}</h3>
+          <h3 className="font-semibold text-lg mb-2" style={{cursor: 'pointer'}}>{title}</h3>
           {renderBody()}
         </div>
       </div>

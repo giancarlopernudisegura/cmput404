@@ -34,6 +34,7 @@ export async function getPosts(author_id: string): Promise<any> {
   try {
     let res = await fetch(`${BACKEND_HOST}/authors/${author_id}/posts/`, {
       mode: "cors",
+      credentials: "include",
       method: "GET",
     });
 
@@ -348,14 +349,14 @@ export async function getSpecPost(author_id: string, post_id: string) {
     });
 
     if (res.status !== 200) {
-      throw Error();
+      throw new Error();
     }
 
     let json = await res.json();
 
     return { ...json, status: res.status };
   } catch (err) {
-    throw Error(FAILED_FETCH_SPEC_POST);
+    throw new Error(FAILED_FETCH_SPEC_POST);
   }
 }
 
