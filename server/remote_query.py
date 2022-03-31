@@ -219,7 +219,7 @@ def submit_remote_follow_request(author_id: str, follower_id: str):
     remote_host = find_remote_author(author_id)
     node = Remote_Node.query.filter_by(id=remote_host).first()
     if not node:
-        return#we dont have a case for no author currently...
+        return False#this shouldn't ever trigger but have it just in case
     local_follower = Author.query.filter_by(id=follower_id).first()
     if not local_follower:
         return #bad local follower somehow?

@@ -501,6 +501,10 @@ def add_follower(author_id: str, follower_id: str) -> Response:
         response = submit_remote_follow_request(author_id, follower_id)
         if response:
             return Response(status=httpStatus.OK)
+        else:#This should never happen but keep it just in case
+            return utils.json_response(
+                httpStatus.NOT_FOUND, {"message": f"author {author_id} does not exist and was specifically not found remotely."}
+            )
     ##local
     follower = Requests.query.filter_by(to=author_id, initiated=follower_id).first()
     if follower:
