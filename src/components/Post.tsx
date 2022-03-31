@@ -2,7 +2,7 @@ import { h } from "preact";
 import FavoriteBorderOutlinedIcon from "@mui/icons-material/FavoriteBorderOutlined";
 import ChatBubbleOutlineOutlinedIcon from "@mui/icons-material/ChatBubbleOutlineOutlined";
 import ShareOutlinedIcon from "@mui/icons-material/ShareOutlined";
-import { IconButton } from "@mui/material";
+import { Alert, IconButton } from "@mui/material";
 import Button from "@mui/material/Button";
 import { useState, useEffect } from "preact/hooks";
 import Favorite from "@mui/icons-material/Favorite";
@@ -14,12 +14,13 @@ import {
   addPostLike,
   deletePostLike,
   getAllComments,
+  getCommentLikes,
   getPostLikes,
+  getSinglePost,
 } from "../utils/apiCalls";
 import ReactMarkdown from "react-markdown";
 import { MARKDOWN, PLAIN } from "../utils/constants";
-import ThumbDown from "@mui/icons-material/ThumbDown";
-import { ThumbUp } from "@mui/icons-material";
+import Share from "@mui/icons-material/Share"
 
 /*
     Post component
@@ -34,6 +35,7 @@ type PostProps = {
   currentAuthor?: string;
   contentType: string;
   onRemove?: Function;
+  onShare?: Function;
   handleEdit?: Function;
   visibility: string;
   unlisted: boolean;
@@ -47,6 +49,7 @@ function Post({
   authorId,
   currentAuthor,
   onRemove,
+  onShare,
   contentType,
   handleEdit,
   visibility,
@@ -58,6 +61,7 @@ function Post({
   const [likeToggle, setLikeToggle] = useState(true);
   const [isLiked, setIsLiked] = useState(0);
   const [postLikes, setPostLikes] = useState(Array());
+  const [commentLikes, setCommentLikes] = useState(Array());
 
   const [comments, setComments] = useState(Array());
   const [errMsg, setErrMsg] = useState("");
@@ -86,11 +90,32 @@ function Post({
 
   const addLike = () => {
     addPostLike(authorId.toString(), postId);
+    for (let i = 0; i < postLikes.length; i++) {
+      if (postLikes[i].author.displayName == currentUser) {
+        alert("You already liked this post.");
+      }
+    }
   };
 
   const deleteLike = () => {
-    deletePostLike(authorId.toString(), postId);
+    for (let i = 0; i < postLikes.length; i++) {
+      if (postLikes[i].author.displayName == currentUser) {
+        deletePostLike(authorId.toString(), postId);
+      } else {
+        alert("You haven't liked this post yet.");
+      }
+    }
   };
+
+  const shareButton = () => {
+    function getPost(authorId: string, postId: string){
+      getSinglePost(authorId.toString(), postId)
+      .then((data) => console.log(data))
+    }
+
+    getPost(authorId, postId);
+
+  }
 
   useEffect(() => {
     // Fetch all the comments of the post from the API
@@ -106,6 +131,12 @@ function Post({
       getPostLikes(authorId.toString(), postId)
         .then((data) => setPostLikes(data.likes))
         .catch((err) => setErrMsg(err.message));
+    }
+
+    function getCommentLike(authorId: string, postId: string, commentId: string){ // Need help getting the comment id from here
+      getCommentLikes(authorId.toString(), postId, commentId)
+      .then((data) => setCommentLikes(data))
+      .catch((err) => setErrMsg(err.message));
     }
 
     fetchComments(authorId, postId);
@@ -132,7 +163,7 @@ function Post({
   };
 
   return (
-    <li className="bg-zinc-100 border-solid border-1 border-slate-600 w-2/3 m-auto rounded-lg py-4 px-5  my-5">
+    <li className="bg-zinc-100 border-solid border-1 border-slate-600 w-2/3 m-auto rounded-lg py-4 px-5  my-5" id={postId} name={postId}>
       <div className="grid grid-cols-1 gap-y-2">
         <div className="flex flex-row justify-between">
           <span className="font-semibold tracking-wide text-lg">
@@ -198,6 +229,16 @@ function Post({
             <Button variant="outlined" onClick={() => deleteLike()}>
               Delete Like
             </Button>
+            {/* <IconButton color="primary" onClick={() => addLike()}>
+              {likeToggle ? (
+                <FavoriteBorderOutlinedIcon fontSize="large" />
+              ) : (
+                <Favorite fontSize="large" />
+              )}
+            </IconButton>
+            <IconButton color="primary" onClick={() => deleteLike()}>
+              <ThumbDown fontSize="large" />
+            </IconButton> */}
           </div>
 
           <div>
@@ -217,10 +258,15 @@ function Post({
             />
           </div>
 
-          <div>
+          <div style={{fill: "black"}}>
+            <IconButton style={{fill: "black"}} onClick={() => {
+              if (onShare) {
+                onShare(authorId, postId)
+              }
+            }}>
             <ShareOutlinedIcon fontSize="large" />
+            </IconButton>
           </div>
-
           <div>
             <Button
               id="view-comments"

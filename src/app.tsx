@@ -11,6 +11,7 @@ import './css/main.css';
 import Inbox from './pages/Inbox';
 import UserPage from './pages/UserPage';
 import AdminSettings from './pages/AdminSettings';
+import Post from './components/Post';
 
 const App = () => {
 

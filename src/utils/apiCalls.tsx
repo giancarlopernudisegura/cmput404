@@ -6,6 +6,8 @@ import {
   FAILED_CREATE_COMMENT,
   FAILED_ADD_LIKE,
   FAILED_DELETE_LIKE,
+  FAILED_GET_COMMENT_LIKES,
+  FAILED_GET_SINGLE_POST,
 } from "../utils/errorMsg";
 
 const BACKEND_HOST = process.env.FLASK_HOST;
@@ -17,7 +19,7 @@ export const get_author_id = async () => {
     method: "GET",
   });
   if (res.status === 200) {
-    const currentUserId : string = res.headers.get("X-User-Id") as string;
+    const currentUserId: string = res.headers.get("X-User-Id") as string;
     if (currentUserId === null) {
       throw new Error("Could not get user id");
     }
@@ -275,6 +277,7 @@ export async function getAllComments(author_id: string, post_id: string) {
         author: data.comments[i].author.displayName,
         content: data.comments[i].content,
         published: publishTime,
+        id: data.comments[i].id,
       };
       listOfComments.push(comment);
     }
@@ -467,4 +470,77 @@ export function deletePostLike(author_id: string, post_id: string) {
     });
 
   return response;
+}
+
+export async function getCommentLikes(
+  author_id: string,
+  post_id: string,
+  comment_id: string
+) {
+  try {
+    const res = await fetch(
+      `${BACKEND_HOST}/authors/${author_id}/posts/${post_id}/${comment_id}/likes`,
+      {
+        mode: "cors",
+        credentials: "include",
+        method: "GET",
+      }
+    );
+
+    let data = res.json();
+    data.then((likeList) => console.log(likeList.likes));
+    return data;
+  } catch (err) {
+    throw Error(FAILED_GET_COMMENT_LIKES);
+  }
+}
+
+export async function getSinglePost(author_id: string, post_id: string) {
+  try {
+    const res = await fetch(
+      `${BACKEND_HOST}/authors/${author_id}/posts/${post_id}/`,
+      {
+        mode: "cors",
+        credentials: "include",
+        method: "GET",
+      }
+    );
+
+    let data = res.json()
+    return data
+
+  } catch (err) {
+    throw Error(FAILED_GET_SINGLE_POST);
+  }
+}
+
+export async function addSharedPost(authorId: string, post_id: string, postData: any){
+  const encodedPostData = JSON.stringify(postData);
+
+  let res;
+  let json;
+  try {
+    // postData contains data from the forms
+    res = await fetch(`${BACKEND_HOST}/authors/${authorId}/posts/${post_id}`, {
+      mode: "cors",
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+      },
+      body: encodedPostData,
+    });
+
+    json = await res.json();
+
+    if (res.status === 200) {
+      return { status: res.status, ...json };
+    } else {
+      throw Error();
+    }
+    // TODO: return post id
+  } catch (err) {
+    throw Error(FAILED_CREATE_POSTS);
+  }
+
 }
