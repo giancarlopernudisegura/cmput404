@@ -21,6 +21,7 @@ import {
 import ReactMarkdown from "react-markdown";
 import { MARKDOWN, PLAIN } from "../utils/constants";
 import Share from "@mui/icons-material/Share"
+import { route } from 'preact-router';
 
 /*
     Post component
@@ -210,7 +211,11 @@ function Post({
         </div>
 
         <div className="px-3 my-2">
+<<<<<<< Updated upstream
           <h3 className="font-semibold text-lg mb-2" style={{cursor: 'pointer'}}>{title}</h3>
+=======
+          <h3 className="font-semibold text-lg mb-2 clickable" onClick={() => route('')}>{title}</h3>
+>>>>>>> Stashed changes
           {renderBody()}
         </div>
       </div>
