@@ -34,7 +34,7 @@ from server.remote_query import *
 import server.utils.api_support as utils
 from typing import Dict, Tuple
 
-from server.utils.exts import get_github_by_id
+from server.utils.exts import get_github_by_id, is_local_node
 
 load_dotenv()
 
@@ -471,10 +471,13 @@ def remove_follower(author_id: str, follower_id: str) -> Response:
             httpStatus.NOT_FOUND,
             {"message": f"Follower {follower_id} is not following {author_id}."},
         )
-    # Inbox.query.filter_by(follow=follower_id).delete()
-    inbox = Inbox.query.filter_by(follow=follower.id).first()
-    db.session.delete(inbox)
-    db.session.commit()
+    inbox = Inbox.query.filter_by(id=author_id).all()
+    for i in inbox:
+        if i.data:
+            data = i.data.json()
+            if str(data["type"]).lower() == "follow" and data["object"]["id"] == follower_id:
+                db.session.delete(i)
+                db.session.commit()
     db.session.delete(follower)
     db.session.commit()
     return Response(status=httpStatus.NO_CONTENT)
@@ -483,6 +486,7 @@ def remove_follower(author_id: str, follower_id: str) -> Response:
 @bp.route("/authors/<string:author_id>/followers/<path:follower_id>", methods=["PUT"])
 @require_authentication
 def add_follower(author_id: str, follower_id: str) -> Response:
+    is_local = current_user.is_authenticated
     if current_user.is_authenticated:
         if current_user.id != follower_id:
             return (
@@ -497,6 +501,10 @@ def add_follower(author_id: str, follower_id: str) -> Response:
         response = submit_remote_follow_request(author_id, follower_id)
         if response:
             return Response(status=httpStatus.OK)
+        else:#This should never happen but keep it just in case
+            return utils.json_response(
+                httpStatus.NOT_FOUND, {"message": f"author {author_id} does not exist and was specifically not found remotely."}
+            )
     ##local
     follower = Requests.query.filter_by(to=author_id, initiated=follower_id).first()
     if follower:
@@ -506,7 +514,7 @@ def add_follower(author_id: str, follower_id: str) -> Response:
         )
     follower = Requests(follower_id, author_id)
     db.session.add(follower)
-    inbox = Inbox(author_id, follow=follower.id)
+    inbox = Inbox(author_id, json.dumps(follower.json(is_local)))
     db.session.add(inbox)
     db.session.commit()
     return Response(status=httpStatus.OK)
@@ -515,11 +523,13 @@ def add_follower(author_id: str, follower_id: str) -> Response:
 @bp.route("/authors/<string:author_id>/inbox", methods=["GET"])
 @require_authentication
 def get_inbox(author_id: str) -> Response:
-    if current_user.id != author_id:
-        return (
-            make_response(jsonify(error=res_msg.NO_PERMISSION)),
-            httpStatus.UNAUTHORIZED,
-        )
+    is_local = current_user.is_authenticated
+    if is_local:
+        if current_user.id != author_id:
+            return (
+                make_response(jsonify(error=res_msg.NO_PERMISSION)),
+                httpStatus.UNAUTHORIZED,
+            )
     page, size = pagination(request.args)
     inbox_items = (
         Inbox.query.filter_by(owner=author_id).paginate(page=page, per_page=size, error_out=False).items
@@ -540,17 +550,13 @@ def get_inbox(author_id: str) -> Response:
 @bp.route("/authors/<string:author_id>/inbox", methods=["POST"])
 @require_authentication
 def post_inbox(author_id: str) -> Response:
+    is_local = current_user.is_authenticated
+    if find_remote_author(author_id):
+        post_remote_inbox(author_id, request.json)
     try:
-        req_type = request.json["type"]
-        if req_type not in ("post", "follow", "like"):
-            raise KeyError()
-        req_id = request.json["id"]
-        if req_type == "post":
-            inbox = Inbox(author_id, post=req_id)
-        elif req_type == "follow":
-            inbox = Inbox(author_id, follow=req_id)
-        elif req_type == "like":
-            inbox = Inbox(author_id, like=req_id)
+        if request.json["type"] not in ["followers", "post", "like", "comment"]:
+            return Response(status=httpStatus.BAD_REQUEST)
+        inbox = Inbox(author_id, json.dumps(request.json))
         db.session.add(inbox)
         db.session.commit()
     except KeyError:
@@ -560,6 +566,7 @@ def post_inbox(author_id: str) -> Response:
             jsonify(
                 type="inbox",
                 author=f"{HOST}/authors/{author_id}",
+
             )
         ),
         httpStatus.OK,
