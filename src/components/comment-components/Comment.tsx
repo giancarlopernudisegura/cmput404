@@ -45,6 +45,7 @@ function Comment({
     }
   };
 
+  //Delete likes for a comment TODO: Update with new way of handling likes
   const deleteLike = () => {
     for (let i = 0; i < commentLikes.length; i++) {
       if (commentLikes[i].author.displayName == currentAuthor) {
