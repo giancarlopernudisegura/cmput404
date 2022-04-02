@@ -2,7 +2,7 @@ import { h } from "preact";
 import FavoriteBorderOutlinedIcon from "@mui/icons-material/FavoriteBorderOutlined";
 import ChatBubbleOutlineOutlinedIcon from "@mui/icons-material/ChatBubbleOutlineOutlined";
 import ShareOutlinedIcon from "@mui/icons-material/ShareOutlined";
-import { Alert, IconButton } from "@mui/material";
+import { Alert, IconButton, Typography } from "@mui/material";
 import Button from "@mui/material/Button";
 import { useState, useEffect } from "preact/hooks";
 import Favorite from "@mui/icons-material/Favorite";
@@ -21,6 +21,7 @@ import {
 import ReactMarkdown from "react-markdown";
 import { MARKDOWN, PLAIN } from "../utils/constants";
 import Share from "@mui/icons-material/Share"
+import Popover from "@mui/material/Popover"
 
 /*
     Post component
@@ -161,6 +162,7 @@ function Post({
         return <p className="text-lg">{body}</p>;
     }
   };
+
 
   return (
     <li className="bg-zinc-100 border-solid border-1 border-slate-600 w-2/3 m-auto rounded-lg py-4 px-5  my-5" id={postId} name={postId}>

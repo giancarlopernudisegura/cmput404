@@ -18,6 +18,7 @@ import AuthorInfo from "../components/profile/AuthorInfo";
 import DialogTemplate from '../components/DialogTemplate';
 import { MARKDOWN } from '../utils/constants';
 import ShareList from "../components/ShareList";
+import { route } from 'preact-router';
 
 
 type profileProps = { path: string };
@@ -119,9 +120,14 @@ function Profile({ path }: profileProps) {
 
   async function sharePost(authorId: string, postId: string){
 
-    window.location.href=`${BACKEND_HOST}/app/profile#${postId}`
+    // window.location.href=`${BACKEND_HOST}/app/sharedpost${postId}`
 
-    navigator.clipboard.writeText(window.location.href)
+    window.location.replace(`${BACKEND_HOST}/app/profile#${postId}`)
+
+    // var link = route('/app/homepage')
+    // console.log(link)
+
+    // navigator.clipboard.writeText(window.location.href)
 
     console.log(`${BACKEND_HOST}/app/profile#${postId}`)
 
