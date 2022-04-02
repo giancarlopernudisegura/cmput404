@@ -105,7 +105,7 @@ def get_all_remote_authors(pagesize, page=1):
         nodes_items = r.json()["items"]
         fix_remote_url(nodes_items, nodes[0])
         items.extend(nodes_items)
-    elif len(r.json()["items"]) == 0:
+    elif len(r.json().get("items", [])) == 0:
         if TOTAL_PAGE == 0:
             TOTAL_PAGE = PREVIOUS_PAGE
         if len(nodes) == 1:
@@ -219,7 +219,7 @@ def submit_remote_follow_request(author_id: str, follower_id: str):
     remote_host = find_remote_author(author_id)
     node = Remote_Node.query.filter_by(id=remote_host).first()
     if not node:
-        return#we dont have a case for no author currently...
+        return False#this shouldn't ever trigger but have it just in case
     local_follower = Author.query.filter_by(id=follower_id).first()
     if not local_follower:
         return #bad local follower somehow?
@@ -230,7 +230,8 @@ def submit_remote_follow_request(author_id: str, follower_id: str):
         "actor": f"{local_host}/authors/{follower_id}",
         "object": f"{node.id}/authors/{author_id}"
     }
-    r = requests.post(f"{node.id}authors/{author_id}/inbox", json=remote_follow_node1, auth=(node.user, node.password))
+    r = requests.post(f"{node.id}authors/{author_id}/inbox/", json=remote_follow_node1, auth=(node.user, node.password))
+    print(r.status_code , r.text)
     return True
     
 
@@ -241,8 +242,7 @@ def post_remote_inbox(author_id: str, obj):#posts a given model to inbox
     for node in nodes:
         r = requests.get(f"{node.id}authors/{author_id}")
         if r.status_code == 200 and r.json()["type"] == "author":
-            obj_json = obj.json()
-            r = requests.post(f"{node.id}authors/{author_id}/inbox", auth=(node.user, node.password), json=obj_json)
+            r = requests.post(f"{node.id}authors/{author_id}/inbox", auth=(node.user, node.password), json=obj)
         
 
 def put_remote_like_inbox(remote_author_id: str, like_author_id: str, comment_id = None, post_id = None):
