@@ -234,11 +234,12 @@ def specific_post(author_id: str, post_id: str) -> Response:
     print(f"AUTHOR_ID {author_id}\nTYPE:{type(author_id)}")
     is_local = current_user.is_authenticated
     """Modify, create or delete a specific post."""
-    if current_user.id != author_id:
-        return (
-            make_response(jsonify(error=res_msg.NO_PERMISSION)),
-            httpStatus.UNAUTHORIZED,
-        )
+    if is_local:
+        if current_user.id != author_id:
+            return (
+                make_response(jsonify(error=res_msg.NO_PERMISSION)),
+                httpStatus.UNAUTHORIZED,
+            )
     if request.method != "PUT":
         post = Post.query.filter_by(id=post_id).first_or_404()
 
