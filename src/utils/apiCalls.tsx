@@ -7,8 +7,6 @@ import {
   FAILED_FETCH_SPEC_POST,
   FAILED_ADD_LIKE,
   FAILED_DELETE_LIKE,
-  FAILED_GET_COMMENT_LIKES,
-  FAILED_GET_SINGLE_POST,
 } from "../utils/errorMsg";
 
 const BACKEND_HOST = process.env.FLASK_HOST;
@@ -346,11 +344,14 @@ export function getFollowers(author_id: string): Promise<any> {
 
 export async function getSpecPost(author_id: string, post_id: string) {
   try {
-    const res = await fetch(`${BACKEND_HOST}/authors/${author_id}/posts/${post_id}`, {
-      mode: "cors",
-      credentials: "include",
-      method: "GET",
-    });
+    const res = await fetch(
+      `${BACKEND_HOST}/authors/${author_id}/posts/${post_id}`,
+      {
+        mode: "cors",
+        credentials: "include",
+        method: "GET",
+      }
+    );
 
     if (res.status !== 200) {
       throw new Error();
@@ -492,23 +493,4 @@ export function deletePostLike(author_id: string, post_id: string) {
     });
 
   return response;
-}
-
-export async function getSinglePost(author_id: string, post_id: string) {
-  try {
-    const res = await fetch(
-      `${BACKEND_HOST}/authors/${author_id}/posts/${post_id}/`,
-      {
-        mode: "cors",
-        credentials: "include",
-        method: "GET",
-      }
-    );
-
-    let data = res.json()
-    return data
-
-  } catch (err) {
-    throw Error(FAILED_GET_SINGLE_POST);
-  }
 }
