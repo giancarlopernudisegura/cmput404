@@ -226,8 +226,8 @@ def test_inbox(test_client: FlaskClient):
     assert r.status_code == 200
     data = json.loads(r.data.decode("utf-8"))
     assert data["type"] == "inbox"
-    assert len(data["items"]) == 1
-    assert data["items"][0]["type"] == "followers"
+    assert len(data["items"]) == 2
+    assert data["items"][1]["type"] == "followers"
     r = test_client.delete(f"/authors/{T_USER2_UUID}/inbox", follow_redirects=True)
     r = test_client.get(f"/authors/{T_USER2_UUID}/inbox", follow_redirects=True)
     data = json.loads(r.data.decode("utf-8"))

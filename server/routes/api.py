@@ -514,7 +514,8 @@ def add_follower(author_id: str, follower_id: str) -> Response:
         )
     follower = Requests(follower_id, author_id)
     db.session.add(follower)
-    inbox = Inbox(author_id, str(follower.json(is_local)))
+    jsonString = json.dumps(follower.json(is_local))
+    inbox = Inbox(author_id, jsonString)
     db.session.add(inbox)
     db.session.commit()
     return Response(status=httpStatus.OK)
@@ -554,7 +555,7 @@ def post_inbox(author_id: str) -> Response:
     if find_remote_author(author_id):
         post_remote_inbox(author_id, request.json)
     try:
-        inbox = Inbox(author_id, str(request.json))
+        inbox = Inbox(author_id, json.dumps(request.json))
         db.session.add(inbox)
         db.session.commit()
     except KeyError:
