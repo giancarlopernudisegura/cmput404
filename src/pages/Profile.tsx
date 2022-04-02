@@ -9,13 +9,15 @@ import {
   editPost,
   getSpecAuthor,
   get_author_id,
-  getAllComments,
+  getSinglePost,
+  addSharedPost
 } from "../utils/apiCalls";
 
 import PostList from "../components/PostList";
 import AuthorInfo from "../components/profile/AuthorInfo";
 import DialogTemplate from '../components/DialogTemplate';
 import { MARKDOWN } from '../utils/constants';
+import ShareList from "../components/ShareList";
 
 
 type profileProps = { path: string };
@@ -36,6 +38,10 @@ function Profile({ path }: profileProps) {
   // get author data 
   const [ author, setAuthor ] = useState(Object());
   const [ myPosts, setMyPosts ] = useState(Array());
+  const BACKEND_HOST = process.env.FLASK_HOST;
+
+  //Posts that have been shared by author
+  const [sharedPosts, setSharedPosts] = useState(Array());
 
   useEffect(() => {
     const authorPromise = get_author_id().then((author_id : any) => {
@@ -111,6 +117,34 @@ function Profile({ path }: profileProps) {
     setMyPosts(newList);
   }
 
+  async function sharePost(authorId: string, postId: string){
+
+    window.location.href=`${BACKEND_HOST}/app/profile#${postId}`
+
+    navigator.clipboard.writeText(window.location.href)
+
+    console.log(`${BACKEND_HOST}/app/profile#${postId}`)
+
+    // function getPost(authorId: string, postId: string){
+    //   getSinglePost(authorId.toString(), postId)
+    //   .then((data) => addSharedPost(authorId.toString(), postId, {
+    //     postId: data.id,
+    //     authorName: data.author.displayName,
+    //     authorId: data.author.id,
+    //     title: data.title,
+    //     description: data.description,
+    //     contentType: data.contentType,
+    //     visibility: data.visibility,
+    //     unlisted: data.unlisted,
+    //   }))
+    //   .catch(err => setErrMsg(err.message))
+    // }
+
+    // getPost(authorId, postId);
+    // console.log(myPosts)
+
+  }
+
   return (
     <div id="profile">
       <DrawerMenu pageName="My Profile">
@@ -128,6 +162,7 @@ function Profile({ path }: profileProps) {
                 initialPosts={myPosts} 
                 currentAuthor={author.displayName} 
                 onRemove={handleRemove}
+                onShare={sharePost}
                 handleEdit={handleEdit}
               />
 

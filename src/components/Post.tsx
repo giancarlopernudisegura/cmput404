@@ -1,114 +1,169 @@
-import { h } from 'preact';
-import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
-import ChatBubbleOutlineOutlinedIcon from '@mui/icons-material/ChatBubbleOutlineOutlined';
-import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
-import { IconButton } from "@mui/material";
+import { h } from "preact";
+import FavoriteBorderOutlinedIcon from "@mui/icons-material/FavoriteBorderOutlined";
+import ChatBubbleOutlineOutlinedIcon from "@mui/icons-material/ChatBubbleOutlineOutlined";
+import ShareOutlinedIcon from "@mui/icons-material/ShareOutlined";
+import { Alert, IconButton } from "@mui/material";
 import Button from "@mui/material/Button";
 import { useState, useEffect } from "preact/hooks";
 import Favorite from "@mui/icons-material/Favorite";
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import CommentList from "../components/comment-components/CommentList";
 import CommentForm from "../components/forms/CommentForm";
-import { getAllComments } from "../utils/apiCalls";
-import ReactMarkdown from 'react-markdown';
-import { MARKDOWN, PLAIN } from '../utils/constants';
+import {
+  addPostLike,
+  deletePostLike,
+  getAllComments,
+  getCommentLikes,
+  getPostLikes,
+  getSinglePost,
+} from "../utils/apiCalls";
+import ReactMarkdown from "react-markdown";
+import { MARKDOWN, PLAIN } from "../utils/constants";
+import Share from "@mui/icons-material/Share"
 
 /*
     Post component
 */
 
 type PostProps = {
-    postId: string,
-    title: string, 
-    body: string,
-    authorName: string,
-    authorId: string,
-    currentAuthor?: string
-    contentType: string;
-    onRemove?: Function,
-    handleEdit?: Function,
-    visibility: string,
-    unlisted: boolean
-}
+  postId: string;
+  title: string;
+  body: string;
+  authorName: string;
+  authorId: string;
+  currentAuthor?: string;
+  contentType: string;
+  onRemove?: Function;
+  onShare?: Function;
+  handleEdit?: Function;
+  visibility: string;
+  unlisted: boolean;
+};
 
 function Post({
-  postId, 
-  title, 
-  body, 
+  postId,
+  title,
+  body,
   authorName,
   authorId,
-  currentAuthor, 
-  onRemove, 
-  contentType, 
-  handleEdit, 
-  visibility, 
-  unlisted 
+  currentAuthor,
+  onRemove,
+  onShare,
+  contentType,
+  handleEdit,
+  visibility,
+  unlisted,
 }: PostProps) {
-    var currentUser: string = currentAuthor as string;
+  var currentUser: string = currentAuthor as string;
 
-    //Toggle for like button
-    const [likeToggle, setLikeToggle] = useState(true);
-    const [isLiked, setIsLiked] = useState(0);
+  //Toggle for like button
+  const [likeToggle, setLikeToggle] = useState(true);
+  const [isLiked, setIsLiked] = useState(0);
+  const [postLikes, setPostLikes] = useState(Array());
+  const [commentLikes, setCommentLikes] = useState(Array());
 
-    const [comments, setComments] = useState(Array());
-    const [errMsg, setErrMsg] = useState("");
+  const [comments, setComments] = useState(Array());
+  const [errMsg, setErrMsg] = useState("");
 
-    //TOGGLE FOR SHOWING COMMENTS
-    const [showComments, setShowComments] = useState(false);
-    const toggleShowComments = () => {
-      setShowComments(!showComments);
-    };
+  //TOGGLE FOR SHOWING COMMENTS
+  const [showComments, setShowComments] = useState(false);
+  const toggleShowComments = () => {
+    setShowComments(!showComments);
+  };
 
-    //Conditionals for the View Comments Button
-    const commentButtonText = showComments === false ? "View Comments" : "Hide Comments";
-    const commentButtonType = showComments === false ? "outlined" : "contained";
+  //Conditionals for the View Comments Button
+  const commentButtonText =
+    showComments === false ? "View Comments" : "Hide Comments";
+  const commentButtonType = showComments === false ? "outlined" : "contained";
 
-    //TOGGLE FOR OPENING MAKE COMMENT DIALOG
-    const [open, setOpen] = useState(false);
+  //TOGGLE FOR OPENING MAKE COMMENT DIALOG
+  const [open, setOpen] = useState(false);
 
-    const openDialog = () => {
-      setOpen(true);
-    };
+  const openDialog = () => {
+    setOpen(true);
+  };
 
-    const closeDialog = () => {
-      setOpen(false);
-    };
+  const closeDialog = () => {
+    setOpen(false);
+  };
 
-    useEffect(() => {
-      // Fetch all the comments of the post from the API
-      function fetchComments(authorId: string, postId: string) {
-        getAllComments(authorId.toString(), postId)
-          .then((data) => setComments(data))
-          .catch((err) => {
-            setErrMsg(err.message);
-          });
-      }
-  
-      fetchComments(authorId, postId);
-    }, []);
-
-    const toggleFunction = () => {
-      setLikeToggle(!likeToggle);
-      if (likeToggle) {
-        setIsLiked(isLiked + 1);
-      }
-      if (!likeToggle) {
-        setIsLiked(isLiked - 1);
+  const addLike = () => {
+    addPostLike(authorId.toString(), postId);
+    for (let i = 0; i < postLikes.length; i++) {
+      if (postLikes[i].author.displayName == currentUser) {
+        alert("You already liked this post.");
       }
     }
+  };
 
-    const renderBody = () => {
-        switch (contentType) {
-            case MARKDOWN:
-                return <ReactMarkdown>{body}</ReactMarkdown>
-            case PLAIN:
-                return <p className='text-lg'>{body}</p>
-        }
+  const deleteLike = () => {
+    for (let i = 0; i < postLikes.length; i++) {
+      if (postLikes[i].author.displayName == currentUser) {
+        deletePostLike(authorId.toString(), postId);
+      } else {
+        alert("You haven't liked this post yet.");
+      }
     }
+  };
+
+  const shareButton = () => {
+    function getPost(authorId: string, postId: string){
+      getSinglePost(authorId.toString(), postId)
+      .then((data) => console.log(data))
+    }
+
+    getPost(authorId, postId);
+
+  }
+
+  useEffect(() => {
+    // Fetch all the comments of the post from the API
+    function fetchComments(authorId: string, postId: string) {
+      getAllComments(authorId.toString(), postId)
+        .then((data) => setComments(data))
+        .catch((err) => {
+          setErrMsg(err.message);
+        });
+    }
+
+    function getAllLikes(authorId: string, postId: string) {
+      getPostLikes(authorId.toString(), postId)
+        .then((data) => setPostLikes(data.likes))
+        .catch((err) => setErrMsg(err.message));
+    }
+
+    function getCommentLike(authorId: string, postId: string, commentId: string){ // Need help getting the comment id from here
+      getCommentLikes(authorId.toString(), postId, commentId)
+      .then((data) => setCommentLikes(data))
+      .catch((err) => setErrMsg(err.message));
+    }
+
+    fetchComments(authorId, postId);
+    getAllLikes(authorId, postId);
+  }, []);
+
+  const toggleFunction = () => {
+    setLikeToggle(!likeToggle);
+    if (likeToggle) {
+      setIsLiked(isLiked + 1);
+    }
+    if (!likeToggle) {
+      setIsLiked(isLiked - 1);
+    }
+  };
+
+  const renderBody = () => {
+    switch (contentType) {
+      case MARKDOWN:
+        return <ReactMarkdown>{body}</ReactMarkdown>;
+      case PLAIN:
+        return <p className="text-lg">{body}</p>;
+    }
+  };
 
   return (
-    <li className="bg-zinc-100 border-solid border-1 border-slate-600 w-2/3 m-auto rounded-lg py-4 px-5  my-5">
+    <li className="bg-zinc-100 border-solid border-1 border-slate-600 w-2/3 m-auto rounded-lg py-4 px-5  my-5" id={postId} name={postId}>
       <div className="grid grid-cols-1 gap-y-2">
         <div className="flex flex-row justify-between">
           <span className="font-semibold tracking-wide text-lg">
@@ -162,15 +217,28 @@ function Post({
 
       <div id="buttons" className="grid grid-cols-1 divide-y py-4">
         <div className="flex flex-row gap-x-4 justify-evenly">
-          <div id="like" className="flex flex-row ">
-            <p>{isLiked}</p>
-            <IconButton color="primary" onClick={() => toggleFunction()}>
+          <p>Likes: {postLikes.length === undefined ? 0 : postLikes.length}</p>
+          <div id="like" className="flex flex-row space-x-4">
+            <Button
+              variant="contained"
+              onClick={() => addLike()}
+              disableElevation={true}
+            >
+              Add Like
+            </Button>
+            <Button variant="outlined" onClick={() => deleteLike()}>
+              Delete Like
+            </Button>
+            {/* <IconButton color="primary" onClick={() => addLike()}>
               {likeToggle ? (
                 <FavoriteBorderOutlinedIcon fontSize="large" />
               ) : (
                 <Favorite fontSize="large" />
               )}
             </IconButton>
+            <IconButton color="primary" onClick={() => deleteLike()}>
+              <ThumbDown fontSize="large" />
+            </IconButton> */}
           </div>
 
           <div>
@@ -190,10 +258,15 @@ function Post({
             />
           </div>
 
-          <div>
+          <div style={{fill: "black"}}>
+            <IconButton style={{fill: "black"}} onClick={() => {
+              if (onShare) {
+                onShare(authorId, postId)
+              }
+            }}>
             <ShareOutlinedIcon fontSize="large" />
+            </IconButton>
           </div>
-
           <div>
             <Button
               id="view-comments"
