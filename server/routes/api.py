@@ -514,8 +514,7 @@ def add_follower(author_id: str, follower_id: str) -> Response:
         )
     follower = Requests(follower_id, author_id)
     db.session.add(follower)
-    jsonString = json.dumps(follower.json(is_local))
-    inbox = Inbox(author_id, jsonString)
+    inbox = Inbox(author_id, json.dumps(follower.json(is_local)))
     db.session.add(inbox)
     db.session.commit()
     return Response(status=httpStatus.OK)
@@ -555,6 +554,8 @@ def post_inbox(author_id: str) -> Response:
     if find_remote_author(author_id):
         post_remote_inbox(author_id, request.json)
     try:
+        if request.json["type"] not in ["followers", "post", "like", "comment"]:
+            return Response(status=httpStatus.BAD_REQUEST)
         inbox = Inbox(author_id, json.dumps(request.json))
         db.session.add(inbox)
         db.session.commit()

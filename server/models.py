@@ -168,12 +168,12 @@ class Post(db.Model, JSONSerializable, InboxItem):
     def push(self):
         subscribers = InboxItem.get_subscribers(self.author)
         for subscriber in subscribers:
-            inbox = Inbox(subscriber, post=self.id)
+            inbox = Inbox(subscriber, json.dumps(self.json()))
             db.session.add(inbox)
         db.session.commit()
 
 
-class Comment(db.Model, JSONSerializable):
+class Comment(db.Model, JSONSerializable, InboxItem):
     __tablename__ = "comment"
     id = db.Column(db.String(), primary_key=True, default=generate_uuid)
     author = db.Column(db.ForeignKey("author.id"))
@@ -254,7 +254,7 @@ class Like(db.Model, JSONSerializable, InboxItem):
             recepient = DbObject.query.filter_by(id=self.comment).first().author
         elif self.post:
             recepient = DbObject.query.filter_by(id=self.post).first().author
-        inbox = Inbox(recepient, like=self.id)
+        inbox = Inbox(recepient, json.dumps(self.json()))
         db.session.add(inbox)
         db.session.commit()
 
