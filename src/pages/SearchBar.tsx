@@ -49,7 +49,7 @@ const Search = () => {
     }, []);
 
     const handleClick = (authorId : string) => {
-        route(`/app/user/${authorId}`);
+        route(`/app/users/${authorId}`);
     }
 
     return (
