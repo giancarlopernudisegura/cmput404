@@ -494,29 +494,6 @@ export function deletePostLike(author_id: string, post_id: string) {
   return response;
 }
 
-export async function getCommentLikes(
-  author_id: string,
-  post_id: string,
-  comment_id: string
-) {
-  try {
-    const res = await fetch(
-      `${BACKEND_HOST}/authors/${author_id}/posts/${post_id}/${comment_id}/likes`,
-      {
-        mode: "cors",
-        credentials: "include",
-        method: "GET",
-      }
-    );
-
-    let data = res.json();
-    data.then((likeList) => console.log(likeList.likes));
-    return data;
-  } catch (err) {
-    throw Error(FAILED_GET_COMMENT_LIKES);
-  }
-}
-
 export async function getSinglePost(author_id: string, post_id: string) {
   try {
     const res = await fetch(
@@ -534,35 +511,4 @@ export async function getSinglePost(author_id: string, post_id: string) {
   } catch (err) {
     throw Error(FAILED_GET_SINGLE_POST);
   }
-}
-
-export async function addSharedPost(authorId: string, post_id: string, postData: any){
-  const encodedPostData = JSON.stringify(postData);
-
-  let res;
-  let json;
-  try {
-    // postData contains data from the forms
-    res = await fetch(`${BACKEND_HOST}/authors/${authorId}/posts/${post_id}`, {
-      mode: "cors",
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json; charset=utf-8",
-      },
-      body: encodedPostData,
-    });
-
-    json = await res.json();
-
-    if (res.status === 200) {
-      return { status: res.status, ...json };
-    } else {
-      throw Error();
-    }
-    // TODO: return post id
-  } catch (err) {
-    throw Error(FAILED_CREATE_POSTS);
-  }
-
 }
