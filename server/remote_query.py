@@ -105,7 +105,7 @@ def get_all_remote_authors(pagesize, page=1):
         nodes_items = r.json()["items"]
         fix_remote_url(nodes_items, nodes[0])
         items.extend(nodes_items)
-    elif len(r.json().get("items", [])) == 0:
+    elif len(r.json()["items"]) == 0:
         if TOTAL_PAGE == 0:
             TOTAL_PAGE = PREVIOUS_PAGE
         if len(nodes) == 1:
