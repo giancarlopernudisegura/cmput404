@@ -4,6 +4,7 @@ import {
   FETCH_IMG_ERROR,
   FAILED_EDIT_POST,
   FAILED_CREATE_COMMENT,
+  FAILED_FETCH_SPEC_POST,
   FAILED_ADD_LIKE,
   FAILED_DELETE_LIKE,
   FAILED_GET_COMMENT_LIKES,
@@ -37,6 +38,7 @@ export async function getPosts(author_id: string): Promise<any> {
   try {
     let res = await fetch(`${BACKEND_HOST}/authors/${author_id}/posts/`, {
       mode: "cors",
+      credentials: "include",
       method: "GET",
     });
 
@@ -340,6 +342,26 @@ export function getFollowers(author_id: string): Promise<any> {
     });
 
   return response;
+}
+
+export async function getSpecPost(author_id: string, post_id: string) {
+  try {
+    const res = await fetch(`${BACKEND_HOST}/authors/${author_id}/posts/${post_id}`, {
+      mode: "cors",
+      credentials: "include",
+      method: "GET",
+    });
+
+    if (res.status !== 200) {
+      throw new Error();
+    }
+
+    let json = await res.json();
+
+    return { ...json, status: res.status };
+  } catch (err) {
+    throw new Error(FAILED_FETCH_SPEC_POST);
+  }
 }
 
 export async function editPost(
