@@ -211,11 +211,7 @@ function Post({
         </div>
 
         <div className="px-3 my-2">
-<<<<<<< Updated upstream
-          <h3 className="font-semibold text-lg mb-2" style={{cursor: 'pointer'}}>{title}</h3>
-=======
-          <h3 className="font-semibold text-lg mb-2 clickable" onClick={() => route('')}>{title}</h3>
->>>>>>> Stashed changes
+          <h3 className="font-semibold text-lg mb-2 clickable" onClick={() => route(`/app/authors/${authorId}/posts/${postId}`)}>{title}</h3>
           {renderBody()}
         </div>
       </div>

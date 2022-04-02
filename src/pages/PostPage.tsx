@@ -32,16 +32,13 @@ const PostPage = ({ path, postId, authorId }: PostPageProps) => {
     const [ editIsPostMkd, setEditIsPostMkd ] = useState<boolean>(false);
 
     useEffect(() => {
-        // check if it passed infor
-
-        // otherwise, get it from the url
+        // get main information form the url
         const getSpecPostFromApi = async () => {
             try {
                 const response = await getSpecPost(authorId as string, postId as string);
-                console.log("RESPONSE: ", response);
+                console.log("RESPONSE", response);
                 setPostInfo(response);
                 setPostAuthor(response.author.displayName);
-                // console.log(post);
             } catch (err) {
                 setErrorMsg((err as Error).message);
             }
@@ -66,7 +63,7 @@ const PostPage = ({ path, postId, authorId }: PostPageProps) => {
         let newEditPost;
         try {
             newEditPost = await editPost(authorId, IdEditPost, newPostBody);
-            console.log("EDIT POST", newEditPost);
+            console.log("NEW EDIT", newEditPost);
         } catch (err) {
             setErrorMsg((err as Error).message);
         }
@@ -80,9 +77,6 @@ const PostPage = ({ path, postId, authorId }: PostPageProps) => {
             unlisted: newEditPost.unlisted
         };
         setPostInfo(reRenderPost);
-
-
-        // TODO: continue working
     }
 
     return (
@@ -102,8 +96,7 @@ const PostPage = ({ path, postId, authorId }: PostPageProps) => {
                                     body={postInfo.description}
                                     authorName={postAuthor}
                                     authorId={authorId as string}
-                                    // TODO get currentAuthor
-                                    currentAuthor={"Lidia Ataupillco Ramos"}
+                                    currentAuthor={postInfo.author.displayName}
                                     handleEdit={handleEdit}
                                     contentType={postInfo.contentType}
                                     visibility={postInfo.visibility}
