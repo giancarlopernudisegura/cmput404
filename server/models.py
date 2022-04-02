@@ -177,7 +177,7 @@ class Comment(db.Model, JSONSerializable):
     __tablename__ = "comment"
     id = db.Column(db.String(), primary_key=True, default=generate_uuid)
     author = db.Column(db.ForeignKey("author.id"))
-    post = db.Column(db.ForeignKey("post.id"))
+    post = db.Column(db.String())
     content = db.Column(db.String())
     contentType = db.Column(db.Enum(ContentType))
     timestamp = db.Column(db.DateTime())
@@ -213,8 +213,8 @@ class Comment(db.Model, JSONSerializable):
 class Like(db.Model, JSONSerializable, InboxItem):
     id = db.Column(db.String(), primary_key=True, default=generate_uuid)
     author = db.Column(db.ForeignKey("author.id"))
-    post = db.Column(db.ForeignKey("post.id"))
-    comment = db.Column(db.ForeignKey("comment.id"))
+    post = db.Column(db.String())
+    comment = db.Column(db.String())
     timestamp = db.Column(db.DateTime())
 
     def __init__(self, author, post=None, comment=None):
