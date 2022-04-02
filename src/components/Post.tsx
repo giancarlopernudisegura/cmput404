@@ -52,9 +52,7 @@ function Post({
 }: PostProps) {
   var currentUser: string = currentAuthor as string;
 
-  //Toggle for like button
-  const [likeToggle, setLikeToggle] = useState(true);
-  const [isLiked, setIsLiked] = useState(0);
+  //Set post likes
   const [postLikes, setPostLikes] = useState(Array());
 
   const [comments, setComments] = useState(Array());
@@ -119,17 +117,8 @@ function Post({
     }
 
     fetchComments(authorId, postId);
+    getAllLikes(authorId, postId);
   }, []);
-
-  const toggleFunction = () => {
-    setLikeToggle(!likeToggle);
-    if (likeToggle) {
-      setIsLiked(isLiked + 1);
-    }
-    if (!likeToggle) {
-      setIsLiked(isLiked - 1);
-    }
-  };
 
   const renderBody = () => {
     switch (contentType) {
@@ -215,13 +204,16 @@ function Post({
         <div className="flex flex-row gap-x-4 justify-evenly">
           <p>Likes: {postLikes.length === undefined ? 0 : postLikes.length}</p>
           <div id="like" className="flex flex-row space-x-4">
-            <IconButton color="primary" onClick={() => toggleFunction()}>
-              {likeToggle ? (
-                <FavoriteBorderOutlinedIcon fontSize="large" />
-              ) : (
-                <Favorite fontSize="large" />
-              )}
-            </IconButton>
+            <Button
+              variant="contained"
+              onClick={() => addLike()}
+              disableElevation={true}
+            >
+              Add Like
+            </Button>
+            <Button variant="outlined" onClick={() => deleteLike()}>
+              Delete Like
+            </Button>
           </div>
 
           <div>
@@ -273,7 +265,12 @@ function Post({
         >
           Total Comments for this post: {comments.length}
         </div>
-        <CommentList allComments={comments} />
+        <CommentList
+          allComments={comments}
+          authorId={authorId}
+          postId={postId}
+          currentAuthor={currentUser}
+        />
       </div>
     </li>
   );

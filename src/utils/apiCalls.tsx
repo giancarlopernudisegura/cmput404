@@ -7,6 +7,8 @@ import {
   FAILED_FETCH_SPEC_POST,
   FAILED_ADD_LIKE,
   FAILED_DELETE_LIKE,
+  FAILED_GET_COMMENT_LIKES,
+  FAILED_ADD_COMMENT_LIKES,
 } from "../utils/errorMsg";
 
 const BACKEND_HOST = process.env.FLASK_HOST;
@@ -479,6 +481,97 @@ export async function addPostLike(author_id: string, post_id: string) {
 export function deletePostLike(author_id: string, post_id: string) {
   const response = fetch(
     `${BACKEND_HOST}/authors/${author_id}/posts/${post_id}/likes`,
+    {
+      mode: "cors",
+      credentials: "include",
+      method: "DELETE",
+    }
+  )
+    .then((res) => {
+      return res.status;
+    })
+    .catch((err) => {
+      throw Error(FAILED_DELETE_LIKE);
+    });
+
+  return response;
+}
+
+/**
+ * Get all comment likes
+ */
+
+export async function getCommentLikes(
+  author_id: string,
+  post_id: string,
+  comment_id: string
+) {
+  try {
+    const res = await fetch(
+      `${BACKEND_HOST}/authors/${author_id}/posts/${post_id}/comments/${comment_id}/likes`,
+      {
+        mode: "cors",
+        credentials: "include",
+        method: "GET",
+      }
+    );
+
+    let data = res.json();
+    data.then((likeList) => console.log(likeList.likes));
+    console.log("comment likes");
+    return data;
+  } catch (err) {
+    throw Error(FAILED_GET_COMMENT_LIKES);
+  }
+}
+
+/**
+ * Add like to comment
+ */
+export async function addCommentLikes(
+  author_id: string,
+  post_id: string,
+  comment_id: string
+) {
+  try {
+    const res = await fetch(
+      `${BACKEND_HOST}/authors/${author_id}/posts/${post_id}/comments/${comment_id}/likes`,
+      {
+        mode: "cors",
+        credentials: "include",
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+        },
+      }
+    );
+
+    let json = await res.json();
+
+    if (res.status !== 200) {
+      throw Error();
+    }
+
+    return { status: res.status, ...json };
+  } catch (err) {
+    throw Error(FAILED_ADD_COMMENT_LIKES);
+  }
+}
+
+/**
+ * Delete likes for a comment
+ * @param author_id
+ * @param post_id
+ * @param comment_id
+ */
+
+export async function deleteCommentLike(
+  author_id: string,
+  post_id: string,
+  comment_id: string
+) {
+  const response = await fetch(
+    `${BACKEND_HOST}/authors/${author_id}/posts/${post_id}/comments/${comment_id}/likes`,
     {
       mode: "cors",
       credentials: "include",
