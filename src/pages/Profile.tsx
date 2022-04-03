@@ -87,7 +87,6 @@ function Profile({ path }: profileProps) {
   }
 
   async function handleEdit(newPostBody: any) {
-    console.log("BODY", newPostBody);
 
     // initialize values
     setIdEditPost(newPostBody.postId);
@@ -144,8 +143,6 @@ function Profile({ path }: profileProps) {
     // console.log(myPosts)
 
   }
-
-  console.log('POSTS', myPosts);
 
   return (
     <div id="profile">
