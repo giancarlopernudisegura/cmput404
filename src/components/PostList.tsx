@@ -22,11 +22,11 @@ function PostList({
   }
 
   return (
-    <div id="post-list" class="container" className="grid grid-cols-1 gap-y-2">
+    <div id="post-list" class="container" className="grid grid-cols-1 gap-y-2 place-content-center">
 
       {initialPosts.length === 0 && 
-        <h2 className=''>
-          No posts found!
+        <h2 className='place-self-center text-xl'>
+          No posts found! 
         </h2>
       }
 
