@@ -169,16 +169,16 @@ class Post(db.Model, JSONSerializable, InboxItem):
     def push(self):
         subscribers = InboxItem.get_subscribers(self.author)
         for subscriber in subscribers:
-            inbox = Inbox(subscriber, post=self.id)
+            inbox = Inbox(subscriber, json.dumps(self.json()))
             db.session.add(inbox)
         db.session.commit()
 
 
-class Comment(db.Model, JSONSerializable):
+class Comment(db.Model, JSONSerializable, InboxItem):
     __tablename__ = "comment"
     id = db.Column(db.String(), primary_key=True, default=generate_uuid)
     author = db.Column(db.ForeignKey("author.id"))
-    post = db.Column(db.ForeignKey("post.id"))
+    post = db.Column(db.String())
     content = db.Column(db.String())
     contentType = db.Column(db.Enum(ContentType))
     timestamp = db.Column(db.DateTime())
@@ -214,8 +214,8 @@ class Comment(db.Model, JSONSerializable):
 class Like(db.Model, JSONSerializable, InboxItem):
     id = db.Column(db.String(), primary_key=True, default=generate_uuid)
     author = db.Column(db.ForeignKey("author.id"))
-    post = db.Column(db.ForeignKey("post.id"))
-    comment = db.Column(db.ForeignKey("comment.id"))
+    post = db.Column(db.String())
+    comment = db.Column(db.String())
     timestamp = db.Column(db.DateTime())
 
     def __init__(self, author, post=None, comment=None):
@@ -255,7 +255,7 @@ class Like(db.Model, JSONSerializable, InboxItem):
             recepient = DbObject.query.filter_by(id=self.comment).first().author
         elif self.post:
             recepient = DbObject.query.filter_by(id=self.post).first().author
-        inbox = Inbox(recepient, like=self.id)
+        inbox = Inbox(recepient, json.dumps(self.json()))
         db.session.add(inbox)
         db.session.commit()
 
@@ -326,41 +326,23 @@ class Inbox(db.Model, JSONSerializable):
     __tablename__ = "inbox"
     id = db.Column(db.String(), primary_key=True, default=generate_uuid)
     owner = db.Column(db.ForeignKey("author.id"))
-    post = db.Column(db.ForeignKey("post.id"))
-    like = db.Column(db.ForeignKey("like.id"))
-    follow = db.Column(db.ForeignKey("requests.id"))
+    data = db.Column(db.String())
 
     def __init__(
         self,
-        owner: int,
-        post: Union[int, None] = None,
-        like: Union[int, None] = None,
-        follow: Union[int, None] = None,
+        owner: str,
+        data: str,
+
     ):
         self.owner = owner
-        argNoneCount = (like, post, follow).count(None)
-        if argNoneCount < 2:
-            raise Exception("Inbox can't relate multiple objects")
-        elif argNoneCount == 3:
-            print(like, post, follow)
-            raise Exception("Inbox must relate one object")
-        self.post = post
-        self.like = like
-        self.follow = follow
+        self.data = data
 
     def __repr__(self):
+        
         return f"<id {self.id} {self.post} {self.like} {self.follow}>"
 
     def json(self, local=True) -> Dict[str, Any]:
-        if self.post:
-            post = Post.query.filter_by(id=self.post).first()
-            return post.json(local)
-        elif self.like:
-            like = Like.query.filter_by(id=self.like).first()
-            return like.json(local)
-        elif self.follow:
-            follow = Requests.query.filter_by(id=self.follow).first()
-            return follow.json(local)
+        return json.loads(self.data)
 
 
 class Remote_Node(db.Model, JSONSerializable):  # contains auth info for remote nodes

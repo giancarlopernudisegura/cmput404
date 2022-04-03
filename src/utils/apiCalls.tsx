@@ -4,6 +4,11 @@ import {
   FETCH_IMG_ERROR,
   FAILED_EDIT_POST,
   FAILED_CREATE_COMMENT,
+  FAILED_FETCH_SPEC_POST,
+  FAILED_ADD_LIKE,
+  FAILED_DELETE_LIKE,
+  FAILED_GET_COMMENT_LIKES,
+  FAILED_GET_SINGLE_POST,
 } from "../utils/errorMsg";
 
 import { SUCCESS, NOT_FOUND } from "../utils/constants";
@@ -44,6 +49,7 @@ export async function getPosts(author_id: string, page?:number): Promise<any> {
 
     var res = await fetch(baseUrl, {
       mode: "cors",
+      credentials: "include",
       method: "GET",
     });
 
@@ -61,7 +67,7 @@ export async function getPosts(author_id: string, page?:number): Promise<any> {
         description: data.items[i].description,
         contentType: data.items[i].contentType,
         visibility: data.items[i].visibility,
-        unlisted: data.items[i].unlisted
+        unlisted: data.items[i].unlisted,
       };
       listOfPosts.push(post);
     }
@@ -140,7 +146,6 @@ export async function newPublicPost(authorId: string, postData: any) {
   }
 }
 
-
 export async function inboxCall(author_id: string, method: string, data?: any) {
   try {
     let metadata = {};
@@ -170,7 +175,7 @@ export async function clearInbox(author_id: string): Promise<boolean> {
   try {
     const res = await fetch(`${BACKEND_HOST}/authors/${author_id}/inbox/`, {
       method: "DELETE",
-      credentials: "include"
+      credentials: "include",
     });
 
     // TODO: change return value
@@ -292,11 +297,12 @@ export async function getAllComments(author_id: string, post_id: string) {
         author: data.comments[i].author.displayName,
         content: data.comments[i].content,
         published: publishTime,
+        id: data.comments[i].id,
       };
       listOfComments.push(comment);
     }
 
-    return listOfComments
+    return listOfComments;
     // return { ...listOfComments, status: res.status };
   } catch (err) {
     throw Error("Unable to retrieve comments for this post");
@@ -341,31 +347,58 @@ export function deletePost(author_id: string, post_id: string) {
   return response;
 }
 
-export function getFollowers(author_id: string) : Promise<any> {
+export function getFollowers(author_id: string): Promise<any> {
   const response = fetch(`${BACKEND_HOST}/authors/${author_id}/followers/`, {
-    mode: 'cors',
-    method: 'GET',
+    mode: "cors",
+    method: "GET",
   })
-  .then(res => {
-    return res.json();
-  })
-  .catch(err => {
-    throw Error('Unable to get followers:' + err);
-  });
+    .then((res) => {
+      return res.json();
+    })
+    .catch((err) => {
+      throw Error("Unable to get followers:" + err);
+    });
 
   return response;
 }
 
-export async function editPost(author_id: string, post_id: string, postInfo: any) {
+export async function getSpecPost(author_id: string, post_id: string) {
   try {
-    const response = await fetch(`${BACKEND_HOST}/authors/${author_id}/posts/${post_id}`, {
-      method: 'POST',
+    const res = await fetch(`${BACKEND_HOST}/authors/${author_id}/posts/${post_id}`, {
+      mode: "cors",
       credentials: "include",
-      body: JSON.stringify(postInfo),
-      headers: {
-        'Content-Type': 'application/json; charset=utf-8',
-      }
+      method: "GET",
     });
+
+    if (res.status !== 200) {
+      throw new Error();
+    }
+
+    let json = await res.json();
+
+    return { ...json, status: res.status };
+  } catch (err) {
+    throw new Error(FAILED_FETCH_SPEC_POST);
+  }
+}
+
+export async function editPost(
+  author_id: string,
+  post_id: string,
+  postInfo: any
+) {
+  try {
+    const response = await fetch(
+      `${BACKEND_HOST}/authors/${author_id}/posts/${post_id}`,
+      {
+        method: "POST",
+        credentials: "include",
+        body: JSON.stringify(postInfo),
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+        },
+      }
+    );
 
     let json = await response.json();
 
@@ -377,7 +410,6 @@ export async function editPost(author_id: string, post_id: string, postInfo: any
   } catch (err) {
     throw Error(FAILED_EDIT_POST);
   }
-
 }
 /**
  * Get likes for a specific post TODO
@@ -393,6 +425,7 @@ export async function getPostLikes(author_id: string, post_id: string) {
   );
 
   let data = res.json();
+  data.then((likeList) => console.log(likeList.likes));
   return data;
 }
 /**
@@ -420,7 +453,6 @@ export async function newPublicComment(
     );
 
     console.log(encodedCommentData);
-    
   } catch (err) {
     throw Error(FAILED_CREATE_COMMENT);
   }
@@ -431,18 +463,124 @@ export function isLocal(node: string) {
   return Boolean(node.match(regex));
 }
 
-export function getAllAuthorsWithoutPag() {
-  const response = fetch(`${BACKEND_HOST}/authors`, {
-    mode: "cors",
-    credentials: "include",
-    method: "GET",
-  })
+/**
+ * Add like to post
+ */
+
+export async function addPostLike(author_id: string, post_id: string) {
+  try {
+    const res = await fetch(
+      `${BACKEND_HOST}/authors/${author_id}/posts/${post_id}/likes`,
+      {
+        mode: "cors",
+        method: "PUT",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+        },
+      }
+    );
+
+    let json = await res.json();
+
+    if (res.status !== 200) {
+      throw Error();
+    }
+
+    return { status: res.status, ...json };
+  } catch (err) {
+    throw Error(FAILED_ADD_LIKE);
+  }
+}
+
+export function deletePostLike(author_id: string, post_id: string) {
+  const response = fetch(
+    `${BACKEND_HOST}/authors/${author_id}/posts/${post_id}/likes`,
+    {
+      mode: "cors",
+      credentials: "include",
+      method: "DELETE",
+    }
+  )
     .then((res) => {
-      return res.json();
+      return res.status;
     })
     .catch((err) => {
-      throw Error("Unable to get authors");
+      throw Error(FAILED_DELETE_LIKE);
     });
 
   return response;
+}
+
+export async function getCommentLikes(
+  author_id: string,
+  post_id: string,
+  comment_id: string
+) {
+  try {
+    const res = await fetch(
+      `${BACKEND_HOST}/authors/${author_id}/posts/${post_id}/${comment_id}/likes`,
+      {
+        mode: "cors",
+        credentials: "include",
+        method: "GET",
+      }
+    );
+
+    let data = res.json();
+    data.then((likeList) => console.log(likeList.likes));
+    return data;
+  } catch (err) {
+    throw Error(FAILED_GET_COMMENT_LIKES);
+  }
+}
+
+export async function getSinglePost(author_id: string, post_id: string) {
+  try {
+    const res = await fetch(
+      `${BACKEND_HOST}/authors/${author_id}/posts/${post_id}/`,
+      {
+        mode: "cors",
+        credentials: "include",
+        method: "GET",
+      }
+    );
+
+    let data = res.json()
+    return data
+
+  } catch (err) {
+    throw Error(FAILED_GET_SINGLE_POST);
+  }
+}
+
+export async function addSharedPost(authorId: string, post_id: string, postData: any){
+  const encodedPostData = JSON.stringify(postData);
+
+  let res;
+  let json;
+  try {
+    // postData contains data from the forms
+    res = await fetch(`${BACKEND_HOST}/authors/${authorId}/posts/${post_id}`, {
+      mode: "cors",
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+      },
+      body: encodedPostData,
+    });
+
+    json = await res.json();
+
+    if (res.status === 200) {
+      return { status: res.status, ...json };
+    } else {
+      throw Error();
+    }
+    // TODO: return post id
+  } catch (err) {
+    throw Error(FAILED_CREATE_POSTS);
+  }
+
 }

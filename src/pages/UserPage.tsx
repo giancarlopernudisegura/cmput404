@@ -21,6 +21,7 @@ const UserPage = ({ path, followId }: UserProps) => {
     const [ currentUserId, setCurrentUserId ] = useState("");
     const [ authorInfo, setAuthorInfo ] = useState<null | any>(null);
     const [ posts, setPosts ] = useState(Array());
+    const BACKEND_HOST = process.env.FLASK_HOST;
 
 
     useEffect(() => {
@@ -103,6 +104,16 @@ const UserPage = ({ path, followId }: UserProps) => {
         }
     }
 
+    async function sharePost(followId: string, postId: string){
+
+        window.location.href=`${BACKEND_HOST}/app/user/${followId}#${postId}`
+
+        navigator.clipboard.writeText(window.location.href)
+    
+        console.log(`${BACKEND_HOST}/app/user/${followId}#${postId}`)
+    
+      }
+
     return (
         <div>
             <DrawerMenu
@@ -128,7 +139,8 @@ const UserPage = ({ path, followId }: UserProps) => {
 
                 {isPostLoading === true ? <CircularProgress /> : (
                     <PostList 
-                        initialPosts={posts} 
+                        initialPosts={posts}
+                        onShare={sharePost} 
                     />
                 )}
 
