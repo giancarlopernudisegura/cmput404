@@ -108,9 +108,10 @@ def single_author(author_id: str) -> Response:
     Returns:
         Response: Flask.Response object containing the json of the author.
     """
+    print(author_id)
+    is_local = current_user.is_authenticated
+    author = Author.query.filter_by(id=author_id).first()
     if request.method == "GET":
-        author = Author.query.filter_by(id=author_id).first()
-        is_local = current_user.is_authenticated
         if author != None:#local author
             return make_response(jsonify(author.json(is_local))), httpStatus.OK
         else:#try remote author
@@ -123,8 +124,14 @@ def single_author(author_id: str) -> Response:
             else:
                 return Response(status=httpStatus.NOT_FOUND)
     elif request.method == "POST":
-        # request.json.get('displayName')
-        pass
+        if not is_local or not current_user.id == author_id:
+            return Response(status=httpStatus.FORBIDDEN)
+        try:
+            author.displayName = request.json["displayName"]
+            db.session.commit()
+            return Response(status=httpStatus.OK)
+        except KeyError:
+            return Response(status=httpStatus.BAD_REQUEST)
 
 
 @bp.route("/authors/<path:author_id>/posts/<path:post_id>", methods=["GET"])
