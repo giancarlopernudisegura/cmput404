@@ -9,8 +9,6 @@ import {
   editPost,
   getSpecAuthor,
   get_author_id,
-  getSinglePost,
-  addSharedPost
 } from "../utils/apiCalls";
 
 import PostList from "../components/PostList";
@@ -87,7 +85,6 @@ function Profile({ path }: profileProps) {
   }
 
   async function handleEdit(newPostBody: any) {
-    console.log("BODY", newPostBody);
 
     // initialize values
     setIdEditPost(newPostBody.postId);
