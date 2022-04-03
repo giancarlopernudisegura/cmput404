@@ -54,11 +54,10 @@ function Profile({ path }: profileProps) {
 
     // Set the author's posts
     var postsPromise = authorPromise.then(authorId => { return getPosts(authorId); });
-    postsPromise.then(posts => {  setMyPosts(posts); });
+    postsPromise.then(posts => {  setMyPosts(posts.items); });
 
     Promise.all([authorPromise, postsPromise])
       .then(() => {
-        console.log('Successfully retrieved author, posts, followers and friends');
         setIsLoading(false); 
       })
       .catch(err => { 
@@ -145,6 +144,8 @@ function Profile({ path }: profileProps) {
     // console.log(myPosts)
 
   }
+
+  console.log('POSTS', myPosts);
 
   return (
     <div id="profile">
