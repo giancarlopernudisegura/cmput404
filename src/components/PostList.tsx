@@ -10,7 +10,6 @@ type PostListProps = {
 }
 
 function PostList({ initialPosts, currentAuthor, onRemove, handleEdit } : PostListProps){
-
   if (currentAuthor === undefined) {
     currentAuthor = 'Anonymous';
   }

@@ -1,6 +1,6 @@
 import { h } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
-import { Alert, CircularProgress, Box, Tab, Tabs } from '@mui/material';
+import { Alert, Button, CircularProgress, Box, Tab, Tabs } from '@mui/material';
 
 
 import { 
@@ -48,39 +48,59 @@ function ExplorePage({ path }: ExplorePageProps) {
         setValue(newValue);
     }
 
+    const [ authorPage, setAuthorPage ] = useState(1);
+
+    const getNextAuthorPage = async () => {
+        try {
+            let results = await getAllAuthors(authorPage);
+            let authors = results.items;
+            let allPosts : Array<any> = [];
+            let allPromises : Array<Promise<any>> = [];
+            authors = authors.map((author : any) => {
+                author['pageNumber'] = 1;
+                return author;
+            });
+
+            for (let i = 0; i < authors.length; i++) {
+                let author = authors[i];
+                allPromises.push(new Promise<any>( async (resolve, reject) => {
+                    let authorPosts : Array<any> = [];
+                    while (author.pageNumber !== null) {
+                        let data : any = await getPosts(author.id, author.pageNumber);
+                        if (data.items.length === 0) {
+                            author.pageNumber = null;
+                        } else {
+                            for (let post of data.items) {
+                                if (post.visibility === PUBLIC) {
+                                    authorPosts.push(post);
+                                }
+                            }
+                            author.pageNumber++;
+                        }
+                    }
+                    resolve(authorPosts);
+                }));
+            }
+
+            let promiseRes = await Promise.all(allPromises);
+            promiseRes.forEach((posts : Array<any>) => {
+                allPosts.push(...posts);
+            });
+            setAuthorPage(authorPage + 1);
+            setPublicPosts(allPosts);
+        } catch (err) {
+            setErrMsg('Error retrieving posts: ' + (err as Error).message);
+        }
+        setPostsLoading(false);
+    }
+    
     // Effect to get all posts
     useEffect( () => {
         async function getPostsFromAllAuthors() {
-            // get all authors 
-            try {
-                let results = await getAllAuthors();
-                let authors = results.items;
-                let allPosts : Array<any> = [];
-
-                for (let author of authors) {
-                    let postsRes = await getPosts(author.id);
-                    if (postsRes.status !== SUCCESS) {
-                        continue;
-                    }
-                    let posts = postsRes.items;
-                    if (posts.length > 0) {
-                        for (let post of posts) {
-                            if (post.visibility === PUBLIC) {
-                                allPosts.push(post);
-                            }
-                        }
-                    }
-                }
-                setPublicPosts(allPosts);
-                
-            } catch (err) {
-                setErrMsg('Unable to get all posts: ' + (err as Error).message);
-            }
-
+            getNextAuthorPage();
         }
 
         getPostsFromAllAuthors();
-        setPostsLoading(false);
     }, []);
 
     // Effect to get github activity
@@ -99,28 +119,6 @@ function ExplorePage({ path }: ExplorePageProps) {
         fetchGithubStream();
         setGithubLoading(false);
     }, []);
-
-    // Effect to get inbox 
-    useEffect(() => {
-        function getInbox() {
-            get_author_id()
-                .then(author_id => {
-                    const response = inboxCall(author_id, "GET");
-                    response
-                        .then(data => {
-                            // TODO: temp, only use posts from inbox for now
-                            setPublicPosts(data.items.filter((item: any) => item.type == "post"));
-                        })
-                        .catch(err => {
-                            setErrMsg(err.message);
-                        });
-                })
-                .catch(console.error);
-        }
-        // getInbox();
-
-    }, []);
-
     
     return (
         <DrawerMenu pageName="Explore">
@@ -156,6 +154,12 @@ function ExplorePage({ path }: ExplorePageProps) {
                                 <PostList
                                     initialPosts={publicPosts}
                                 />
+
+                                <Button
+                                    onClick={() => getNextAuthorPage()}
+                                >
+                                    Load More
+                                </Button>
                             </div>
                         )}
                 </TabPanel>
