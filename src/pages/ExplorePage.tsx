@@ -97,28 +97,6 @@ function ExplorePage({ path }: ExplorePageProps) {
         fetchGithubStream();
         setGithubLoading(false);
     }, []);
-
-    // Effect to get inbox 
-    useEffect(() => {
-        function getInbox() {
-            get_author_id()
-                .then(author_id => {
-                    const response = inboxCall(author_id, "GET");
-                    response
-                        .then(data => {
-                            // TODO: temp, only use posts from inbox for now
-                            setPublicPosts(data.items.filter((item: any) => item.type == "post"));
-                        })
-                        .catch(err => {
-                            setErrMsg(err.message);
-                        });
-                })
-                .catch(console.error);
-        }
-        // getInbox();
-
-    }, []);
-
     
     return (
         <DrawerMenu pageName="Explore">
