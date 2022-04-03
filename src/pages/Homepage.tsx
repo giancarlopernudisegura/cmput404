@@ -34,8 +34,8 @@ function Homepage(props : FeedProps) {
       
       for (let friend of friends) {
         // get friends posts 
-        let posts = await getPosts(friend.id);
-
+        let postsResults = await getPosts(friend.id);
+        let posts = postsResults.items;
         if (posts.length > 0) {
           friendsPostsList.push(...posts);
         }
