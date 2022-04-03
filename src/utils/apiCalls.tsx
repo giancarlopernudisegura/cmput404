@@ -452,10 +452,7 @@ export function isLocal(node: string) {
  * Add like to post
  */
 
-export async function addPostLike(
-  author_id: string,
-  post_id: string
-) {
+export async function addPostLike(author_id: string, post_id: string) {
   try {
     const res = await fetch(
       `${BACKEND_HOST}/authors/${author_id}/posts/${post_id}/likes`,
@@ -465,7 +462,7 @@ export async function addPostLike(
         credentials: "include",
         headers: {
           "Content-Type": "application/json; charset=utf-8",
-        }
+        },
       }
     );
 
@@ -475,7 +472,7 @@ export async function addPostLike(
       throw Error();
     }
 
-    return { status: res.status};
+    return { status: res.status };
   } catch (err) {
     throw Error(FAILED_ADD_LIKE);
   }

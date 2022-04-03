@@ -10,11 +10,17 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CommentList from "../components/comment-components/CommentList";
 import CommentForm from "../components/forms/CommentForm";
-import { addPostLike, getAllComments, getPostLikes, deletePostLike, get_author_id } from "../utils/apiCalls";
+import {
+  addPostLike,
+  getAllComments,
+  getPostLikes,
+  deletePostLike,
+  get_author_id,
+} from "../utils/apiCalls";
 import ReactMarkdown from "react-markdown";
 import { MARKDOWN, PLAIN } from "../utils/constants";
-import Share from "@mui/icons-material/Share"
-import { route } from 'preact-router';
+import Share from "@mui/icons-material/Share";
+import { route } from "preact-router";
 
 /*
     Post component
@@ -51,16 +57,16 @@ function Post({
 
   const BACKEND_HOST = process.env.FLASK_HOST;
   //Toggle for like button
-  const [ currentUserId, setCurrentUserId ] = useState<string | null>(null)
-  const [ isLiked, setIsLiked ] = useState(false);
-  const [ numLikes, setNumLikes ] = useState(0);
-  const [ postLikes, setPostLikes ] = useState(Array());
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [isLiked, setIsLiked] = useState(false);
+  const [numLikes, setNumLikes] = useState(0);
+  const [postLikes, setPostLikes] = useState(Array());
 
   const [comments, setComments] = useState(Array());
-  const [ errMsg, setErrMsg ] = useState("");
+  const [errMsg, setErrMsg] = useState("");
 
   //TOGGLE FOR SHOWING COMMENTS
-  const [ showComments, setShowComments ] = useState(false);
+  const [showComments, setShowComments] = useState(false);
   const toggleShowComments = () => {
     setShowComments(!showComments);
   };
@@ -71,7 +77,7 @@ function Post({
   const commentButtonType = showComments === false ? "outlined" : "contained";
 
   //TOGGLE FOR OPENING MAKE COMMENT DIALOG
-  const [ open, setOpen ] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const openDialog = () => {
     setOpen(true);
@@ -103,13 +109,13 @@ function Post({
         setNumLikes(response.likes.length);
 
         // check if user liked the post
-        response.likes.forEach((like : any) => {
+        response.likes.forEach((like: any) => {
           if (like.author.id === currentUserIdTemp) {
             setIsLiked(true);
           }
         });
         console.log("LIKES", response);
-      } catch(err) {
+      } catch (err) {
         setErrMsg((err as Error).message);
       }
     }
@@ -201,7 +207,12 @@ function Post({
         </div>
 
         <div className="px-3 my-2">
-          <h3 className="font-semibold text-lg mb-2 clickable" onClick={() => route(`/app/authors/${authorId}/posts/${postId}`)}>{title}</h3>
+          <h3
+            className="font-semibold text-lg mb-2 clickable"
+            onClick={() => route(`/app/authors/${authorId}/posts/${postId}`)}
+          >
+            {title}
+          </h3>
           {renderBody()}
         </div>
       </div>

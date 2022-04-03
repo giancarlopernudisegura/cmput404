@@ -65,12 +65,12 @@ function Comment({
       await deleteCommentLike(authorId, postId, id);
       setNumLikes(numLikes - 1);
       setIsLiked(false);
-      console.log("delete")
+      console.log("delete");
     } else {
       await addCommentLikes(authorId, postId, id);
       setNumLikes(numLikes + 1);
       setIsLiked(true);
-      console.log("add")
+      console.log("add");
     }
     // setIsLiked(!isLiked);
   };
