@@ -8,7 +8,7 @@ export default function Follow({
   object
 }: Follow) {
   const acceptFollow = () => {
-    fetch(`/authors/${object}/followers/${actor}`, { method: 'PUT' })
+    fetch(`/authors/${object.id}/followers/${actor.id}`, { method: 'PUT' })
   }
 
   return (
