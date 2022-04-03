@@ -9,8 +9,6 @@ import {
   editPost,
   getSpecAuthor,
   get_author_id,
-  getSinglePost,
-  addSharedPost
 } from "../utils/apiCalls";
 
 import PostList from "../components/PostList";
@@ -24,16 +22,16 @@ type profileProps = { path: string };
 function Profile({ path }: profileProps) {
   const [errMsg, setErrMsg] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  
+
   // Dialog
-  const [ openDialog, setOnOpenDialog ] = useState<boolean>(false);
+  const [openDialog, setOnOpenDialog] = useState<boolean>(false);
 
   // editPost
-  const [ IdEditPost, setIdEditPost] = useState<string>("");
-  const [ editPostBody, setEditPostBody ] = useState<string>("");
-  const [ editPostCat, setEditPostCat ] = useState<string>("");
-  const [ editPostTitle, setEditPostTitle ] = useState<string>("");
-  const [ editIsPostMkd, setEditIsPostMkd ] = useState<boolean>(false);
+  const [IdEditPost, setIdEditPost] = useState<string>("");
+  const [editPostBody, setEditPostBody] = useState<string>("");
+  const [editPostCat, setEditPostCat] = useState<string>("");
+  const [editPostTitle, setEditPostTitle] = useState<string>("");
+  const [editIsPostMkd, setEditIsPostMkd] = useState<boolean>(false);
 
   // get author data 
   const [ author, setAuthor ] = useState(Object());
@@ -63,7 +61,7 @@ function Profile({ path }: profileProps) {
   }
 
   useEffect(() => {
-    const authorPromise = get_author_id().then((author_id : any) => {
+    const authorPromise = get_author_id().then((author_id: any) => {
       getSpecAuthor(author_id).then(data => {
         setAuthor(data);
         console.log("DATA", data);
@@ -81,10 +79,10 @@ function Profile({ path }: profileProps) {
 
     Promise.all([authorPromise, postsPromise])
       .then(() => {
-        setIsLoading(false); 
+        setIsLoading(false);
       })
-      .catch(err => { 
-        setErrMsg('Error retrieving profile data: ' + err.message); 
+      .catch(err => {
+        setErrMsg('Error retrieving profile data: ' + err.message);
         setIsLoading(false);
       });
 
@@ -103,7 +101,7 @@ function Profile({ path }: profileProps) {
     function removePost(authorId: string, postId: string) {
       // call api to delete post
       deletePost(authorId, postId)
-      .catch(err => {setErrMsg(err.message);});
+        .catch(err => { setErrMsg(err.message); });
     }
 
     removePost(author.id, postId);
@@ -130,7 +128,7 @@ function Profile({ path }: profileProps) {
 
     const newList = myPosts.map(post => {
       if (post.postId === IdEditPost) {
-        return { ...newPostBody,  description: newPostBody.content, authorId: post.authorId, authorName: post.authorName, postId: post.postId };
+        return { ...newPostBody, description: newPostBody.content, authorId: post.authorId, authorName: post.authorName, postId: post.postId };
       } else {
         return post;
       }
@@ -139,9 +137,9 @@ function Profile({ path }: profileProps) {
     setMyPosts(newList);
   }
 
-  async function sharePost(authorId: string, postId: string){
+  async function sharePost(authorId: string, postId: string) {
 
-    window.location.href=`${BACKEND_HOST}/app/profile#${postId}`
+    window.location.href = `${BACKEND_HOST}/app/profile#${postId}`
 
     navigator.clipboard.writeText(window.location.href)
 
@@ -172,24 +170,25 @@ function Profile({ path }: profileProps) {
       <DrawerMenu pageName="My Profile">
         {errMsg && <Alert severity="error">{errMsg}</Alert>}
 
-        {isLoading === true ? 
-          <CircularProgress 
-            className="grid place-items-center h-screen"/> : (
+        {isLoading === true ?
+          <CircularProgress
+            className="grid place-items-center h-screen" /> : (
             <div className="flex flex-col m-auto">
               <AuthorInfo
                 author={author}
+                is_owner
               />
 
-              <PostList 
-                initialPosts={myPosts} 
-                currentAuthor={author.displayName} 
+              <PostList
+                initialPosts={myPosts}
+                currentAuthor={author.displayName}
                 onRemove={handleRemove}
                 onShare={sharePost}
                 handleEdit={handleEdit}
               />
 
               <Button
-                className="w-fit-center"
+                className="w-fit"
                 variant="contained"
                 onClick={() => getNextPostPage()}
               >
@@ -212,8 +211,8 @@ function Profile({ path }: profileProps) {
                 />
               }
             </div>
-        )
-      }
+          )
+        }
 
       </DrawerMenu>
     </div>
