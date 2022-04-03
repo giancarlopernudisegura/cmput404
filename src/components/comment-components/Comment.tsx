@@ -5,9 +5,10 @@ type CommentProps = {
   author: string;
   body: string;
   timeStamp: string;
+  id: string;
 };
 
-function Comment({ author, body, timeStamp }: CommentProps) {
+function Comment({ author, body, timeStamp, id }: CommentProps) {
   return (
     <div
       id="comment-component"

@@ -10,7 +10,6 @@ import {
     inboxCall, 
     getGithubStream, 
     newPublicPost,
-    getAllAuthorsWithoutPag
  } from '../utils/apiCalls';
 
 import { PUBLIC, SUCCESS } from '../utils/constants';
@@ -21,7 +20,6 @@ import SearchBar from './SearchBar';
 import TabPanel from '../components/tabs/TabPanel';
 import PostList from '../components/PostList';
 import GitHubActivity from '../components/GitHubActivity';
-import SectionTabs from '../components/tabs/SectionTabs';
 
 
 type ExplorePageProps = { path: string };

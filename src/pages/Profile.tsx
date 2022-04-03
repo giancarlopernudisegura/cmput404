@@ -9,13 +9,15 @@ import {
   editPost,
   getSpecAuthor,
   get_author_id,
-  getAllComments,
+  getSinglePost,
+  addSharedPost
 } from "../utils/apiCalls";
 
 import PostList from "../components/PostList";
 import AuthorInfo from "../components/profile/AuthorInfo";
 import DialogTemplate from '../components/DialogTemplate';
 import { MARKDOWN } from '../utils/constants';
+import ShareList from "../components/ShareList";
 
 
 type profileProps = { path: string };
@@ -37,6 +39,10 @@ function Profile({ path }: profileProps) {
   // get author data 
   const [ author, setAuthor ] = useState(Object());
   const [ myPosts, setMyPosts ] = useState(Array());
+  const BACKEND_HOST = process.env.FLASK_HOST;
+
+  //Posts that have been shared by author
+  const [sharedPosts, setSharedPosts] = useState(Array());
 
   useEffect(() => {
     const authorPromise = get_author_id().then((author_id : any) => {
@@ -48,11 +54,10 @@ function Profile({ path }: profileProps) {
 
     // Set the author's posts
     var postsPromise = authorPromise.then(authorId => { return getPosts(authorId); });
-    postsPromise.then(posts => {  setMyPosts(posts); });
+    postsPromise.then(posts => {  setMyPosts(posts.items); });
 
     Promise.all([authorPromise, postsPromise])
       .then(() => {
-        console.log('Successfully retrieved author, posts, followers and friends');
         setIsLoading(false); 
       })
       .catch(err => { 
@@ -82,7 +87,6 @@ function Profile({ path }: profileProps) {
   }
 
   async function handleEdit(newPostBody: any) {
-    console.log("BODY", newPostBody);
 
     // initialize values
     setIdEditPost(newPostBody.postId);
@@ -102,14 +106,42 @@ function Profile({ path }: profileProps) {
     }
 
     const newList = myPosts.map(post => {
-      if (post.id === IdEditPost) {
-        return newPostBody;
+      if (post.postId === IdEditPost) {
+        return { ...newPostBody,  description: newPostBody.content, authorId: post.authorId, authorName: post.authorName, postId: post.postId };
       } else {
         return post;
       }
     });
 
     setMyPosts(newList);
+  }
+
+  async function sharePost(authorId: string, postId: string){
+
+    window.location.href=`${BACKEND_HOST}/app/profile#${postId}`
+
+    navigator.clipboard.writeText(window.location.href)
+
+    console.log(`${BACKEND_HOST}/app/profile#${postId}`)
+
+    // function getPost(authorId: string, postId: string){
+    //   getSinglePost(authorId.toString(), postId)
+    //   .then((data) => addSharedPost(authorId.toString(), postId, {
+    //     postId: data.id,
+    //     authorName: data.author.displayName,
+    //     authorId: data.author.id,
+    //     title: data.title,
+    //     description: data.description,
+    //     contentType: data.contentType,
+    //     visibility: data.visibility,
+    //     unlisted: data.unlisted,
+    //   }))
+    //   .catch(err => setErrMsg(err.message))
+    // }
+
+    // getPost(authorId, postId);
+    // console.log(myPosts)
+
   }
 
   return (
@@ -129,11 +161,12 @@ function Profile({ path }: profileProps) {
                 initialPosts={myPosts} 
                 currentAuthor={author.displayName} 
                 onRemove={handleRemove}
+                onShare={sharePost}
                 handleEdit={handleEdit}
               />
 
               {openDialog && 
-                <DialogTemplate
+                <DialogTemplate 
                   open={openDialog}
                   handleClose={() => setOnOpenDialog(false)}
                   updatePost={editPostCall}

@@ -24,6 +24,7 @@ function CommentList({ allComments }: CommentListProps) {
                 author={comment.author}
                 body={comment.content}
                 timeStamp={comment.published}
+                id={comment.id}
               />
             </li>
           ))}

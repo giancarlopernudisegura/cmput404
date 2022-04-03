@@ -11,6 +11,7 @@ import './css/main.css';
 import Inbox from './pages/Inbox';
 import UserPage from './pages/UserPage';
 import AdminSettings from './pages/AdminSettings';
+import PostPage from './pages/PostPage';
 
 const App = () => {
 
@@ -23,7 +24,8 @@ const App = () => {
         <Homepage path="/app/homepage" />
         <Profile path="/app/profile" />
         <Inbox path="/app/inbox" />
-        <UserPage path="/app/user/:followId" />
+        <UserPage path="/app/users/:followId" />
+        <PostPage path="/app/authors/:authorId/posts/:postId" />
         <AdminSettings path="/app/admin" />
       </Router>
     </div>
@@ -36,3 +38,4 @@ render(
   </Provider>,
   document.body
 );
+
