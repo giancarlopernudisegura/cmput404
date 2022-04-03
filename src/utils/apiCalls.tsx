@@ -10,6 +10,7 @@ import {
   FAILED_GET_COMMENT_LIKES,
   FAILED_GET_SINGLE_POST,
 } from "../utils/errorMsg";
+import { Follow } from "../types"
 
 import { SUCCESS, NOT_FOUND } from "../utils/constants";
 
@@ -223,6 +224,18 @@ export const logOutCall = async () => {
     throw Error("Unable to log out user");
   }
 };
+
+export const followerRequest = async (
+  author_id: string,
+  follower_id: string
+) => {
+  const res = await fetch(`/authors/${author_id}/inbox`);
+  if (res.status >= 400) return undefined;
+  const data = await res.json();
+  const items = data.items as any[];
+  const follow = items.find(item => (item.type as string).toLowerCase() === "follow" && item.actor.id === follower_id) as Follow;
+  return follow;
+}
 
 export const followerCall = async (
   currentUserId: string,
@@ -554,7 +567,7 @@ export async function getSinglePost(author_id: string, post_id: string) {
   }
 }
 
-export async function addSharedPost(authorId: string, post_id: string, postData: any){
+export async function addSharedPost(authorId: string, post_id: string, postData: any) {
   const encodedPostData = JSON.stringify(postData);
 
   let res;
