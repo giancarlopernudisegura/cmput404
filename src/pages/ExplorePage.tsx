@@ -157,6 +157,7 @@ function ExplorePage({ path }: ExplorePageProps) {
 
                                 <Button
                                     onClick={() => getNextAuthorPage()}
+                                    variant="contained"
                                 >
                                     Load More
                                 </Button>
