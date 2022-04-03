@@ -1,7 +1,14 @@
-import { Divider, Button } from "@mui/material";
+import { Divider, Button, IconButton } from "@mui/material";
 import { h } from "preact";
 import { useState, useEffect } from "preact/hooks";
-import { getCommentLikes, addCommentLikes, deleteCommentLike } from "../../utils/apiCalls";
+import Favorite from "@mui/icons-material/Favorite";
+import FavoriteBorderOutlinedIcon from "@mui/icons-material/FavoriteBorderOutlined";
+import {
+  getCommentLikes,
+  addCommentLikes,
+  deleteCommentLike,
+  get_author_id,
+} from "../../utils/apiCalls";
 
 type CommentProps = {
   author: string;
@@ -24,37 +31,49 @@ function Comment({
 }: CommentProps) {
   const [commentLikes, setCommentLikes] = useState(Array());
   const [errMsg, setErrMsg] = useState("");
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [numLikes, setNumLikes] = useState(0);
+  const [isLiked, setIsLiked] = useState(false);
 
   useEffect(() => {
-    function commentLikes(authorId: string, postId: string, id: string) {
-      getCommentLikes(authorId.toString(), postId, id)
-        .then((data) => setCommentLikes(data.likes))
-        .catch((err) => setErrMsg(err.message));
+    async function commentLikes(authorId: string, postId: string, id: string) {
+      let response;
+      try {
+        const currentUserIdTemp = await get_author_id();
+        setCurrentUserId(currentUserIdTemp);
+        response = await getCommentLikes(currentUserIdTemp, postId, id);
+        setCommentLikes(response.likes);
+        setNumLikes(response.likes.length);
+
+        // check if user liked the post
+        response.likes.forEach((like: any) => {
+          if (like.author.id === currentUserIdTemp) {
+            setIsLiked(true);
+          }
+        });
+        console.log("LIKES", response);
+      } catch (err) {
+        setErrMsg((err as Error).message);
+      }
     }
 
     commentLikes(authorId, postId, id);
   }, []);
 
-  //Add likes for a comment
-  const addLike = () => {
-    addCommentLikes(authorId, postId, id);
-    for (let i = 0; i < commentLikes.length; i++) {
-      if (commentLikes[i].author.displayName == currentAuthor) {
-        alert("You already liked this comment.");
-      }
+  const toggleLike = async () => {
+    if (isLiked) {
+      await deleteCommentLike(authorId, postId, id);
+      setNumLikes(numLikes - 1);
+      setIsLiked(false);
+      console.log("delete")
+    } else {
+      await addCommentLikes(authorId, postId, id);
+      setNumLikes(numLikes + 1);
+      setIsLiked(true);
+      console.log("add")
     }
+    // setIsLiked(!isLiked);
   };
-
-  //Delete likes for a comment TODO: Update with new way of handling likes
-  const deleteLike = () => {
-    for (let i = 0; i < commentLikes.length; i++) {
-      if (commentLikes[i].author.displayName == currentAuthor) {
-        deleteCommentLike(authorId, postId, id);
-      } else {
-        alert("You haven't liked this post yet.");
-      }
-    }
-  }
 
   return (
     <div
@@ -83,23 +102,17 @@ function Comment({
           id="likes-and-buttons"
           className="flex flex-row justify-between pb-4"
         >
-          <p>
-            Likes: {commentLikes.length === undefined ? 0 : commentLikes.length}
-          </p>
-          
-          <div id="add-delete-buttons" className="flex flex-row justify-evenly space-x-4">
-          <Button
-            variant="contained"
-            onClick={() => addLike()}
-            disableElevation={true}
-          >
-            Add Like
-          </Button>
-          <Button variant="outlined" onClick={() => deleteLike()}>
-            Delete Like
-          </Button>
+          <p>Likes: {numLikes === undefined ? 0 : numLikes}</p>
+
+          <div id="add-delete-buttons" className="">
+            <IconButton color="primary" onClick={() => toggleLike()}>
+              {isLiked ? (
+                <Favorite fontSize="large" />
+              ) : (
+                <FavoriteBorderOutlinedIcon fontSize="large" />
+              )}
+            </IconButton>
           </div>
-          
         </div>
       </div>
       <Divider />

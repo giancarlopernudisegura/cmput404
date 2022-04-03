@@ -49,7 +49,6 @@ function Post({
 }: PostProps) {
   var currentUser: string = currentAuthor as string;
 
-  //Set post likes
   const BACKEND_HOST = process.env.FLASK_HOST;
   //Toggle for like button
   const [ currentUserId, setCurrentUserId ] = useState<string | null>(null)
@@ -80,25 +79,6 @@ function Post({
 
   const closeDialog = () => {
     setOpen(false);
-  };
-
-  const addLike = () => {
-    addPostLike(authorId.toString(), postId);
-    for (let i = 0; i < postLikes.length; i++) {
-      if (postLikes[i].author.displayName == currentUser) {
-        alert("You already liked this post.");
-      }
-    }
-  };
-
-  const deleteLike = () => {
-    for (let i = 0; i < postLikes.length; i++) {
-      if (postLikes[i].author.displayName == currentUser) {
-        deletePostLike(authorId.toString(), postId);
-      } else {
-        alert("You haven't liked this post yet.");
-      }
-    }
   };
 
   useEffect(() => {
