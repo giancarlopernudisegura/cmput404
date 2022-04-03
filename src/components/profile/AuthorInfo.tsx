@@ -1,13 +1,15 @@
 import { h } from 'preact';
 import { useState, useEffect } from 'preact/hooks';
 import { getFollowers, followerCall } from '../../utils/apiCalls';
+import EditIcon from "@mui/icons-material/Edit";
 
 
 type AuthorProps = {
     author: any,
+    is_owner?: boolean,
 };
 
-function AuthorInfo({ author }: AuthorProps) {
+function AuthorInfo({ author, is_owner = false }: AuthorProps) {
     const [myFollowers, setMyFollowers] = useState(Array());
     const [myFriends, setMyFriends] = useState(Array())
 
@@ -15,7 +17,7 @@ function AuthorInfo({ author }: AuthorProps) {
         return <h1>Error loading information about this author.</h1>;
     }
 
-    useEffect( () => {
+    useEffect(() => {
 
         async function fetchFollowers() {
             try {
@@ -28,10 +30,10 @@ function AuthorInfo({ author }: AuthorProps) {
             catch (err) {
                 console.log('Error fetching followers:', err);
             }
-        }   
+        }
 
         async function fetchFriends() {
-            
+
             try {
                 let followers = await fetchFollowers();
                 var friends = new Array();
@@ -58,10 +60,25 @@ function AuthorInfo({ author }: AuthorProps) {
         }
         fetchFriends();
     }, []);
-    
+
+    const editName = async () => {
+        const name = window.prompt('Edit name');
+        if (name !== null) {
+            await fetch(`/authors/${author.id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    displayName: name
+                })
+            });
+            window.location.reload();
+        }
+    }
 
 
-    return(
+    return (
         <div className="flex justify-evenly w-full py-5">
             <img src={author.profileImage}
                 className="rounded-full w-1/5">
@@ -72,12 +89,12 @@ function AuthorInfo({ author }: AuthorProps) {
                     {author.displayName ? `${author.displayName}` : "No Name Found"}
                 </h1>
 
-                {author.github ? 
+                {author.github ?
                     <a href={`${author.github}`}
                         className="text-sm font-thin text-gray-400 hover:text-blue-500">
                         {author.github}
-                    </a> 
-                : null}
+                    </a>
+                    : null}
 
                 {/* TODO: add friends */}
                 <div className='flex flex-row space-x-8'>
@@ -86,6 +103,11 @@ function AuthorInfo({ author }: AuthorProps) {
                 </div>
 
             </div>
+            {is_owner ?
+                <div className="cursor-pointer">
+                    <EditIcon onClick={editName} />
+                </div>
+                : null}
 
         </div>
     );
