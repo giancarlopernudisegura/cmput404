@@ -254,7 +254,8 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, isMar
                         />
                     </div>
                     <div>
-                        <Button variant="contained"
+                        <Button 
+                            variant="contained"
                             onClick={handleSubmit}
                             className="w-1/3"
                         >{buttonName}
