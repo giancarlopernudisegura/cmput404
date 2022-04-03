@@ -10,6 +10,8 @@ from server.test_constants import *
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from server.run import create_app
 
+BACKEND = os.environ.get("FLASK_HOST")
+
 
 def login(client: FlaskClient, user_id: str):
     r = client.post(
@@ -198,7 +200,7 @@ def test_followers(test_client: FlaskClient):
     assert r.status_code == 200
     r = test_client.put(f"/authors/{T_USER2_UUID}/followers/{T_USER3_UUID}", follow_redirects=True)
     assert r.status_code == 403
-    r = test_client.get(f"/authors/{T_USER2_UUID}/followers", follow_redirects=True)
+    r = test_client.get(f"/authors/{T_USER1_UUID}/followers", follow_redirects=True)
     data = json.loads(r.data.decode("utf-8"))
     assert data["type"] == "followers"
     assert len(data["items"]) == 1
@@ -219,15 +221,41 @@ def test_inbox(test_client: FlaskClient):
     r = test_client.get(f"/authors/{T_USER2_UUID}/inbox", follow_redirects=True)
     assert r.status_code == 401
     # user 1 will follow user 2
-    test_client.put(f"/authors/{T_USER2_UUID}/followers/{T_USER1_UUID}", follow_redirects=True)
+    test_client.post(f"/authors/{T_USER2_UUID}/inbox",
+            follow_redirects=True,
+            content_type="application/json",
+            data=json.dumps(
+                {
+                    "type": "Follow",
+                    "summary": "Giancarlo wants to follow Dan",
+                    "object": {
+                        "type": "author",
+                        "id": f"{BACKEND}/authors/{T_USER1_UUID}",
+                        "url": f"{BACKEND}/authors/{T_USER1_UUID}",
+                        "host": "{BACKEND}/",
+                        "displayName": "Giancarlo",
+                        "github": "http://github.com/giancarlopernudisegura",
+                        "profileImage": "https://avatars.githubusercontent.com/u/31188380?v=4"
+                    },
+                    "actor": {
+                        "type": "author",
+                        "id": "{BACKEND}/authors/{T_USER2_UUID}",
+                        "host": "{BACKEND}/",
+                        "displayName": "Dan",
+                        "url": "{BACKEND}/authors/{T_USER2_UUID}",
+                        "github": "http://github.com/pegmode",
+                        "profileImage": "https://avatars.githubusercontent.com/u/738053?v=4"
+                    }
+                }
+            ))
     logout(test_client)
     login(test_client, T_USER2_UUID)
     r = test_client.get(f"/authors/{T_USER2_UUID}/inbox", follow_redirects=True)
     assert r.status_code == 200
     data = json.loads(r.data.decode("utf-8"))
     assert data["type"] == "inbox"
-    assert len(data["items"]) == 2
-    assert data["items"][1]["type"] == "followers"
+    assert len(data["items"]) == 1
+    assert data["items"][0]["type"] == "Follow"
     r = test_client.delete(f"/authors/{T_USER2_UUID}/inbox", follow_redirects=True)
     r = test_client.get(f"/authors/{T_USER2_UUID}/inbox", follow_redirects=True)
     data = json.loads(r.data.decode("utf-8"))
