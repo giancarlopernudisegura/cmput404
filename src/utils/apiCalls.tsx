@@ -441,7 +441,7 @@ export async function getPostLikes(author_id: string, post_id: string) {
   );
 
   let data = res.json();
-  data.then((likeList) => console.log(likeList.likes));
+  // data.then((likeList) => console.log(likeList.likes));
   return data;
 }
 /**
@@ -547,8 +547,8 @@ export async function getCommentLikes(
     );
 
     let data = res.json();
-    data.then((likeList) => console.log(likeList.likes));
-    console.log("comment likes");
+    // data.then((likeList) => console.log(likeList.likes));
+    // console.log("comment likes");
     return data;
   } catch (err) {
     throw Error(FAILED_GET_COMMENT_LIKES);
@@ -576,13 +576,13 @@ export async function addCommentLikes(
       }
     );
 
-    let json = await res.json();
+    // let json = await res.json();
 
-    if (res.status !== 200) {
+    if (res.status !== 201) {
       throw Error();
     }
 
-    return { status: res.status, ...json };
+    return { status: res.status };
   } catch (err) {
     throw Error(FAILED_ADD_COMMENT_LIKES);
   }

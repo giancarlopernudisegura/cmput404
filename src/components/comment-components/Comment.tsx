@@ -51,13 +51,14 @@ function Comment({
             setIsLiked(true);
           }
         });
-        console.log("LIKES", response);
+        console.log("COMMENT LIKES", response);
       } catch (err) {
         setErrMsg((err as Error).message);
       }
     }
 
     commentLikes(authorId, postId, id);
+    console.log(isLiked);
   }, []);
 
   const toggleLike = async () => {

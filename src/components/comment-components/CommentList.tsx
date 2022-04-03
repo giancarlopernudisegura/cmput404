@@ -12,7 +12,12 @@ type CommentListProps = {
   currentAuthor: string;
 };
 
-function CommentList({ allComments, authorId, postId, currentAuthor }: CommentListProps) {
+function CommentList({
+  allComments,
+  authorId,
+  postId,
+  currentAuthor,
+}: CommentListProps) {
   return (
     <div id="list-of-comments">
       {allComments.length < 1 ? (
