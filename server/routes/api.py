@@ -487,6 +487,12 @@ def remove_follower(author_id: str, follower_id: str) -> Response:
 @require_authentication
 def add_follower(author_id: str, follower_id: str) -> Response:
     is_local = current_user.is_authenticated
+    if current_user.is_authenticated:
+        if current_user.id != author_id:
+            return (
+                make_response(jsonify(error=res_msg.NO_PERMISSION)),
+                httpStatus.FORBIDDEN,
+            )
     regex = r"https?:\/\/.*\/authors\/(.+)"
     if (match := re.match(regex, follower_id)):
         follower_id = match.group(1)
