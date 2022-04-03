@@ -452,7 +452,10 @@ export function isLocal(node: string) {
  * Add like to post
  */
 
-export async function addPostLike(author_id: string, post_id: string) {
+export async function addPostLike(
+  author_id: string,
+  post_id: string
+) {
   try {
     const res = await fetch(
       `${BACKEND_HOST}/authors/${author_id}/posts/${post_id}/likes`,
@@ -462,17 +465,17 @@ export async function addPostLike(author_id: string, post_id: string) {
         credentials: "include",
         headers: {
           "Content-Type": "application/json; charset=utf-8",
-        },
+        }
       }
     );
 
-    let json = await res.json();
+    // let json = await res.json();
 
-    if (res.status !== 200) {
+    if (res.status !== 201) {
       throw Error();
     }
 
-    return { status: res.status, ...json };
+    return { status: res.status};
   } catch (err) {
     throw Error(FAILED_ADD_LIKE);
   }
@@ -482,7 +485,6 @@ export function deletePostLike(author_id: string, post_id: string) {
   const response = fetch(
     `${BACKEND_HOST}/authors/${author_id}/posts/${post_id}/likes`,
     {
-      mode: "cors",
       credentials: "include",
       method: "DELETE",
     }

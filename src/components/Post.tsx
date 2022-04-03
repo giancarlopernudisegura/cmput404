@@ -10,12 +10,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CommentList from "../components/comment-components/CommentList";
 import CommentForm from "../components/forms/CommentForm";
-import {
-  addPostLike,
-  deletePostLike,
-  getAllComments,
-  getPostLikes,
-} from "../utils/apiCalls";
+import { addPostLike, getAllComments, getPostLikes, deletePostLike, get_author_id } from "../utils/apiCalls";
 import ReactMarkdown from "react-markdown";
 import { MARKDOWN, PLAIN } from "../utils/constants";
 import Share from "@mui/icons-material/Share"
@@ -55,14 +50,18 @@ function Post({
   var currentUser: string = currentAuthor as string;
 
   //Set post likes
-  const [postLikes, setPostLikes] = useState(Array());
+  const BACKEND_HOST = process.env.FLASK_HOST;
+  //Toggle for like button
+  const [ currentUserId, setCurrentUserId ] = useState<string | null>(null)
+  const [ isLiked, setIsLiked ] = useState(false);
+  const [ numLikes, setNumLikes ] = useState(0);
+  const [ postLikes, setPostLikes ] = useState(Array());
 
   const [comments, setComments] = useState(Array());
-  const [errMsg, setErrMsg] = useState("");
-  const BACKEND_HOST = process.env.FLASK_HOST;
+  const [ errMsg, setErrMsg ] = useState("");
 
   //TOGGLE FOR SHOWING COMMENTS
-  const [showComments, setShowComments] = useState(false);
+  const [ showComments, setShowComments ] = useState(false);
   const toggleShowComments = () => {
     setShowComments(!showComments);
   };
@@ -73,7 +72,7 @@ function Post({
   const commentButtonType = showComments === false ? "outlined" : "contained";
 
   //TOGGLE FOR OPENING MAKE COMMENT DIALOG
-  const [open, setOpen] = useState(false);
+  const [ open, setOpen ] = useState(false);
 
   const openDialog = () => {
     setOpen(true);
@@ -104,23 +103,53 @@ function Post({
 
   useEffect(() => {
     // Fetch all the comments of the post from the API
-    function fetchComments(authorId: string, postId: string) {
-      getAllComments(authorId.toString(), postId)
-        .then((data) => setComments(data))
-        .catch((err) => {
-          setErrMsg(err.message);
-        });
+    async function fetchComments(authorId: string, postId: string) {
+      let data;
+      try {
+        data = await getAllComments(authorId.toString(), postId);
+        setComments(data);
+      } catch (err) {
+        setErrMsg((err as Error).message);
+      }
     }
 
-    function getAllLikes(authorId: string, postId: string) {
-      getPostLikes(authorId.toString(), postId)
-        .then((data) => setPostLikes(data.likes))
-        .catch((err) => setErrMsg(err.message));
+    async function getAllLikes(authorId: string, postId: string) {
+      let response;
+      try {
+        const currentUserIdTemp = await get_author_id();
+        setCurrentUserId(currentUserIdTemp);
+        response = await getPostLikes(currentUserIdTemp, postId);
+        setPostLikes(response.likes);
+        setNumLikes(response.likes.length);
+
+        // check if user liked the post
+        response.likes.forEach((like : any) => {
+          if (like.author.id === currentUserIdTemp) {
+            setIsLiked(true);
+          }
+        });
+        console.log("LIKES", response);
+      } catch(err) {
+        setErrMsg((err as Error).message);
+      }
     }
 
     fetchComments(authorId, postId);
     getAllLikes(authorId, postId);
   }, []);
+
+  const toggleLike = async () => {
+    if (isLiked) {
+      await deletePostLike(authorId, postId);
+      setNumLikes(numLikes - 1);
+      setIsLiked(false);
+    } else {
+      await addPostLike(authorId, postId);
+      setNumLikes(numLikes + 1);
+      setIsLiked(true);
+    }
+    // setIsLiked(!isLiked);
+  };
 
   const renderBody = () => {
     switch (contentType) {
@@ -199,18 +228,15 @@ function Post({
 
       <div id="buttons" className="grid grid-cols-1 divide-y py-4">
         <div className="flex flex-row gap-x-4 justify-evenly">
-          <p>Likes: {postLikes.length === undefined ? 0 : postLikes.length}</p>
-          <div id="like" className="flex flex-row space-x-4">
-            <Button
-              variant="contained"
-              onClick={() => addLike()}
-              disableElevation={true}
-            >
-              Add Like
-            </Button>
-            <Button variant="outlined" onClick={() => deleteLike()}>
-              Delete Like
-            </Button>
+          <div id="like" className="flex flex-row justify-between space-x-4">
+            <p>Likes: {numLikes === undefined ? 0 : numLikes}</p>
+            <IconButton color="primary" onClick={() => toggleLike()}>
+              {isLiked ? (
+                <Favorite fontSize="large" />
+              ) : (
+                <FavoriteBorderOutlinedIcon fontSize="large" />
+              )}
+            </IconButton>
           </div>
 
           <div>
