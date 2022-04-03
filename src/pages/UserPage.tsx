@@ -37,7 +37,7 @@ const UserPage = ({ path, followId }: UserProps) => {
         const getPostsApiCall = async (userId: string) => {
             try {
                 const fetchedPosts = await getPosts(userId);
-                setPosts(fetchedPosts);
+                setPosts(fetchedPosts.items);
                 setIsPostLoading(false);
             } catch (err) {
                 setErrMsg((err as Error).message);
