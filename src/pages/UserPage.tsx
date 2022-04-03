@@ -7,6 +7,7 @@ import { Alert, Button } from "@mui/material";
 
 import PostList from '../components/PostList';
 import AuthorInfo from '../components/profile/AuthorInfo';
+import { Author } from '../types';
 
 type UserProps = {
     path: string,
@@ -25,13 +26,13 @@ const UserPage = ({ path, followId }: UserProps) => {
     const [isLoading, setIsLoading] = useState(true);
     const [isPostLoading, setIsPostLoading] = useState(true);
     const [currentUserId, setCurrentUserId] = useState("");
-    const [authorInfo, setAuthorInfo] = useState<null | any>(null);
+    const [currentUserInfo, setCurrentUserInfo] = useState<null | Author>(null);
+    const [authorInfo, setAuthorInfo] = useState<null | Author>(null);
     const [posts, setPosts] = useState(Array());
     const BACKEND_HOST = process.env.FLASK_HOST;
 
 
     useEffect(() => {
-
         // Get the user's post 
         const getPostsApiCall = async (userId: string) => {
             try {
@@ -48,6 +49,8 @@ const UserPage = ({ path, followId }: UserProps) => {
         const isFollowerApiCall = async () => {
             const myUserId = await get_author_id(); // Currently returns the loggedin used
             setCurrentUserId(myUserId);
+            const currUserRes = await getSpecAuthor(myUserId);
+            setCurrentUserInfo(currUserRes as Author);
 
             let userRes;
             if (followId === undefined) return;
@@ -70,7 +73,7 @@ const UserPage = ({ path, followId }: UserProps) => {
             }
 
             if (userRes.status === 200) {
-                setAuthorInfo(userRes);
+                setAuthorInfo(userRes as Author);
             }
             setIsLoading(false);
 
@@ -88,17 +91,29 @@ const UserPage = ({ path, followId }: UserProps) => {
 
     const handleFollow = async () => {
         if (followId === undefined) return;
+        if (currentUserInfo === null) return;
+        if (authorInfo === null) return;
         try {
             let res;
-            if (doesFollow === followStatus.pending) {
-                //
-            } else if (doesFollow === followStatus.following) {
+            if (doesFollow === followStatus.following) {
                 res = await followerCall(followId, currentUserId, "DELETE");
                 if (res.status === 204) {
                     setDoesFollow(followStatus.notFollowing);
                 }
-            } else {
-                res = await followerCall(followId, currentUserId, "PUT");
+            } else if (doesFollow === followStatus.notFollowing) {
+                const followRequestObject = {
+                    type: "follow",
+                    summary: `${currentUserInfo.displayName} wants to follow ${authorInfo.displayName}.`,
+                    object: authorInfo,
+                    actor: currentUserInfo
+                }
+                res = await fetch(`/authors/${followId}/inbox`, {
+                    method: "POST",
+                    body: JSON.stringify(followRequestObject),
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                });
                 if (res.status === 200) {
                     setDoesFollow(followStatus.pending);
                 }

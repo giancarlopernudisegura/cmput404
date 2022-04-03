@@ -209,6 +209,7 @@ export const followerRequest = async (
   follower_id: string
 ) => {
   const res = await fetch(`/authors/${author_id}/inbox`);
+  if (res.status >= 400) return undefined;
   const data = await res.json();
   const items = data.items as any[];
   const follow = items.find(item => (item.type as string).toLowerCase() === "follow" && item.actor.id === follower_id) as Follow;

@@ -564,7 +564,7 @@ def post_inbox(author_id: str) -> Response:
     if find_remote_author(author_id):
         post_remote_inbox(author_id, request.json)
     try:
-        if request.json["type"].lower() not in ["followers", "post", "like", "comment"]:
+        if request.json["type"].lower() not in ["follow", "post", "like", "comment"]:
             return Response(status=httpStatus.BAD_REQUEST)
         inbox = Inbox(author_id, json.dumps(request.json))
         db.session.add(inbox)
