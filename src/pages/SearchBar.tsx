@@ -53,7 +53,7 @@ const Search = () => {
     }
 
     return (
-        <div>
+        <div className='mb-4'>
             <Autocomplete 
                 freeSolo
                 options={[...authors]}

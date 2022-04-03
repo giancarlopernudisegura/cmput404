@@ -49,7 +49,6 @@ function AuthorInfo({ author }: AuthorProps) {
                         throw Error();
                     }
                 }
-                console.log('FRIENDS', friends);
                 setMyFriends(friends);
 
             } catch (err) {
@@ -58,7 +57,6 @@ function AuthorInfo({ author }: AuthorProps) {
 
         }
         fetchFriends();
-      
     }, []);
     
 

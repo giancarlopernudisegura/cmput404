@@ -116,7 +116,8 @@ class Post(db.Model, JSONSerializable, InboxItem):
         self.private = private
         self.unlisted = unlisted
         self.title = title
-        self.category = category
+        if self.category != None:
+            self.category = category.split(",")
         self.content = content
         if contentType == None:
             raise Exception("Posts require content type")
