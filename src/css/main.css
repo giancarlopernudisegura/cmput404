@@ -9,3 +9,7 @@
         @apply font-semibold tracking-wide text-lg;
     }
 }
+
+.clickable {
+    cursor: pointer;
+}
