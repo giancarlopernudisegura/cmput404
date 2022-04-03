@@ -8,6 +8,7 @@ import { get_author_id } from '../utils/apiCalls';
 
 import useAuthorId  from '../components/hooks/useAuthorId';  
 import useFollowers from '../components/hooks/useFollowers';
+import useFriends from '../components/hooks/useFriends';
 
 type FeedProps = {
   path: string
@@ -18,22 +19,22 @@ function Homepage(props : FeedProps) {
   const [errMsg, setErrMsg] = useState("");
 
   try {
-
     const authorId = useAuthorId();
 
     if (authorId !== "") {
       // Get the author's followers
       const followers = useFollowers(authorId);
-      console.log('followers:', followers);
 
-      // Get the author's friends
+      if (followers.length > 0) {
+        const friends = useFriends(authorId, followers);
+      }
 
     }
-
 
   } catch (err) {
     setErrMsg('Error: ' + err);
   }
+
   
 
   return (
