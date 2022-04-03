@@ -14,11 +14,12 @@ const ShowAuthor = ({ author, handleClick } : any) => {
     return (
         <div style={{cursor: 'pointer'}} onClick={() => handleClick(author.id)}
         >
-            <CardContent>
-                <p>{author.displayName}</p>
-                <p>{author.github}</p>
+            <CardContent className='flex flex-row gap-x-4 items-stretch hover:bg-gray-100'>
+                <img src={author.profileImage}
+                    className='w-12 rounded-full' />
+                <span className='self-center'>{author.displayName}</span>
             </CardContent>
-            <img src={author.profileImage} style={{ width: "30%"}} />
+            
         </div>
     );
 }

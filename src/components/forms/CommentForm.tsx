@@ -61,7 +61,6 @@ class CommentForm extends Component<Props, State> {
       this.setState({
         authorId: data.toString(),
       });
-      console.log(data);
     });
   }
 
