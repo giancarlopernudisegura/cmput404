@@ -3,6 +3,10 @@ import { followerCall } from '../../utils/apiCalls';
 
 
 export default function useFollowers(authorId: string, followers: Array<any>) {
+    if (authorId === "" || followers.length === 0) {
+        return [];
+    }
+    
     const [friends, setFriends] = useState<Array<any>>([]);
 
     useEffect(() => {

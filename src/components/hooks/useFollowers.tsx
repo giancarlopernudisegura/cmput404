@@ -4,6 +4,10 @@ import { getFollowers } from '../../utils/apiCalls';
 
 
 export default function useFollowers(authorId: string) {
+    if (authorId === "") {
+        return [];
+    }
+
     const [followers, setFollowers] = useState([]);
 
     useEffect(() => {
