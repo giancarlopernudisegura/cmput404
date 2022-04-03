@@ -51,7 +51,7 @@ export async function getPosts(author_id: string, page?:number): Promise<any> {
     var res = await fetch(baseUrl, {
       mode: "cors",
       credentials: "include",
-      method: "GET",
+      method: "GET"
     });
 
     let data = await res.json();
