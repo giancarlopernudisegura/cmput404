@@ -23,6 +23,7 @@ type profileProps = { path: string };
 function Profile({ path }: profileProps) {
   const [errMsg, setErrMsg] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  
   // Dialog
   const [ openDialog, setOnOpenDialog ] = useState<boolean>(false);
 
@@ -51,11 +52,10 @@ function Profile({ path }: profileProps) {
 
     // Set the author's posts
     var postsPromise = authorPromise.then(authorId => { return getPosts(authorId); });
-    postsPromise.then(posts => {  setMyPosts(posts); });
+    postsPromise.then(posts => {  setMyPosts(posts.items); });
 
     Promise.all([authorPromise, postsPromise])
       .then(() => {
-        console.log('Successfully retrieved author, posts, followers and friends');
         setIsLoading(false); 
       })
       .catch(err => { 

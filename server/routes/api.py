@@ -460,7 +460,7 @@ def is_follower(author_id: str, follower_id: str) -> Response:
 )
 @require_authentication
 def remove_follower(author_id: str, follower_id: str) -> Response:
-    if current_user.id != follower_id:
+    if current_user.id != author_id:
         return (
             make_response(jsonify(error=res_msg.NO_PERMISSION)),
             httpStatus.UNAUTHORIZED,
@@ -489,7 +489,7 @@ def remove_follower(author_id: str, follower_id: str) -> Response:
 def add_follower(author_id: str, follower_id: str) -> Response:
     is_local = current_user.is_authenticated
     if current_user.is_authenticated:
-        if current_user.id != follower_id:
+        if current_user.id != author_id:
             return (
                 make_response(jsonify(error=res_msg.NO_PERMISSION)),
                 httpStatus.FORBIDDEN,
@@ -525,23 +525,34 @@ def add_follower(author_id: str, follower_id: str) -> Response:
 @require_authentication
 def get_inbox(author_id: str) -> Response:
     is_local = current_user.is_authenticated
-    if is_local:
-        if current_user.id != author_id:
-            return (
-                make_response(jsonify(error=res_msg.NO_PERMISSION)),
-                httpStatus.UNAUTHORIZED,
-            )
     page, size = pagination(request.args)
     inbox_items = (
         Inbox.query.filter_by(owner=author_id).paginate(page=page, per_page=size, error_out=False).items
     )
-    is_local = current_user.is_authenticated
+    inbox_items = [i.json(is_local) for i in inbox_items]
+    follow_requests = list(filter(lambda i: str(i.get("type", "")).lower() == "follow", inbox_items))
+    if is_local and current_user.id != author_id and follow_requests:
+        return (
+            make_response(
+                jsonify(
+                    type="inbox",
+                    author=f"{HOST}/authors/{author_id}",
+                    items=follow_requests
+                )
+            ),
+            httpStatus.OK,
+        )
+    elif is_local and current_user.id != author_id:
+        return (
+            make_response(jsonify(error=res_msg.NO_PERMISSION)),
+            httpStatus.UNAUTHORIZED,
+        )
     return (
         make_response(
             jsonify(
                 type="inbox",
                 author=f"{HOST}/authors/{author_id}",
-                items=[i.json(is_local) for i in inbox_items],
+                items=inbox_items,
             )
         ),
         httpStatus.OK,
@@ -551,11 +562,10 @@ def get_inbox(author_id: str) -> Response:
 @bp.route("/authors/<string:author_id>/inbox", methods=["POST"])
 @require_authentication
 def post_inbox(author_id: str) -> Response:
-    is_local = current_user.is_authenticated
     if find_remote_author(author_id):
         post_remote_inbox(author_id, request.json)
     try:
-        if request.json["type"].lower() not in ["followers", "post", "like", "comment"]:
+        if request.json["type"].lower() not in ["follow", "post", "like", "comment"]:
             return Response(status=httpStatus.BAD_REQUEST)
         inbox = Inbox(author_id, json.dumps(request.json))
         db.session.add(inbox)

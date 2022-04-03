@@ -111,7 +111,7 @@ const Settings = ({ path }: SettingsProps) => {
     }
 
     const loadUsers = async (page: number): Promise<User[]> => {
-        const res = await fetch(`/authors?size=5&page=${page}`)
+        const res = await fetch(`/authors?size=10&page=${page}`)
         if (res.status !== 200) {
             setIsLoading(false);
             return [];

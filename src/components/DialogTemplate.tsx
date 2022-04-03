@@ -24,26 +24,31 @@ type DialogProps = {
 const DialogTemplate = ({ open, handleClose, updatePost, postBody, setPostBody, postCat, setPostCat, postTitle, setPostTitle, isMarkdown, setIsMarkdown }: DialogProps) => {
 
     return (
-        <Dialog open={open} onClose={() => handleClose()}>
-            <PostForm
-                body={postBody}
-                setBody={setPostBody}
-                category={postCat}
-                setCategory={setPostCat}
-                title={postTitle}
-                setTitle={setPostTitle}
-                isMarkdown={isMarkdown}
-                setIsMarkdown={setIsMarkdown}
-                buttonName={"Update Post"}
-                submitAction={updatePost}
-            />
+            <Dialog 
+                open={open} 
+                onClose={() => handleClose()}
+                fullWidth={true}
+            >
+                
+                <PostForm
+                    body={postBody}
+                    setBody={setPostBody}
+                    category={postCat}
+                    setCategory={setPostCat}
+                    title={postTitle}
+                    setTitle={setPostTitle}
+                    isMarkdown={isMarkdown}
+                    setIsMarkdown={setIsMarkdown}
+                    buttonName={"Update Post"}
+                    submitAction={updatePost}
+                />
 
-            <Button onClick={() => {
-                handleClose();
-            }}>
-                Close
-            </Button>
-        </Dialog>
+                <Button onClick={() => {
+                    handleClose();
+                }}>
+                    Close
+                </Button>
+            </Dialog>
     );
 };
 
