@@ -1,7 +1,6 @@
-import { h, Component, ComponentChild } from 'preact'
-import { AppBar, Card, CardContent, Menu, MenuItem } from '@mui/material';
+import { h } from 'preact'
 import { useEffect, useState } from 'preact/hooks';
-import { Button, CircularProgress } from '@mui/material';
+import { CircularProgress, Alert } from '@mui/material';
 import DrawerMenu from '../components/sidemenu-components/Drawer'
 
 import { getPosts } from '../utils/apiCalls';
@@ -25,9 +24,8 @@ function Homepage(props : FeedProps) {
   const authorId = useAuthorId();
   const followers = useFollowers(authorId);
   const friends = useFriends(authorId, followers);
-  if (authorId !== "" && followers.length > 0 && friends.length > 0) {
-    console.log("Homepage Data:", authorId, followers, friends);
-
+  if (authorId === "" && followers.length === 0) {
+    setErrMsg("Sorry, we're encountering some issues. Please try again later.");
   }
 
   useEffect( () => {
@@ -37,7 +35,6 @@ function Homepage(props : FeedProps) {
       for (let friend of friends) {
         // get friends posts 
         let posts = await getPosts(friend.id);
-        console.log("Fetched posts for friend:", friend.id, posts);
 
         if (posts.length > 0) {
           friendsPostsList.push(...posts);
@@ -48,18 +45,28 @@ function Homepage(props : FeedProps) {
       setLoading(false);
 
     }
-    fetchFriendsPosts();
+
+    try {
+      fetchFriendsPosts();
+    } catch (err) {
+      setErrMsg((err as Error).message);
+    }
+
   }, [authorId, followers, friends])
 
   return (
     <div>
-        <DrawerMenu pageName="Home">
+      {errMsg && (
+        <Alert severity="error">{errMsg}</Alert>
+      )}
 
-          {loading ? <CircularProgress /> : 
-            <PostList initialPosts={friendsPosts} 
-          />}
+      <DrawerMenu pageName="Home">
 
-        </DrawerMenu>
+        {loading ? <CircularProgress /> : 
+          <PostList initialPosts={friendsPosts} 
+        />}
+
+      </DrawerMenu>
     </div>
   )
 }

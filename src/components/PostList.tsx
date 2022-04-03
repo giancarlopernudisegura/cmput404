@@ -22,8 +22,14 @@ function PostList({
   }
 
   return (
-    <div id="post-list" class="container">
-      {initialPosts.length === 0 && <h2>No posts found!</h2>}
+    <div id="post-list" class="container" className="grid grid-cols-1 gap-y-2">
+
+      {initialPosts.length === 0 && 
+        <h2 className=''>
+          No posts found!
+        </h2>
+      }
+
       <ul>
         {initialPosts
           .filter(
