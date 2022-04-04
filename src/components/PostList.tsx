@@ -6,7 +6,6 @@ type PostListProps = {
   initialPosts: Array<any>;
   currentAuthor?: string;
   onRemove?: Function;
-  onShare?: Function;
   handleEdit?: Function;
 };
 
@@ -15,7 +14,6 @@ function PostList({
   currentAuthor,
   onRemove,
   handleEdit,
-  onShare,
 }: PostListProps) {
   if (currentAuthor === undefined) {
     currentAuthor = "Anonymous";
@@ -23,8 +21,14 @@ function PostList({
 
   console.log(initialPosts)
   return (
-    <div id="post-list" class="container">
-      {initialPosts.length === 0 && <h2>No posts found!</h2>}
+    <div id="post-list" class="container" className="grid grid-cols-1 gap-y-2 place-content-center">
+
+      {initialPosts.length === 0 &&
+        <h2 className='place-self-center text-xl'>
+          No posts found!
+        </h2>
+      }
+
       <ul>
         {initialPosts
           .filter(
@@ -43,7 +47,6 @@ function PostList({
               authorId={post.authorId}
               currentAuthor={currentAuthor}
               onRemove={onRemove}
-              onShare={onShare}
               handleEdit={handleEdit}
               contentType={post.contentType}
               visibility={post.visibility}

@@ -8,7 +8,7 @@ import {
   FAILED_ADD_LIKE,
   FAILED_DELETE_LIKE,
   FAILED_GET_COMMENT_LIKES,
-  FAILED_GET_SINGLE_POST,
+  FAILED_ADD_COMMENT_LIKES,
 } from "../utils/errorMsg";
 import { Follow } from "../types"
 
@@ -379,11 +379,14 @@ export function getFollowers(author_id: string): Promise<any> {
 
 export async function getSpecPost(author_id: string, post_id: string) {
   try {
-    const res = await fetch(`${BACKEND_HOST}/authors/${author_id}/posts/${post_id}`, {
-      mode: "cors",
-      credentials: "include",
-      method: "GET",
-    });
+    const res = await fetch(
+      `${BACKEND_HOST}/authors/${author_id}/posts/${post_id}`,
+      {
+        mode: "cors",
+        credentials: "include",
+        method: "GET",
+      }
+    );
 
     if (res.status !== 200) {
       throw new Error();
@@ -427,7 +430,7 @@ export async function editPost(
   }
 }
 /**
- * Get likes for a specific post TODO
+ * Get likes for a specific post
  */
 export async function getPostLikes(author_id: string, post_id: string) {
   const res = await fetch(
@@ -440,7 +443,7 @@ export async function getPostLikes(author_id: string, post_id: string) {
   );
 
   let data = res.json();
-  data.then((likeList) => console.log(likeList.likes));
+  // data.then((likeList) => console.log(likeList.likes));
   return data;
 }
 /**
@@ -496,13 +499,13 @@ export async function addPostLike(author_id: string, post_id: string) {
       }
     );
 
-    let json = await res.json();
+    // let json = await res.json();
 
-    if (res.status !== 200) {
+    if (res.status !== 201) {
       throw Error();
     }
 
-    return { status: res.status, ...json };
+    return { status: res.status };
   } catch (err) {
     throw Error(FAILED_ADD_LIKE);
   }
@@ -512,7 +515,6 @@ export function deletePostLike(author_id: string, post_id: string) {
   const response = fetch(
     `${BACKEND_HOST}/authors/${author_id}/posts/${post_id}/likes`,
     {
-      mode: "cors",
       credentials: "include",
       method: "DELETE",
     }
@@ -527,6 +529,10 @@ export function deletePostLike(author_id: string, post_id: string) {
   return response;
 }
 
+/**
+ * Get all comment likes
+ */
+
 export async function getCommentLikes(
   author_id: string,
   post_id: string,
@@ -534,7 +540,7 @@ export async function getCommentLikes(
 ) {
   try {
     const res = await fetch(
-      `${BACKEND_HOST}/authors/${author_id}/posts/${post_id}/${comment_id}/likes`,
+      `${BACKEND_HOST}/authors/${author_id}/posts/${post_id}/comments/${comment_id}/likes`,
       {
         mode: "cors",
         credentials: "include",
@@ -543,59 +549,73 @@ export async function getCommentLikes(
     );
 
     let data = res.json();
-    data.then((likeList) => console.log(likeList.likes));
+    // data.then((likeList) => console.log(likeList.likes));
+    // console.log("comment likes");
     return data;
   } catch (err) {
     throw Error(FAILED_GET_COMMENT_LIKES);
   }
 }
 
-export async function getSinglePost(author_id: string, post_id: string) {
+/**
+ * Add like to comment
+ */
+export async function addCommentLikes(
+  author_id: string,
+  post_id: string,
+  comment_id: string
+) {
   try {
     const res = await fetch(
-      `${BACKEND_HOST}/authors/${author_id}/posts/${post_id}/`,
+      `${BACKEND_HOST}/authors/${author_id}/posts/${post_id}/comments/${comment_id}/likes`,
       {
         mode: "cors",
         credentials: "include",
-        method: "GET",
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+        },
       }
     );
 
-    let data = res.json()
-    return data
+    // let json = await res.json();
 
+    if (res.status !== 201) {
+      throw Error();
+    }
+
+    return { status: res.status };
   } catch (err) {
-    throw Error(FAILED_GET_SINGLE_POST);
+    throw Error(FAILED_ADD_COMMENT_LIKES);
   }
 }
 
-export async function addSharedPost(authorId: string, post_id: string, postData: any) {
-  const encodedPostData = JSON.stringify(postData);
+/**
+ * Delete likes for a comment
+ * @param author_id
+ * @param post_id
+ * @param comment_id
+ */
 
-  let res;
-  let json;
-  try {
-    // postData contains data from the forms
-    res = await fetch(`${BACKEND_HOST}/authors/${authorId}/posts/${post_id}`, {
+export async function deleteCommentLike(
+  author_id: string,
+  post_id: string,
+  comment_id: string
+) {
+  const response = await fetch(
+    `${BACKEND_HOST}/authors/${author_id}/posts/${post_id}/comments/${comment_id}/likes`,
+    {
       mode: "cors",
-      method: "POST",
       credentials: "include",
-      headers: {
-        "Content-Type": "application/json; charset=utf-8",
-      },
-      body: encodedPostData,
+      method: "DELETE",
+    }
+  )
+    .then((res) => {
+      return res.status;
+    })
+    .catch((err) => {
+      throw Error(FAILED_DELETE_LIKE);
     });
 
-    json = await res.json();
-
-    if (res.status === 200) {
-      return { status: res.status, ...json };
-    } else {
-      throw Error();
-    }
-    // TODO: return post id
-  } catch (err) {
-    throw Error(FAILED_CREATE_POSTS);
-  }
-
+  return response;
 }

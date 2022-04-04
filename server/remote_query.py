@@ -50,6 +50,15 @@ def format_remote_post(author_id, post_id, node_id, return_dict):#format remote 
     }
     return return_dict
 
+remote_likes_types = ["liked", "likes"]#list of the different like types found in remotes
+
+def format_remote_likes(likesDict):#translate remote like format to our like
+    if "type" in likesDict and likesDict["type"] in remote_likes_types:#if the object is a like
+        return { "likes": likesDict["items"]}
+    else:
+        raise Exception("Attempted to translate bad like format from remote")
+
+
 def calculate_remote_page(objType, page, size):#calculate the remote page based on our page
     #objType should be the model Type
     # if page == 2:
@@ -82,46 +91,30 @@ def fix_remote_url(node_items: list, node):#fix url bug in some remote nodes dat
 
 #endpoint interactions
     
-global PREVIOUS_PAGE
-global TOTAL_PAGE
-TOTAL_PAGE = 0
-PREVIOUS_PAGE = 0
+
+session = requests_cache.CachedSession('remote_authors_cache', expire_after=1)
 
 
 def get_all_remote_authors(pagesize, page=1):
-    global PREVIOUS_PAGE
-    global TOTAL_PAGE
-    # print("Previous page", PREVIOUS_PAGE)
-    # print("Total page", TOTAL_PAGE)
-
     nodes = Remote_Node.query.all()
     items = []
-
     if len(nodes) == 0:
         return items
-
-    r = requests.get(f"{nodes[0].id}authors?size={pagesize}&page={page}")
-    if r.status_code == 200 and len(r.json()["items"]) != 0:
-        nodes_items = r.json()["items"]
-        fix_remote_url(nodes_items, nodes[0])
-        items.extend(nodes_items)
-    elif len(r.json().get("items", [])) == 0:
-        if TOTAL_PAGE == 0:
-            TOTAL_PAGE = PREVIOUS_PAGE
-        if len(nodes) == 1:
-            return items
-        r = requests.get(f"{nodes[1].id}authors?size={pagesize}&page={page - TOTAL_PAGE}")
+    for node in nodes:
+        r = session.get(f"{node.id}authors?size=40&page=1", auth=(node.user, node.password))
         if r.status_code == 200 and len(r.json()["items"]) != 0:
-            nodes_items = r.json()["items"]
-            fix_remote_url(nodes_items, nodes[1])
-            items.extend(nodes_items)
-    PREVIOUS_PAGE = page
-    return items
+            node_items = r.json()["items"]
+            fix_remote_url(node_items, nodes[0])
+            items.extend(node_items)   
+    start_idx = pagesize * (page - 1)
+    end_idx = start_idx + pagesize
+    return items[start_idx:end_idx]      
+
 
 def get_remote_author(author_id: str):
     nodes = Remote_Node.query.all()
     for node in nodes:
-        r = author_cache.get(f"{node.id}authors/{author_id}")
+        r = author_cache.get(f"{node.id}authors/{author_id}", auth=(node.user, node.password))
         if r.status_code == 200 and r.json()["type"] == "author":
             node_items = [r.json()]
             fix_remote_url(node_items, node)
@@ -132,7 +125,7 @@ def get_remote_author_posts(author_id: str, size :int, page=1):
     items = []
     nodes = Remote_Node.query.all()
     for node in nodes:
-        r = requests.get(f"{node.id}authors/{author_id}/posts?size={size}&page={page}")
+        r = requests.get(f"{node.id}authors/{author_id}/posts?size={size}&page={page}", auth=(node.user, node.password))
         if r.status_code == 200 and r.json()["type"] == "posts":
             remote_posts = []
             for post in r.json()["items"]:#format posts
@@ -147,7 +140,7 @@ def get_remote_author_posts(author_id: str, size :int, page=1):
 def get_remote_post(author_id: str, post_id: str):#tested for https://backend-404.herokuapp.com
     nodes = Remote_Node.query.all()
     for node in nodes:
-        r = requests.get(f"{node.id}authors/{author_id}/posts/{post_id}")
+        r = requests.get(f"{node.id}authors/{author_id}/posts/{post_id}", auth=(node.user, node.password))
         if r.status_code == 200 and r.json()["type"] == "post":
             return format_remote_post(author_id, post_id, node.id, r.json())
     return None#post not found
@@ -156,7 +149,7 @@ def get_remote_post(author_id: str, post_id: str):#tested for https://backend-40
 def get_remote_comments(author_id: str, post_id: str, size=30, page=1):#get all posts comments
     nodes = Remote_Node.query.all()
     for node in nodes:
-        r = requests.get(f"{node.id}authors/{author_id}/posts/{post_id}/comments?size={size}&page={page}")
+        r = requests.get(f"{node.id}authors/{author_id}/posts/{post_id}/comments?size={size}&page={page}", auth=(node.user, node.password))
         if r.status_code == 200 and r.json()["type"] == "comments":
             return r.json()["items"][:size]
     return []
@@ -164,7 +157,7 @@ def get_remote_comments(author_id: str, post_id: str, size=30, page=1):#get all 
 def get_remote_comment(author_id: str, post_id: str, comment_id: str):#get single comment
     nodes = Remote_Node.query.all()
     for node in nodes:
-        r = requests.get(f"{node.id}authors/{author_id}/posts/{post_id}/comments/{comment_id}")
+        r = requests.get(f"{node.id}authors/{author_id}/posts/{post_id}/comments/{comment_id}", auth=(node.user, node.password))
         if r.status_code == 200 and r.json()["type"] == "comment":
             return r.json()
     return None
@@ -172,26 +165,34 @@ def get_remote_comment(author_id: str, post_id: str, comment_id: str):#get singl
 def get_remote_post_likes(author_id: str, post_id: str):    
     nodes = Remote_Node.query.all()
     for node in nodes:
-        r = requests.get(f"{node.id}authors/{author_id}/posts/{post_id}/likes?size=30&page=1")
-        if r.status_code == 200 and (r.json()["type"] == "likes" or r.json()["type"] == "liked"):
-            return r.json()["items"]
+        r = requests.get(f"{node.id}authors/{author_id}/posts/{post_id}/likes?size=30&page=1", auth=(node.user, node.password))
+        if "type" in r.json():#nodes 1 and 2
+            if r.status_code == 200 and (r.json()["type"] == "likes" or r.json()["type"] == "liked"):
+                return {"likes":r.json()["items"]}
+        else:
+            if r.status_code == 200:
+                return {"likes":r.json()}
     return []
 
 def get_remote_comment_likes(author_id: str, post_id: str, comment_id: str):
     nodes = Remote_Node.query.all()
     for node in nodes:
-        r = requests.get(f"{node.id}authors/{author_id}/posts/{post_id}/comments/{comment_id}/likes?size=30&page=1")
-        if r.status_code == 200 and (r.json()["type"] == "likes" or r.json()["type"] == "liked"):
-            return r.json()["items"]
+        r = requests.get(f"{node.id}authors/{author_id}/posts/{post_id}/comments/{comment_id}/likes?size=30&page=1", auth=(node.user, node.password))
+        if "type" in r.json():#nodes 1 and 2
+            if r.status_code == 200 and (r.json()["type"] == "likes" or r.json()["type"] == "liked"):
+                return {"likes":r.json()["items"]}
+        else:
+            if r.status_code == 200:
+                return {"likes":r.json()}
     return []
 
 
 def get_remote_author_liked(author_id: str):
     nodes = Remote_Node.query.all()
     for node in nodes:
-        r = requests.get(f"{node.id}authors/{author_id}/liked?size=30&page=1")
+        r = requests.get(f"{node.id}authors/{author_id}/liked?size=30&page=1", auth=(node.user, node.password))
         if r.status_code == 200 and r.json()["type"] == "liked":  
-            return r.json()["items"]
+            return {"type":"liked" ,"items":r.json()["items"]}
     return []
 
 def get_remote_followers(author_id: str):
