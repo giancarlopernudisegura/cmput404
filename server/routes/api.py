@@ -215,13 +215,10 @@ def post(author_id: str) -> Response:
                     {"message": "No visibility given for this post"},
                 )
         except KeyError:
-            print(0)
             return Response(status=httpStatus.BAD_REQUEST)
         except ValueError:
-            print(1)
             return Response(status=httpStatus.BAD_REQUEST)
         except TypeError:
-            print(2)
             return Response(status=httpStatus.BAD_REQUEST)
         except Exception as e:
             return utils.json_response(httpStatus.BAD_REQUEST, {"message": str(e)})
