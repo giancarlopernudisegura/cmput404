@@ -6,6 +6,8 @@ import Tab from '@mui/material/Tab';
 import ReactMarkdown from 'react-markdown';
 import { MARKDOWN, PLAIN } from '../../utils/constants';
 import { useEffect, useState } from 'preact/hooks';
+import PrivacyDialog from './PrivacyDialog';
+import Divider from '@mui/material/Divider';
 
 type PostFormProps = {
     body: string,
@@ -28,8 +30,8 @@ type Image = {
 
 const placeholderContent = {
     tempBody: "What's on your mind?",
-    tempTitle: "Enter your title here",
-    tempCategory: "Enter the category here"
+    tempTitle: "Enter your title",
+    tempCategory: "Enter the category of this post"
 };
 
 function PostForm({ body, setBody, category, setCategory, title, setTitle, isMarkdown, setIsMarkdown, buttonName, submitAction }: PostFormProps) {
@@ -38,6 +40,10 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, isMar
     const [tabValue, setTabValue] = useState<number>(0);
     const [imageMkd, setImageMkd] = useState<string>("");
     const [images, setImages] = useState<Array<Image>>([]);
+
+    const privacyOptions = ['Public', 'Friends'];
+    const [privacyDialogOpen, setPrivacyDialogOpen] = useState(false);
+    const [selectedPrivacy, setSelectedPrivacy] = useState(privacyOptions[0]);
 
     useEffect(() => {
         setAuthorDetails();
@@ -93,6 +99,7 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, isMar
     const handleSubmit = async (event: any) => {
         var contentType = PLAIN;
         let imgMkd = '';
+
         if (isMarkdown === true) {
             contentType = MARKDOWN;
             const imagesList = [...images];
@@ -102,10 +109,10 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, isMar
                 for (let img of imagesList) {
                     let imageData = {
                         "title": img.file.name,
-                        "unlisted": true,
+                        "unlisted": false,
                         "content": img.base64,
                         "category": "image",
-                        "visibility": "PUBLIC",
+                        "visibility": selectedPrivacy,
                         "contentType": `${img.file.type}`
                     };
 
@@ -125,12 +132,13 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, isMar
             }
         }
 
+
         const postData = {
             "title": title,
             "content": body + imgMkd,
             "category": category,
-            "contentType": contentType,
-            "visibility": "PUBLIC",
+            "contentType": contentType, 
+            "visibility": selectedPrivacy,
             "unlisted": false,
         };
 
@@ -140,7 +148,7 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, isMar
 
         await submitAction(authorId, postData);
 
-        alert('You have successfully posted to your public page!');
+        alert('You have successfully posted to your page!');
         event.preventDefault();
     };
 
@@ -187,81 +195,120 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, isMar
         setImageMkd(imgMkd);
     }
 
+    // Toggle public, friends only, single friend or unlisted
+
+    const handlePrivacyClickOpen = () => {
+        setPrivacyDialogOpen(true);
+    }
+
+    const handlePrivacyClose = (value: string) => {
+        setPrivacyDialogOpen(false);
+        setSelectedPrivacy(value)
+    }
+
 
     return (
         <div class="create-post"
-            className="bg-zinc-100 border-solid border-1 border-slate-600 w-2/3 m-auto rounded-lg py-4 px-5  my-5">
-            <div class="displayname"
-                className="mb-4 font-semibold">
-                {authorDisplayName}
-            </div>
-
-            <div className='grid grid-cols-1 gap-y-2'>
-                <label className=''>Title</label>
-                <input
-                    type="text"
-                    placeholder={placeholderContent.tempTitle}
-                    onChange={handleTitle}
-                    value={title}
-                ></input>
-            </div>
-
-            <Tabs value={tabValue} onChange={handleTabChange}>
-                <Tab label="Text"></Tab>
-                {(isMarkdown === true) && <Tab label="Preview"></Tab>}
-            </Tabs>
-
-            {(tabValue === 0) && <textarea type="text"
-                placeholder={placeholderContent.tempBody}
-                value={body}
-                onChange={handleBody}
-                className="w-full"
-            >
-            </textarea>}
-
-            {(tabValue === 1) && <ReactMarkdown>{body}</ReactMarkdown>}
-
-            <div className='grid grid-cols-1 gap-y-2'>
-                <label>Category</label>
-                <input
-                    placeholder={placeholderContent.tempCategory}
-                    type="text"
-                    onChange={handleCategory}
-                    value={category}
-                ></input>
-            </div>
-
-            {isMarkdown && (
-                <div>
-                    {imageMkd && <ReactMarkdown>{imageMkd}</ReactMarkdown>}
-                    <input
-                        accept="image/*"
-                        multiple
-                        type="file"
-                        id="upload-file2"
-                        onChange={handleUploadPhoto}
-                    />
+            className="bg-zinc-100 border-solid border-1 border-slate-600 w-2/3 m-auto rounded-lg py-4 px-5 my-5">
+                <div class="displayname"
+                    className="mb-4 font-semibold">
+                    {authorDisplayName}
                 </div>
-            )}
+
+                    <div className='grid grid-cols-1 gap-y-3'>
+                        <label>Title</label>
+                        <input 
+                            type="text"
+                            placeholder={placeholderContent.tempTitle}
+                            onChange={handleTitle}
+                            value={title}
+                            className="w-full rounded-lg p-3"
+                        >
+                        </input>
+                    
+                        <div className='grid grid-cols-1 gap-y-2'>
+                            <div class='tabs' className='mb-4'>
+                                <Tabs value={tabValue} onChange={handleTabChange}>
+                                    <Tab label="Text"></Tab>
+                                    {(isMarkdown === true) && <Tab label="Preview"></Tab>}
+                                </Tabs>
+                            </div>
+
+                            {(tabValue === 0) && 
+                                <textarea type="text"
+                                    placeholder={placeholderContent.tempBody}
+                                    value={body}
+                                    onChange={handleBody}
+                                    className="w-full rounded-lg p-3" 
+                                >    
+                                </textarea>
+                            }
+                            {(tabValue === 1) && 
+                                <div className='bg-white rounded-lg p-3 h-24'>
+                                    <ReactMarkdown>
+                                        {body}
+                                    </ReactMarkdown>
+                                </div>
+                            }
+                        </div>
+                        
+                        <label>Category</label>
+                        <input 
+                            placeholder={placeholderContent.tempCategory}
+                            type="text"
+                            onChange={handleCategory}
+                            value={category}
+                            className="w-full rounded-lg p-3"
+                        ></input>
+
+                    </div>
 
 
-            <div className="flex flex-row justify-between mt-3">
-                <FormControlLabel
-                    checked={isMarkdown}
-                    control={<Switch />}
-                    label="Markdown"
-                    onChange={() => setIsMarkdown(!isMarkdown)}
-                />
-            </div>
-            <div>
-                <Button
-                    variant="contained"
-                    onClick={handleSubmit}
-                    className="w-1/3"
-                >{buttonName}
-                </Button>
-                {/* TODO: toggle public or private */}
-            </div>
+                    <div className="flex flex-col mt-8">
+                        <div className='flex flex-row gap-x-2 mb-5'>
+                            <FormControlLabel
+                                checked={isMarkdown}
+                                control={<Switch />} 
+                                label="Markdown" 
+                                onChange={() => setIsMarkdown(!isMarkdown)}
+                            /> 
+
+                            {isMarkdown && (
+                                <div>
+                                    {imageMkd && <ReactMarkdown>{imageMkd}</ReactMarkdown>}
+                                    <input
+                                        accept="image/*"
+                                        multiple
+                                        type="file"
+                                        id="upload-file2"
+                                        onChange={handleUploadPhoto}
+                                    />
+                                </div>
+                            )}
+                        </div>
+                        
+                        <Divider variant="middle" />
+
+                        <div className='flex flex-row justify-end gap-x-4 mt-5'>
+                            <Button variant="outlined" onClick={handlePrivacyClickOpen}>
+                                {selectedPrivacy}
+                            </Button>
+                            <PrivacyDialog
+                                selectedValue={selectedPrivacy}
+                                open={privacyDialogOpen}
+                                onClose={handlePrivacyClose}
+                                options={privacyOptions}
+                            />
+
+                            <Button variant="contained"
+                                onClick={handleSubmit}
+                                className="w-1/3"
+                            >
+                                {buttonName}
+                            </Button>
+                        </div>
+
+                    </div>
 
         </div>
     );
