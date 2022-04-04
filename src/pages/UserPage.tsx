@@ -123,16 +123,6 @@ const UserPage = ({ path, followId }: UserProps) => {
         }
     }
 
-    async function sharePost(followId: string, postId: string) {
-
-        window.location.href = `${BACKEND_HOST}/app/user/${followId}#${postId}`
-
-        navigator.clipboard.writeText(window.location.href)
-
-        console.log(`${BACKEND_HOST}/app/user/${followId}#${postId}`)
-
-    }
-
     const renderFollowButtonText = () => {
         if (doesFollow === followStatus.following) {
             return "Following"

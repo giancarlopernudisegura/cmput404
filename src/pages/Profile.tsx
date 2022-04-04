@@ -113,34 +113,6 @@ function Profile({ path }: profileProps) {
     setMyPosts(newList);
   }
 
-  async function sharePost(authorId: string, postId: string) {
-
-    window.location.href = `${BACKEND_HOST}/app/profile#${postId}`
-
-    navigator.clipboard.writeText(window.location.href)
-
-    console.log(`${BACKEND_HOST}/app/profile#${postId}`)
-
-    // function getPost(authorId: string, postId: string){
-    //   getSinglePost(authorId.toString(), postId)
-    //   .then((data) => addSharedPost(authorId.toString(), postId, {
-    //     postId: data.id,
-    //     authorName: data.author.displayName,
-    //     authorId: data.author.id,
-    //     title: data.title,
-    //     description: data.description,
-    //     contentType: data.contentType,
-    //     visibility: data.visibility,
-    //     unlisted: data.unlisted,
-    //   }))
-    //   .catch(err => setErrMsg(err.message))
-    // }
-
-    // getPost(authorId, postId);
-    // console.log(myPosts)
-
-  }
-
   return (
     <div id="profile">
       <DrawerMenu pageName="My Profile">
