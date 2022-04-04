@@ -2,7 +2,7 @@ import { h } from "preact";
 import FavoriteBorderOutlinedIcon from "@mui/icons-material/FavoriteBorderOutlined";
 import ChatBubbleOutlineOutlinedIcon from "@mui/icons-material/ChatBubbleOutlineOutlined";
 import ShareOutlinedIcon from "@mui/icons-material/ShareOutlined";
-import { Alert, Icon, IconButton } from "@mui/material";
+import { Alert, Icon, IconButton, Link } from "@mui/material";
 import Button from "@mui/material/Button";
 import { useState, useEffect } from "preact/hooks";
 import Favorite from "@mui/icons-material/Favorite";
@@ -35,6 +35,7 @@ type PostProps = {
   body: string;
   categories: string[],
   origin: string;
+  source: string;
   authorName: string;
   authorId: string;
   currentAuthor?: string;
@@ -52,6 +53,7 @@ function Post({
   body,
   categories,
   origin,
+  source,
   authorName,
   authorId,
   currentAuthor,
@@ -62,6 +64,7 @@ function Post({
   visibility,
   unlisted,
 }: PostProps) {
+  console.log(source, origin);
   var currentUser: string = currentAuthor as string;
 
   //Toggle for like button
@@ -219,7 +222,7 @@ function Post({
                       body: JSON.stringify({
                         type: "post",
                         title,
-                        source: /^https?/.test(postId) ? postId : `${process.env.FLASK_HOST}/authors/${authorId}/posts/${postId}`,
+                        source,
                         origin,
                         content: body,
                         contentType,
@@ -316,6 +319,8 @@ function Post({
             </Button>
           </div>
         </div>
+        <Link href={source}>source</Link>
+        <Link href={origin}>origin</Link>
       </div>
       <div
         id="comment-section"

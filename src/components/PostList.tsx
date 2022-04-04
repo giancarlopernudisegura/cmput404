@@ -36,7 +36,8 @@ function PostList({
               postId={post.postId}
               title={post.title}
               body={post.description}
-              origin={post.source}
+              origin={post.origin}
+              source={post.source}
               categories={post.categories}
               authorName={post.authorName}
               authorId={post.authorId}

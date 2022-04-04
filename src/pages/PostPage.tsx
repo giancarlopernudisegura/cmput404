@@ -94,7 +94,8 @@ const PostPage = ({ path, postId, authorId }: PostPageProps) => {
                                     postId={postInfo.id}
                                     title={postInfo.title}
                                     body={postInfo.description}
-                                    origin={postInfo.source}
+                                    origin={postInfo.origin}
+                                    source={postInfo.source}
                                     categories={postInfo.categories}
                                     authorName={postAuthor}
                                     authorId={authorId as string}

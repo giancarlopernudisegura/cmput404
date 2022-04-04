@@ -57,6 +57,7 @@ export default function Inbox({ path }: notiProps) {
                   visibility={post.visibility}
                   unlisted={post.unlisted}
                   origin={post.origin}
+                  source={post.source}
                   categories={post.categories}
                 />;
               case "follow":
