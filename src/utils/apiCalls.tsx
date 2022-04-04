@@ -23,7 +23,7 @@ export const get_author_id = async () => {
     method: "GET",
   });
   if (res.status === SUCCESS) {
-    const currentUserId : string = res.headers.get("X-User-Id") as string;
+    const currentUserId: string = res.headers.get("X-User-Id") as string;
     if (currentUserId === null) {
       throw new Error("Could not get user id");
     }
@@ -37,7 +37,7 @@ export const get_author_id = async () => {
  * @param author_id
  * @returns Array<Post>
  */
-export async function getPosts(author_id: string, page?:number): Promise<any> {
+export async function getPosts(author_id: string, page?: number): Promise<any> {
   var baseUrl = `${BACKEND_HOST}/authors/${author_id}/posts/`
   var listOfPosts = Array();
 
@@ -69,6 +69,8 @@ export async function getPosts(author_id: string, page?:number): Promise<any> {
         contentType: data.items[i].contentType,
         visibility: data.items[i].visibility,
         unlisted: data.items[i].unlisted,
+        origin: data.items[i].origin,
+        source: data.items[i].source,
       };
       listOfPosts.push(post);
     }

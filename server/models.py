@@ -87,6 +87,8 @@ class Author(db.Model, UserMixin, JSONSerializable):
 class Post(db.Model, JSONSerializable, InboxItem):
     __tablename__ = "post"
     id = db.Column(db.String(), primary_key=True, default=generate_uuid)
+    source = db.Column(db.String())
+    origin = db.Column(db.String())
     author = db.Column(db.ForeignKey("author.id"))
     timestamp = db.Column(db.DateTime())
     private = db.Column(db.Boolean())  # only friends can see
@@ -104,8 +106,10 @@ class Post(db.Model, JSONSerializable, InboxItem):
         content: str,
         contentType,
         private: bool,
+        source: str,
+        origin: str,
         unlisted: bool = False,
-        id: Union[int, None] = None,
+        id: Union[str, None] = None,
     ):
         if author is None:
             raise Exception("Posts require an author")
@@ -122,6 +126,8 @@ class Post(db.Model, JSONSerializable, InboxItem):
         if contentType == None:
             raise Exception("Posts require content type")
         self.contentType = contentType
+        self.source = source
+        self.origin = origin
 
     @property
     def likes(self):
@@ -145,8 +151,8 @@ class Post(db.Model, JSONSerializable, InboxItem):
             "title": self.title,
             "id": id,
             # TODO: going to hardcode source and origin to be only our node for now, must be changed later
-            "source": f"{HOST}/authors/{self.author}/posts/{self.id}",
-            "origin": f"{HOST}/authors/{self.author}/posts/{self.id}",
+            "source": self.source or f"{HOST}/authors/{self.author}/posts/{self.id}",
+            "origin": self.origin or f"{HOST}/authors/{self.author}/posts/{self.id}",
             "description": self.content,
             "contentType": str(self.contentType),
             "author": author.json(local),
