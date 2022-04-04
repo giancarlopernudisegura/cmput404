@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 import { Close } from "@mui/icons-material";
 import { MARKDOWN, PLAIN } from "../../utils/constants";
+import ReactMarkdown from "react-markdown";
 
 type Props = {
   author_id: string;
