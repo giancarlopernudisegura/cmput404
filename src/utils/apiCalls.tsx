@@ -428,7 +428,7 @@ export async function editPost(
   }
 }
 /**
- * Get likes for a specific post TODO
+ * Get likes for a specific post
  */
 export async function getPostLikes(author_id: string, post_id: string) {
   const res = await fetch(

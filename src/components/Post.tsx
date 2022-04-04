@@ -104,7 +104,7 @@ function Post({
       try {
         const currentUserIdTemp = await get_author_id();
         setCurrentUserId(currentUserIdTemp);
-        response = await getPostLikes(currentUserIdTemp, postId);
+        response = await getPostLikes(authorId, postId);
         setPostLikes(response.likes);
         setNumLikes(response.likes.length);
 
