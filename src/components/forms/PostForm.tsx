@@ -7,7 +7,7 @@ import ReactMarkdown from 'react-markdown';
 import { MARKDOWN, PLAIN } from '../../utils/constants';
 import { useEffect, useState } from 'preact/hooks';
 import PrivacyDialog from './PrivacyDialog';
-import Typography from '@mui/material/Typography';
+import Divider from '@mui/material/Divider';
 
 type PostFormProps = { 
     body: string,
@@ -205,7 +205,7 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, isMar
 
     return (
         <div class="create-post"
-            className="bg-zinc-100 border-solid border-1 border-slate-600 w-2/3 m-auto rounded-lg py-4 px-5  my-5">
+            className="bg-zinc-100 border-solid border-1 border-slate-600 w-2/3 m-auto rounded-lg py-4 px-5 my-5">
                 <div class="displayname"
                     className="mb-4 font-semibold">
                     {authorDisplayName}
@@ -260,8 +260,8 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, isMar
                     </div>
 
 
-                    <div className="flex flex-row justify-between mt-12 items-center">
-                        <div className='flex flex-col gap-y-2'>
+                    <div className="flex flex-col mt-8">
+                        <div className='flex flex-row gap-x-2 mb-5'>
                             <FormControlLabel
                                 checked={isMarkdown}
                                 control={<Switch />} 
@@ -282,24 +282,28 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, isMar
                                 </div>
                             )}
                         </div>
-    
-
-                        <Button variant="outlined" onClick={handlePrivacyClickOpen}>
-                            {selectedPrivacy}
-                        </Button>
-                        <PrivacyDialog 
-                            selectedValue={selectedPrivacy}
-                            open={privacyDialogOpen}
-                            onClose={handlePrivacyClose}
-                            options={privacyOptions}
-                        />
                         
-                        <Button variant="contained"
-                            onClick={handleSubmit}
-                            className="w-1/3"
-                        >
-                            {buttonName}
-                        </Button>
+                        <Divider variant="middle" />
+
+                        <div className='flex flex-row justify-end gap-x-4 mt-5'>
+                            <Button variant="outlined" onClick={handlePrivacyClickOpen}>
+                                {selectedPrivacy}
+                            </Button>
+                            <PrivacyDialog
+                                selectedValue={selectedPrivacy}
+                                open={privacyDialogOpen}
+                                onClose={handlePrivacyClose}
+                                options={privacyOptions}
+                            />
+
+                            <Button variant="contained"
+                                onClick={handleSubmit}
+                                className="w-1/3"
+                            >
+                                {buttonName}
+                            </Button>
+                        </div>
+
 
                     </div>
 
