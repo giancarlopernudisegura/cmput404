@@ -3,7 +3,7 @@ import { useEffect, useState } from 'preact/hooks';
 import { CircularProgress, Alert } from '@mui/material';
 import DrawerMenu from '../components/sidemenu-components/Drawer'
 
-import { getPosts } from '../utils/apiCalls';
+import { getPosts, get_author_id } from '../utils/apiCalls';
 
 import useAuthorId  from '../components/hooks/useAuthorId';  
 import useFollowers from '../components/hooks/useFollowers';
@@ -42,7 +42,6 @@ function Homepage(props : FeedProps) {
       }
 
       setFriendsPosts(friendsPostsList);
-      setLoading(false);
 
     }
 
@@ -50,9 +49,11 @@ function Homepage(props : FeedProps) {
       fetchFriendsPosts();
     } catch (err) {
       setErrMsg((err as Error).message);
+    } finally {
+      setLoading(false);
     }
 
-  }, [authorId, followers, friends])
+  }, [followers, friends])
 
   return (
     <div>
