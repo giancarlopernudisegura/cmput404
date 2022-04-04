@@ -101,6 +101,7 @@ const UserPage = ({ path, followId }: UserProps) => {
         } catch (err) {
             setErrMsg((err as Error).message);
             setIsLoading(false);
+            setIsPostLoading(false);
         }
     }, []);
 
@@ -170,7 +171,6 @@ const UserPage = ({ path, followId }: UserProps) => {
                         </Button>
                     </div>
                 )}
-
                 {isPostLoading === true ? <CircularProgress /> : (
                     <div className="flex flex-col m-auto items-center">
                         <PostList

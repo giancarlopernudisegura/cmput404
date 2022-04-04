@@ -249,7 +249,30 @@ function Post({
         <div className="px-3 my-2">
           <h3
             className="font-semibold text-lg mb-2 clickable"
-            onClick={() => route(`/app/authors/${authorId}/posts/${postId}`)}
+            onClick={() => {
+              // get the author id from the url
+              const authIdRegex = /http:\/\/.*\/authors\/([a-z0-9-]+)/g;
+              const authIdExt = authIdRegex.exec(authorId);
+              let newAuthId : any;
+
+              // check if it's a remote node
+              if (authIdExt === null || authIdExt.length === 0) {
+                newAuthId = authorId;
+              } else {
+                newAuthId = authIdExt[1];
+              }
+
+              // get posts Id from the url
+              const postIdRegex = /http:\/\/.*\/authors\/[a-z0-9-]+\/posts\/([a-z0-9-]+)/g;
+              const postIdExt = postIdRegex.exec(postId);
+              let newPostId : any;
+              if (postIdExt === null || postIdExt.length === 0) {
+                newPostId = postId;
+              } else {
+                newPostId = postIdExt[1];
+              }
+              route(`/app/authors/${newAuthId}/posts/${newPostId}`);
+            }}
           >
             {title}
           </h3>
