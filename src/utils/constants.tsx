@@ -5,6 +5,7 @@ export const PLAIN = "text/plain";
 // Post Visibility Types (public, private, friends-only)
 export const PUBLIC = 'PUBLIC';
 export const PRIVATE = 'PRIVATE';
+export const FRIENDS = 'FRIENDS';
 
 // HTTP Status Codes
 export const SUCCESS = 200;
