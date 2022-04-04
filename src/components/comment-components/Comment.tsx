@@ -35,7 +35,6 @@ function Comment({
 }: CommentProps) {
   const [commentLikes, setCommentLikes] = useState(Array());
   const [errMsg, setErrMsg] = useState("");
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [numLikes, setNumLikes] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
 
@@ -44,8 +43,7 @@ function Comment({
       let response;
       try {
         const currentUserIdTemp = await get_author_id();
-        setCurrentUserId(currentUserIdTemp);
-        response = await getCommentLikes(currentUserIdTemp, postId, id);
+        response = await getCommentLikes(authorId, postId, id);
         setCommentLikes(response.likes);
         setNumLikes(response.likes.length);
 

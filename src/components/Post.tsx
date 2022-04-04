@@ -19,7 +19,6 @@ import {
 } from "../utils/apiCalls";
 import ReactMarkdown from "react-markdown";
 import { MARKDOWN, PLAIN } from "../utils/constants";
-import Share from "@mui/icons-material/Share";
 import { route } from "preact-router";
 
 /*
@@ -104,7 +103,7 @@ function Post({
       try {
         const currentUserIdTemp = await get_author_id();
         setCurrentUserId(currentUserIdTemp);
-        response = await getPostLikes(currentUserIdTemp, postId);
+        response = await getPostLikes(authorId, postId);
         setPostLikes(response.likes);
         setNumLikes(response.likes.length);
 
