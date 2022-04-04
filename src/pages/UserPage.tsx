@@ -42,6 +42,7 @@ const UserPage = ({ path, followId }: UserProps) => {
             if (fetchedPosts.length === 0) {
                 alert("There are no more posts to show");
                 setButtonText(NO_MORE_POSTS_TEXT);
+                setIsPostLoading(false);
                 return;
             }
             setPosts([...posts, ...fetchedPosts]);
@@ -73,6 +74,7 @@ const UserPage = ({ path, followId }: UserProps) => {
             if (follow !== undefined) {
                 setDoesFollow(followStatus.pending);
             } else {
+                console.log('022222')
                 const res = await followerCall(followId, myUserId, "GET");
                 if (res.status === 200) {
                     const follower = res.items;
