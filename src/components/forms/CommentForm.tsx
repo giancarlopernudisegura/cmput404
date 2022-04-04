@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 import { Close } from "@mui/icons-material";
 import { MARKDOWN, PLAIN } from "../../utils/constants";
+import ReactMarkdown from "react-markdown";
 
 type Props = {
   author_id: string;
@@ -117,6 +118,8 @@ class CommentForm extends Component<Props, State> {
                 label="Markdown"
                 onChange={this.setMarkdown}
               />
+
+              {this.state.markdown === false ? this.state.body : <ReactMarkdown>{this.state.body}</ReactMarkdown>}
 
               <Button
                 variant="contained"

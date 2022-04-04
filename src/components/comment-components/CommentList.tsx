@@ -1,4 +1,5 @@
 import { h } from "preact";
+import { MARKDOWN, PLAIN } from "../../utils/constants";
 import Comment from "../comment-components/Comment";
 
 /**
@@ -26,7 +27,7 @@ function CommentList({
         </div>
       ) : (
         <ul>
-          {allComments.map((comment) => (
+          {allComments.filter((comment) => comment.contentType === MARKDOWN || comment.contentType === PLAIN).map((comment) => (
             <li key={comment.author}>
               <Comment
                 author={comment.author}
