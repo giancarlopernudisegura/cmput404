@@ -39,13 +39,15 @@ const UserPage = ({ path, followId }: UserProps) => {
         try {
             const postsRes = await getPosts(followId as string, postPage);
             const fetchedPosts = postsRes.items;
-            if (fetchedPosts.length === 0) {
+            const userPublicPosts = fetchedPosts.filter( (post : any) => post.visibility === 'PUBLIC');
+
+            if (userPublicPosts.length === 0) {
                 alert("There are no more posts to show");
                 setButtonText(NO_MORE_POSTS_TEXT);
                 setIsPostLoading(false);
                 return;
             }
-            setPosts([...posts, ...fetchedPosts]);
+            setPosts([...posts, ...userPublicPosts]);
             // update post page
             setPostPage(postPage + 1);
         } catch (err) {
@@ -172,7 +174,7 @@ const UserPage = ({ path, followId }: UserProps) => {
                     </div>
                 )}
                 {isPostLoading === true ? <CircularProgress /> : (
-                    <div className="flex flex-col m-auto items-center">
+                    <div>
                         <PostList
                             initialPosts={posts}
                         />
