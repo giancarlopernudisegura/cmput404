@@ -78,16 +78,6 @@ function Comment({
     // setIsLiked(!isLiked);
   };
 
-  const renderBody = () => {
-    switch (contentType) {
-      case MARKDOWN:
-        return <ReactMarkdown>{body}</ReactMarkdown>;
-      case PLAIN:
-        return <p className="text-lg">{body}</p>;
-    }
-  };
-  
-
   return (
     <div
       id="comment-component"
@@ -109,7 +99,11 @@ function Comment({
           </div>
         </div>
         <div className="my-2 pb-4">
-        {contentType === PLAIN ? <p className="text-lg">{body}</p> : <ReactMarkdown>{body}</ReactMarkdown>}
+          {contentType === PLAIN ? (
+            <p className="text-lg">{body}</p>
+          ) : (
+            <ReactMarkdown>{body}</ReactMarkdown>
+          )}
         </div>
         <div
           id="likes-and-buttons"
