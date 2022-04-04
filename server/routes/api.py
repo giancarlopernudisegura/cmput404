@@ -585,8 +585,10 @@ def get_inbox(author_id: str) -> Response:
 @require_authentication
 def post_inbox(author_id: str) -> Response:
     is_local = current_user.is_authenticated
-    if is_local and find_remote_author(author_id):
-        post_remote_inbox(author_id, request.json)
+    remote_url = find_remote_author(author_id)
+    if is_local and remote_url:
+        status = post_remote_inbox(author_id, json.dumps(request.json), remote_url)
+        return Response(status=status)
     try:
         if request.json["type"].lower() not in ["follow", "post", "like", "comment"]:
             return Response(status=httpStatus.BAD_REQUEST)
