@@ -142,7 +142,8 @@ def get_remote_post(author_id: str, post_id: str):#tested for https://backend-40
     for node in nodes:
         r = requests.get(f"{node.id}authors/{author_id}/posts/{post_id}", auth=(node.user, node.password))
         if r.status_code == 200 and r.json()["type"] == "post":
-            return format_remote_post(author_id, post_id, node.id, r.json())
+            # return format_remote_post(author_id, post_id, node.id, r.json())
+            return r.json()
     return None#post not found
 
 
