@@ -308,7 +308,6 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, isMar
                             </Button>
                         </div>
 
-
                     </div>
 
         </div>

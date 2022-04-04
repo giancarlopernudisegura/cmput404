@@ -8,4 +8,4 @@ export const FAILED_FETCH_SPEC_POST = "Unable to get the information about this 
 export const FAILED_ADD_LIKE = "There was an error adding a like to this post";
 export const FAILED_DELETE_LIKE = "There was an error deleting a like for this post";
 export const FAILED_GET_COMMENT_LIKES = "There was an error getting likes for comments";
-export const FAILED_GET_SINGLE_POST = "There was an error getting this post";
+export const FAILED_ADD_COMMENT_LIKES = "There was an error adding a like for this comment";

@@ -6,7 +6,6 @@ type PostListProps = {
   initialPosts: Array<any>;
   currentAuthor?: string;
   onRemove?: Function;
-  onShare?: Function;
   handleEdit?: Function;
 };
 
@@ -15,7 +14,6 @@ function PostList({
   currentAuthor,
   onRemove,
   handleEdit,
-  onShare,
 }: PostListProps) {
   if (currentAuthor === undefined) {
     currentAuthor = "Anonymous";
@@ -45,7 +43,6 @@ function PostList({
                 authorId={post.authorId}
                 currentAuthor={currentAuthor}
                 onRemove={onRemove}
-                onShare={onShare}
                 handleEdit={handleEdit}
                 contentType={post.contentType}
                 visibility={post.visibility}

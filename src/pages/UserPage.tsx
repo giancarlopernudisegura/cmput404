@@ -4,10 +4,12 @@ import { CircularProgress } from '@mui/material';
 import { useEffect, useState } from "preact/hooks";
 import { get_author_id, followerCall, getSpecAuthor, getPosts, followerRequest } from '../utils/apiCalls';
 import { Alert, Button } from "@mui/material";
+import { LOAD_MORE_TEXT, NO_MORE_POSTS_TEXT } from '../utils/constants';
 
 import PostList from '../components/PostList';
 import AuthorInfo from '../components/profile/AuthorInfo';
 import { Author } from '../types';
+
 
 type UserProps = {
     path: string,
@@ -30,19 +32,31 @@ const UserPage = ({ path, followId }: UserProps) => {
     const [authorInfo, setAuthorInfo] = useState<null | Author>(null);
     const [posts, setPosts] = useState(Array());
     const BACKEND_HOST = process.env.FLASK_HOST;
+    const [ postPage, setPostPage ] = useState(1);
+    const [ buttonText, setButtonText ] = useState(LOAD_MORE_TEXT);
 
+    const getNextPostPage = async () => {
+        try {
+            const postsRes = await getPosts(followId as string, postPage);
+            const fetchedPosts = postsRes.items;
+            if (fetchedPosts.length === 0) {
+                alert("There are no more posts to show");
+                setButtonText(NO_MORE_POSTS_TEXT);
+                return;
+            }
+            setPosts([...posts, ...fetchedPosts]);
+            // update post page
+            setPostPage(postPage + 1);
+        } catch (err) {
+            setErrMsg((err as Error).message);
+        }
+        setIsPostLoading(false);
+    }
 
     useEffect(() => {
         // Get the user's post 
         const getPostsApiCall = async (userId: string) => {
-            try {
-                const fetchedPosts = await getPosts(userId);
-                setPosts(fetchedPosts.items);
-                setIsPostLoading(false);
-            } catch (err) {
-                setErrMsg((err as Error).message);
-                setIsPostLoading(false);
-            }
+            getNextPostPage();
         }
 
         // Check if the user is following the author
@@ -123,16 +137,6 @@ const UserPage = ({ path, followId }: UserProps) => {
         }
     }
 
-    async function sharePost(followId: string, postId: string) {
-
-        window.location.href = `${BACKEND_HOST}/app/user/${followId}#${postId}`
-
-        navigator.clipboard.writeText(window.location.href)
-
-        console.log(`${BACKEND_HOST}/app/user/${followId}#${postId}`)
-
-    }
-
     const renderFollowButtonText = () => {
         if (doesFollow === followStatus.following) {
             return "Following"
@@ -167,10 +171,18 @@ const UserPage = ({ path, followId }: UserProps) => {
                 )}
 
                 {isPostLoading === true ? <CircularProgress /> : (
-                    <PostList
-                        initialPosts={posts}
-                        onShare={sharePost}
-                    />
+                    <div className="flex flex-col m-auto items-center">
+                        <PostList
+                            initialPosts={posts}
+                        />
+                        <Button
+                            className="w-fit"
+                            variant="contained"
+                            onClick={() => getNextPostPage()}
+                        >
+                            {buttonText}
+                        </Button>
+                    </div>
                 )}
 
             </DrawerMenu>

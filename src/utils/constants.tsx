@@ -9,3 +9,8 @@ export const PRIVATE = 'PRIVATE';
 // HTTP Status Codes
 export const SUCCESS = 200;
 export const NOT_FOUND = 404;
+
+// UserPage 
+export const LOAD_MORE_TEXT = "Load More";
+export const NO_MORE_POSTS_TEXT = "No more posts to show";
+export const ALERT_NO_MORE_POSTS_TEXT = "There are no more posts to show";
