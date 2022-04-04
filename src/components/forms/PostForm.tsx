@@ -41,6 +41,10 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, isMar
     const [ imageMkd, setImageMkd ] = useState<string>("");
     const [ images, setImages ] = useState<Array<Image>>([]);
 
+    const privacyOptions = ['Public', 'Friends'];
+    const [privacyDialogOpen, setPrivacyDialogOpen] = useState(false);
+    const [selectedPrivacy, setSelectedPrivacy] = useState(privacyOptions[0]);
+
     useEffect(() => {
         setAuthorDetails();
     }, []);
@@ -104,10 +108,10 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, isMar
                 for (let img of imagesList) {
                     let imageData = {
                         "title": img.file.name,
-                        "unlisted": true,
+                        "unlisted": false,
                         "content": img.base64,
                         "category": "image",
-                        "visibility": "PUBLIC",
+                        "visibility": selectedPrivacy.toUpperCase(),
                         "contentType": `${img.file.type}`
                     };
 
@@ -132,7 +136,7 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, isMar
             "content": body + imgMkd,
             "category": category,
             "contentType": contentType, 
-            "visibility": "PUBLIC",
+            "visibility": selectedPrivacy.toUpperCase(),
             "unlisted": false,
         };
 
@@ -190,9 +194,7 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, isMar
     }
 
     // Toggle public, friends only, single friend or unlisted
-    const privacyOptions = ['Public', 'Friends', 'Unlisted', 'Specific Friends...'];
-    const [privacyDialogOpen, setPrivacyDialogOpen] = useState(false);
-    const [selectedPrivacy, setSelectedPrivacy] = useState(privacyOptions[0]);
+
     const handlePrivacyClickOpen = () => {
         setPrivacyDialogOpen(true);
     }
