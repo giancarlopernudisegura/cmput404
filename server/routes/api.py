@@ -466,7 +466,7 @@ def is_follower(author_id: str, follower_id: str) -> Response:
 )
 @require_authentication
 def remove_follower(author_id: str, follower_id: str) -> Response:
-    if current_user.id != author_id:
+    if current_user.id != follower_id and current_user.id != author_id:
         return (
             make_response(jsonify(error=res_msg.NO_PERMISSION)),
             httpStatus.UNAUTHORIZED,
