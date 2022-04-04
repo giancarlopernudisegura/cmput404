@@ -99,6 +99,7 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, isMar
     const handleSubmit = async (event: any) => {
         var contentType = PLAIN;
         let imgMkd = '';
+
         if (isMarkdown === true) {
             contentType = MARKDOWN;
             const imagesList = [...images];
@@ -111,7 +112,7 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, isMar
                         "unlisted": false,
                         "content": img.base64,
                         "category": "image",
-                        "visibility": selectedPrivacy.toUpperCase(),
+                        "visibility": selectedPrivacy,
                         "contentType": `${img.file.type}`
                     };
 
@@ -131,12 +132,13 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, isMar
             }
         }
 
+
         const postData = {
             "title": title,
             "content": body + imgMkd,
             "category": category,
             "contentType": contentType, 
-            "visibility": selectedPrivacy.toUpperCase(),
+            "visibility": selectedPrivacy,
             "unlisted": false,
         };
 
@@ -146,7 +148,7 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, isMar
 
         await submitAction(authorId, postData);
 
-        alert('You have successfully posted to your public page!');
+        alert('You have successfully posted to your page!');
         event.preventDefault();
     };
 

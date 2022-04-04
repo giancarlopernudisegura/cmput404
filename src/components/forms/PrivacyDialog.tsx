@@ -26,7 +26,7 @@ export default function PrivacyDialog(props: PrivacyDialogProps) {
     return(
         <Dialog onClose={handleClose} open={open}>
             <DialogTitle>Select Privacy</DialogTitle>
-            <List sx={{ pt: 0}}>
+            <List sx={{ pt: 0 }}>
                 {options.map( (option) => (
                     <ListItem button onClick={() => handleListItemClick(option)} key={option}>
                         <ListItemText primary={option} />
