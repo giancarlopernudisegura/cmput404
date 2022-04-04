@@ -42,6 +42,7 @@ const UserPage = ({ path, followId }: UserProps) => {
             if (fetchedPosts.length === 0) {
                 alert("There are no more posts to show");
                 setButtonText(NO_MORE_POSTS_TEXT);
+                setIsPostLoading(false);
                 return;
             }
             setPosts([...posts, ...fetchedPosts]);
@@ -100,6 +101,7 @@ const UserPage = ({ path, followId }: UserProps) => {
         } catch (err) {
             setErrMsg((err as Error).message);
             setIsLoading(false);
+            setIsPostLoading(false);
         }
     }, []);
 
@@ -169,9 +171,11 @@ const UserPage = ({ path, followId }: UserProps) => {
                         </Button>
                     </div>
                 )}
-
+                {console.log("INITIAL POSTS", isPostLoading)}
+                {console.log("POSTS", posts)}
                 {isPostLoading === true ? <CircularProgress /> : (
                     <div className="flex flex-col m-auto items-center">
+                        {console.log("CAME HERE")}
                         <PostList
                             initialPosts={posts}
                         />
