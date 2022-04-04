@@ -10,9 +10,15 @@ import {
     inboxCall, 
     getGithubStream, 
     newPublicPost,
- } from '../utils/apiCalls';
+} from '../utils/apiCalls';
 
-import { PUBLIC, SUCCESS } from '../utils/constants';
+import { 
+    LOAD_MORE_TEXT, 
+    NO_MORE_POSTS_TEXT, 
+    PUBLIC, 
+    SUCCESS, 
+    ALERT_NO_MORE_POSTS_TEXT 
+} from '../utils/constants';
 
 import PostForm from '../components/forms/PostForm';
 import DrawerMenu from '../components/sidemenu-components/Drawer';
@@ -39,6 +45,7 @@ function ExplorePage({ path }: ExplorePageProps) {
     const [ publicPosts, setPublicPosts ] = useState(Array());
     const [ githubActivity, setGithubActivity ] = useState(Array());
     const [ errMsg, setErrMsg ] = useState("");
+    const [ buttonText, setButtonText ] = useState(LOAD_MORE_TEXT);
 
     // Handle tab changes 
     const [value, setValue] = useState(0);
@@ -58,6 +65,11 @@ function ExplorePage({ path }: ExplorePageProps) {
                 author['pageNumber'] = 1;
                 return author;
             });
+
+            if (authors.length === 0) {
+                alert(ALERT_NO_MORE_POSTS_TEXT);
+                setButtonText(NO_MORE_POSTS_TEXT);
+            }
 
             for (let i = 0; i < authors.length; i++) {
                 let author = authors[i];
@@ -85,7 +97,7 @@ function ExplorePage({ path }: ExplorePageProps) {
                 allPosts.push(...posts);
             });
             setAuthorPage(authorPage + 1);
-            setPublicPosts(allPosts);
+            setPublicPosts([...publicPosts, ...allPosts]);
         } catch (err) {
             setErrMsg('Error retrieving posts: ' + (err as Error).message);
         }
@@ -154,10 +166,11 @@ function ExplorePage({ path }: ExplorePageProps) {
                                 />
 
                                 <Button
+                                    className="w-fit"
                                     onClick={() => getNextAuthorPage()}
                                     variant="contained"
                                 >
-                                    Load More
+                                    {buttonText}
                                 </Button>
                             </div>
                         )}
@@ -181,8 +194,6 @@ function ExplorePage({ path }: ExplorePageProps) {
                     }
                 </TabPanel>
             </Box>
-
-
         </DrawerMenu>
     );
 }

@@ -1,7 +1,7 @@
 import { h } from "preact";
 import { useState, useEffect } from "preact/hooks";
 import DrawerMenu from "../components/sidemenu-components/Drawer";
-import { Alert, CircularProgress } from "@mui/material";
+import { Alert, Button, CircularProgress } from "@mui/material";
 
 import {
   getPosts,
@@ -13,8 +13,8 @@ import {
 
 import PostList from "../components/PostList";
 import AuthorInfo from "../components/profile/AuthorInfo";
-import DialogTemplate from "../components/DialogTemplate";
-import { MARKDOWN } from "../utils/constants";
+import DialogTemplate from '../components/DialogTemplate';
+import { LOAD_MORE_TEXT, MARKDOWN, NO_MORE_POSTS_TEXT } from '../utils/constants';
 
 type profileProps = { path: string };
 
@@ -32,39 +32,62 @@ function Profile({ path }: profileProps) {
   const [editPostTitle, setEditPostTitle] = useState<string>("");
   const [editIsPostMkd, setEditIsPostMkd] = useState<boolean>(false);
 
-  // get author data
-  const [author, setAuthor] = useState(Object());
-  const [myPosts, setMyPosts] = useState(Array());
+  // get author data 
+  const [ author, setAuthor ] = useState(Object());
+  const [ myPosts, setMyPosts ] = useState(Array());
+  const [ postPage, setPostPage ] = useState(1);
+  const [ buttonText, setButtonText ] = useState(LOAD_MORE_TEXT);
   const BACKEND_HOST = process.env.FLASK_HOST;
 
   //Posts that have been shared by author
   const [sharedPosts, setSharedPosts] = useState(Array());
 
+  const getNextPostPage = async () => {
+    try {
+        const postsRes = await getPosts(author.id, postPage);
+        const fetchedPosts = postsRes.items;
+        if (fetchedPosts.length === 0) {
+            alert("There are no more posts to show");
+            setButtonText(NO_MORE_POSTS_TEXT);
+            return;
+        }
+        setMyPosts([...myPosts, ...fetchedPosts]);
+        // update post page
+        setPostPage(postPage + 1);
+    } catch (err) {
+        setErrMsg((err as Error).message);
+    }
+  }
+
   useEffect(() => {
     const authorPromise = get_author_id().then((author_id: any) => {
-      getSpecAuthor(author_id).then((data) => {
+      getSpecAuthor(author_id).then(data => {
         setAuthor(data);
+        console.log("DATA", data);
       });
       return author_id;
     });
 
     // Set the author's posts
-    var postsPromise = authorPromise.then((authorId) => {
-      return getPosts(authorId);
+    var postsPromise = authorPromise.then(authorId => { 
+      let posts = getPosts(authorId, postPage); 
+      setPostPage(postPage + 1);
+      return posts;
     });
-    postsPromise.then((posts) => {
-      setMyPosts(posts.items);
-    });
+    postsPromise.then(posts => {  setMyPosts(posts.items); });
 
     Promise.all([authorPromise, postsPromise])
       .then(() => {
         setIsLoading(false);
       })
-      .catch((err) => {
-        setErrMsg("Error retrieving profile data: " + err.message);
+      .catch(err => {
+        setErrMsg('Error retrieving profile data: ' + err.message);
         setIsLoading(false);
       });
+
   }, []);
+
+
 
   function handleRemove(postId: string) {
     // open the modal to make sure
@@ -76,15 +99,15 @@ function Profile({ path }: profileProps) {
 
     function removePost(authorId: string, postId: string) {
       // call api to delete post
-      deletePost(authorId, postId).catch((err) => {
-        setErrMsg(err.message);
-      });
+      deletePost(authorId, postId)
+        .catch(err => { setErrMsg(err.message); });
     }
 
     removePost(author.id, postId);
   }
 
   async function handleEdit(newPostBody: any) {
+
     // initialize values
     setIdEditPost(newPostBody.postId);
     setEditPostBody(newPostBody.description);
@@ -102,15 +125,9 @@ function Profile({ path }: profileProps) {
       setErrMsg((err as Error).message);
     }
 
-    const newList = myPosts.map((post) => {
+    const newList = myPosts.map(post => {
       if (post.postId === IdEditPost) {
-        return {
-          ...newPostBody,
-          description: newPostBody.content,
-          authorId: post.authorId,
-          authorName: post.authorName,
-          postId: post.postId,
-        };
+        return { ...newPostBody, description: newPostBody.content, authorId: post.authorId, authorName: post.authorName, postId: post.postId };
       } else {
         return post;
       }
@@ -124,36 +141,49 @@ function Profile({ path }: profileProps) {
       <DrawerMenu pageName="My Profile">
         {errMsg && <Alert severity="error">{errMsg}</Alert>}
 
-        {isLoading === true ? (
-          <CircularProgress className="grid place-items-center h-screen" />
-        ) : (
-          <div className="flex flex-col m-auto">
-            <AuthorInfo author={author} is_owner />
-
-            <PostList
-              initialPosts={myPosts}
-              currentAuthor={author.displayName}
-              onRemove={handleRemove}
-              handleEdit={handleEdit}
-            />
-
-            {openDialog && (
-              <DialogTemplate
-                open={openDialog}
-                handleClose={() => setOnOpenDialog(false)}
-                updatePost={editPostCall}
-                postBody={editPostBody}
-                setPostBody={setEditPostBody}
-                postCat={editPostCat}
-                setPostCat={setEditPostCat}
-                postTitle={editPostTitle}
-                setPostTitle={setEditPostTitle}
-                isMarkdown={editIsPostMkd}
-                setIsMarkdown={setEditIsPostMkd}
+        {isLoading === true ?
+          <CircularProgress
+            className="grid place-items-center h-screen" /> : (
+            <div className="flex flex-col m-auto">
+              <AuthorInfo
+                author={author}
+                is_owner
               />
-            )}
-          </div>
-        )}
+
+              <PostList
+                initialPosts={myPosts}
+                currentAuthor={author.displayName}
+                onRemove={handleRemove}
+                handleEdit={handleEdit}
+              />
+
+              <Button
+                className="w-fit"
+                variant="contained"
+                onClick={() => getNextPostPage()}
+              >
+                {buttonText}
+              </Button>
+
+              {openDialog && 
+                <DialogTemplate 
+                  open={openDialog}
+                  handleClose={() => setOnOpenDialog(false)}
+                  updatePost={editPostCall}
+                  postBody={editPostBody}
+                  setPostBody={setEditPostBody}
+                  postCat={editPostCat}
+                  setPostCat={setEditPostCat}
+                  postTitle={editPostTitle}
+                  setPostTitle={setEditPostTitle}
+                  isMarkdown={editIsPostMkd}
+                  setIsMarkdown={setEditIsPostMkd}
+                />
+              }
+            </div>
+          )
+        }
+
       </DrawerMenu>
     </div>
   );
