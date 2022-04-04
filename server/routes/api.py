@@ -158,7 +158,8 @@ def post(author_id: str) -> Response:
     if (match := re.match(regex, author_id)):
         author_id = match.group(1)
     print(author_id)
-    if not Author.query.filter_by(id=author_id).first() and not find_remote_author(author_id):
+    is_remote = find_remote_author(author_id)
+    if not Author.query.filter_by(id=author_id).first() and not is_remote:
         return utils.json_response(
                     httpStatus.NOT_FOUND,
                     {"message": "Author not found"},
@@ -172,10 +173,8 @@ def post(author_id: str) -> Response:
             .items
         )
         remote_posts = []
-        if len(posts) < size and not Author.query.filter_by(id=author_id).first():
-            remote_size = size - len(posts) 
-            remote_page = calculate_remote_page(Post, page, size)
-            remote_posts = get_remote_author_posts(author_id, remote_size, page=remote_page)
+        if is_remote and not Author.query.filter_by(id=author_id).first():
+            remote_posts = get_remote_author_posts(author_id, size, page)
         posts_items = [post.json(is_local) for post in posts]
         posts_items.extend(remote_posts)
         return (
