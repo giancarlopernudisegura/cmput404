@@ -167,7 +167,7 @@ def post(author_id: str) -> Response:
     if request.method == "GET":
         page, size = pagination(request.args)
         posts = (
-            Post.query.filter_by(author=author_id, private=False)
+            Post.query.filter_by(author=author_id)
             .paginate(page=page, per_page=size, error_out=False)
             .items
         )
