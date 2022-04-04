@@ -2,7 +2,7 @@ import { h } from "preact";
 import FavoriteBorderOutlinedIcon from "@mui/icons-material/FavoriteBorderOutlined";
 import ChatBubbleOutlineOutlinedIcon from "@mui/icons-material/ChatBubbleOutlineOutlined";
 import ShareOutlinedIcon from "@mui/icons-material/ShareOutlined";
-import { Alert, IconButton } from "@mui/material";
+import { Alert, IconButton, Typography } from "@mui/material";
 import Button from "@mui/material/Button";
 import { useState, useEffect } from "preact/hooks";
 import Favorite from "@mui/icons-material/Favorite";
@@ -12,16 +12,14 @@ import CommentList from "../components/comment-components/CommentList";
 import CommentForm from "../components/forms/CommentForm";
 import {
   addPostLike,
-  deletePostLike,
   getAllComments,
-  getCommentLikes,
   getPostLikes,
-  getSinglePost,
+  deletePostLike,
+  get_author_id,
 } from "../utils/apiCalls";
 import ReactMarkdown from "react-markdown";
 import { MARKDOWN, PLAIN } from "../utils/constants";
-import Share from "@mui/icons-material/Share"
-import { route } from 'preact-router';
+import { route } from "preact-router";
 
 /*
     Post component
@@ -36,7 +34,6 @@ type PostProps = {
   currentAuthor?: string;
   contentType: string;
   onRemove?: Function;
-  onShare?: Function;
   handleEdit?: Function;
   visibility: string;
   unlisted: boolean;
@@ -50,7 +47,6 @@ function Post({
   authorId,
   currentAuthor,
   onRemove,
-  onShare,
   contentType,
   handleEdit,
   visibility,
@@ -58,11 +54,12 @@ function Post({
 }: PostProps) {
   var currentUser: string = currentAuthor as string;
 
+  const BACKEND_HOST = process.env.FLASK_HOST;
   //Toggle for like button
-  const [likeToggle, setLikeToggle] = useState(true);
-  const [isLiked, setIsLiked] = useState(0);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [isLiked, setIsLiked] = useState(false);
+  const [numLikes, setNumLikes] = useState(0);
   const [postLikes, setPostLikes] = useState(Array());
-  const [commentLikes, setCommentLikes] = useState(Array());
 
   const [comments, setComments] = useState(Array());
   const [errMsg, setErrMsg] = useState("");
@@ -89,69 +86,54 @@ function Post({
     setOpen(false);
   };
 
-  const addLike = () => {
-    addPostLike(authorId.toString(), postId);
-    for (let i = 0; i < postLikes.length; i++) {
-      if (postLikes[i].author.displayName == currentUser) {
-        alert("You already liked this post.");
-      }
-    }
-  };
-
-  const deleteLike = () => {
-    for (let i = 0; i < postLikes.length; i++) {
-      if (postLikes[i].author.displayName == currentUser) {
-        deletePostLike(authorId.toString(), postId);
-      } else {
-        alert("You haven't liked this post yet.");
-      }
-    }
-  };
-
-  const shareButton = () => {
-    function getPost(authorId: string, postId: string){
-      getSinglePost(authorId.toString(), postId)
-      .then((data) => console.log(data))
-    }
-
-    getPost(authorId, postId);
-
-  }
-
   useEffect(() => {
     // Fetch all the comments of the post from the API
-    function fetchComments(authorId: string, postId: string) {
-      getAllComments(authorId.toString(), postId)
-        .then((data) => setComments(data))
-        .catch((err) => {
-          setErrMsg(err.message);
+    async function fetchComments(authorId: string, postId: string) {
+      let data;
+      try {
+        data = await getAllComments(authorId.toString(), postId);
+        setComments(data);
+      } catch (err) {
+        setErrMsg((err as Error).message);
+      }
+    }
+
+    async function getAllLikes(authorId: string, postId: string) {
+      let response;
+      try {
+        const currentUserIdTemp = await get_author_id();
+        setCurrentUserId(currentUserIdTemp);
+        response = await getPostLikes(authorId, postId);
+        setPostLikes(response.likes);
+        setNumLikes(response.likes.length);
+
+        // check if user liked the post
+        response.likes.forEach((like: any) => {
+          if (like.author.id === currentUserIdTemp) {
+            setIsLiked(true);
+          }
         });
-    }
-
-    function getAllLikes(authorId: string, postId: string) {
-      getPostLikes(authorId.toString(), postId)
-        .then((data) => setPostLikes(data.likes))
-        .catch((err) => setErrMsg(err.message));
-    }
-
-    function getCommentLike(authorId: string, postId: string, commentId: string){ // Need help getting the comment id from here
-      getCommentLikes(authorId.toString(), postId, commentId)
-      .then((data) => setCommentLikes(data))
-      .catch((err) => setErrMsg(err.message));
+        console.log("LIKES", response);
+      } catch (err) {
+        setErrMsg((err as Error).message);
+      }
     }
 
     fetchComments(authorId, postId);
     getAllLikes(authorId, postId);
   }, []);
 
-  const toggleFunction = () => {
-    setLikeToggle(!likeToggle);
-    if (likeToggle) {
-      setIsLiked(isLiked + 1);
+  const toggleLike = async () => {
+    if (isLiked) {
+      await deletePostLike(authorId, postId);
+      setNumLikes(numLikes - 1);
+      setIsLiked(false);
+    } else {
+      await addPostLike(authorId, postId);
+      setNumLikes(numLikes + 1);
+      setIsLiked(true);
     }
-    if (!likeToggle) {
-      setIsLiked(isLiked - 1);
-    }
+    // setIsLiked(!isLiked);
   };
 
   const renderBody = () => {
@@ -163,8 +145,21 @@ function Post({
     }
   };
 
+  //GET LINK TO SHARE POST
+
+  function getPostLink(authorId: string, postId: string) {
+    navigator.clipboard
+      .writeText(`${BACKEND_HOST}/app/authors/${authorId}/posts/${postId}`)
+      .then(() => {
+        alert("Link successfully copied to clipboard!");
+      })
+      .catch(() => {
+        alert("Something went wrong with adding the link to the clipboard.");
+      });
+  }
+
   return (
-    <li className="bg-zinc-100 border-solid border-1 border-slate-600 w-2/3 m-auto rounded-lg py-4 px-5  my-5" id={postId} name={postId}>
+    <li className="bg-zinc-100 border-solid border-1 border-slate-600 w-2/3 m-auto rounded-lg py-4 px-5  my-5">
       <div className="grid grid-cols-1 gap-y-2">
         <div className="flex flex-row justify-between">
           <span className="font-semibold tracking-wide text-lg">
@@ -178,22 +173,22 @@ function Post({
                 <IconButton>
                   <EditIcon
                     cursor="pointer"
-                    style={{ fill: "black" }} 
+                    style={{ fill: "black" }}
                     onClick={() => {
                       const editPost = {
-                          postId,
-                          title,
-                          description: body,
-                          contentType,
-                          visibility,
-                          unlisted
+                        postId,
+                        title,
+                        description: body,
+                        contentType,
+                        visibility,
+                        unlisted,
                       };
 
                       handleEdit(editPost);
-                  }}
+                    }}
                   />
-                </IconButton>)
-              }
+                </IconButton>
+              )}
 
               {onRemove && (
                 <IconButton>
@@ -204,42 +199,34 @@ function Post({
                       onRemove(postId);
                     }}
                   />
-                </IconButton>)
-              }
+                </IconButton>
+              )}
             </span>
           )}
         </div>
 
         <div className="px-3 my-2">
-          <h3 className="font-semibold text-lg mb-2 clickable" onClick={() => route(`/app/authors/${authorId}/posts/${postId}`)}>{title}</h3>
+          <h3
+            className="font-semibold text-lg mb-2 clickable"
+            onClick={() => route(`/app/authors/${authorId}/posts/${postId}`)}
+          >
+            {title}
+          </h3>
           {renderBody()}
         </div>
       </div>
 
       <div id="buttons" className="grid grid-cols-1 divide-y py-4">
         <div className="flex flex-row gap-x-4 justify-evenly">
-          <p>Likes: {postLikes.length === undefined ? 0 : postLikes.length}</p>
-          <div id="like" className="flex flex-row space-x-4">
-            <Button
-              variant="contained"
-              onClick={() => addLike()}
-              disableElevation={true}
-            >
-              Add Like
-            </Button>
-            <Button variant="outlined" onClick={() => deleteLike()}>
-              Delete Like
-            </Button>
-            {/* <IconButton color="primary" onClick={() => addLike()}>
-              {likeToggle ? (
-                <FavoriteBorderOutlinedIcon fontSize="large" />
-              ) : (
+          <div id="like" className="flex flex-row justify-between space-x-4">
+            <p>Likes: {numLikes === undefined ? 0 : numLikes}</p>
+            <IconButton color="primary" onClick={() => toggleLike()}>
+              {isLiked ? (
                 <Favorite fontSize="large" />
+              ) : (
+                <FavoriteBorderOutlinedIcon fontSize="large" />
               )}
             </IconButton>
-            <IconButton color="primary" onClick={() => deleteLike()}>
-              <ThumbDown fontSize="large" />
-            </IconButton> */}
           </div>
 
           <div>
@@ -259,13 +246,14 @@ function Post({
             />
           </div>
 
-          <div style={{fill: "black"}}>
-            <IconButton style={{fill: "black"}} onClick={() => {
-              if (onShare) {
-                onShare(authorId, postId)
-              }
-            }}>
-            <ShareOutlinedIcon fontSize="large" />
+          <div style={{ fill: "black" }}>
+            <IconButton
+              style={{ fill: "black" }}
+              onClick={() => {
+                getPostLink(authorId, postId);
+              }}
+            >
+              <ShareOutlinedIcon fontSize="large" />
             </IconButton>
           </div>
           <div>
@@ -290,7 +278,12 @@ function Post({
         >
           Total Comments for this post: {comments.length}
         </div>
-        <CommentList allComments={comments} />
+        <CommentList
+          allComments={comments}
+          authorId={authorId}
+          postId={postId}
+          currentAuthor={currentUser}
+        />
       </div>
     </li>
   );
