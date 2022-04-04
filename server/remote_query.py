@@ -92,6 +92,7 @@ def fix_remote_url(node_items: list, node):#fix url bug in some remote nodes dat
 #endpoint interactions
     
 
+session = requests_cache.CachedSession('remote_authors_cache', expire_after=1)
 
 
 def get_all_remote_authors(pagesize, page=1):
@@ -100,7 +101,7 @@ def get_all_remote_authors(pagesize, page=1):
     if len(nodes) == 0:
         return items
     for node in nodes:
-        r = requests.get(f"{node.id}authors?size=40&page=1", auth=(node.user, node.password))
+        r = session.get(f"{node.id}authors?size=40&page=1", auth=(node.user, node.password))
         if r.status_code == 200 and len(r.json()["items"]) != 0:
             node_items = r.json()["items"]
             fix_remote_url(node_items, nodes[0])
