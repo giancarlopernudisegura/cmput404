@@ -4,6 +4,7 @@ from server.models import Author, Inbox, Post, Comment, Requests, Like, Remote_N
 import requests
 import requests_cache
 import os
+import re
 
 
 author_cache = requests_cache.CachedSession('author_cache')
@@ -246,13 +247,13 @@ def submit_remote_follow_request(author_id: str, follower_id: str):
 
 #inbox wrappers
 
-def post_remote_inbox(author_id: str, obj):#posts a given model to inbox
-    nodes = Remote_Node.query.all()
-    for node in nodes:
-        r = requests.get(f"{node.id}authors/{author_id}")
-        if r.status_code == 200 and r.json()["type"] == "author":
-            r = requests.post(f"{node.id}authors/{author_id}/inbox", auth=(node.user, node.password), json=obj)
-        
+def post_remote_inbox(author_id: str, obj, remote_url: str):#posts a given model to inbox
+    #stuff
+    hosturl = re.match('^https?:\/\/[^/]*\/', remote_url).group(0)
+    node = Remote_Node.query.filter_by(id=hosturl).first()
+    headers = {'Content-type': 'application/json'}
+    r = requests.post(f"{node.id}authors/{author_id}/inbox", auth=(node.user, node.password), json=obj, headers=headers)
+    return r.status_code
 
 def put_remote_like_inbox(remote_author_id: str, like_author_id: str, comment_id = None, post_id = None):
     if comment_id and post_id:
