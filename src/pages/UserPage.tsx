@@ -74,7 +74,6 @@ const UserPage = ({ path, followId }: UserProps) => {
             if (follow !== undefined) {
                 setDoesFollow(followStatus.pending);
             } else {
-                console.log('022222')
                 const res = await followerCall(followId, myUserId, "GET");
                 if (res.status === 200) {
                     const follower = res.items;

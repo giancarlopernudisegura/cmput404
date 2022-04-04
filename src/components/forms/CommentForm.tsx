@@ -54,7 +54,6 @@ class CommentForm extends Component<Props, State> {
 
   setMarkdown() {
     this.setState({ markdown: !this.state.markdown });
-    console.log("MARKDOWN:", this.state.markdown);
   }
 
   setAuthorDetails() {

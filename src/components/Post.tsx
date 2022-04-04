@@ -59,7 +59,6 @@ function Post({
   visibility,
   unlisted,
 }: PostProps) {
-  console.log(source, origin);
   var currentUser: string = currentAuthor as string;
 
   const BACKEND_HOST = process.env.FLASK_HOST;
@@ -123,7 +122,6 @@ function Post({
             setIsLiked(true);
           }
         });
-        console.log("LIKES", response);
       } catch (err) {
         setErrMsg((err as Error).message);
       }

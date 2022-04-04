@@ -470,7 +470,6 @@ export async function newPublicComment(
       }
     );
 
-    console.log(encodedCommentData);
   } catch (err) {
     throw Error(FAILED_CREATE_COMMENT);
   }

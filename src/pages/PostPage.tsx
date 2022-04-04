@@ -36,7 +36,6 @@ const PostPage = ({ path, postId, authorId }: PostPageProps) => {
         const getSpecPostFromApi = async () => {
             try {
                 const response = await getSpecPost(authorId as string, postId as string);
-                console.log("RESPONSE", response);
                 setPostInfo(response);
                 setPostAuthor(response.author.displayName);
             } catch (err) {
@@ -63,7 +62,6 @@ const PostPage = ({ path, postId, authorId }: PostPageProps) => {
         let newEditPost;
         try {
             newEditPost = await editPost(authorId, IdEditPost, newPostBody);
-            console.log("NEW EDIT", newEditPost);
         } catch (err) {
             setErrorMsg((err as Error).message);
         }

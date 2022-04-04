@@ -17,19 +17,17 @@ export default function SectionTabs({ sectionContent }: TabPanelProps) {
     const handleChange = (event: React.SyntheticEvent, newValue: number) => {
         setValue(newValue);
     }
-    console.log('SECTION CONTENT', sectionContent);
     const [tabLabels, setTabLabels] = useState(Array());
 
-    useEffect( () => {
+    useEffect(() => {
         const unpackSectionContents = () => {
             let labels = Object.keys(sectionContent);
             setTabLabels(labels);
         }
         unpackSectionContents();
-        console.log('tabLabels', tabLabels);
 
     }, [sectionContent])
-    
+
 
     return (
         <Box sx={{ width: '100%' }}>
