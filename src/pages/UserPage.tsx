@@ -28,7 +28,7 @@ const UserPage = ({ path, followId }: UserProps) => {
     const [currentUserId, setCurrentUserId] = useState("");
     const [currentUserInfo, setCurrentUserInfo] = useState<null | Author>(null);
     const [authorInfo, setAuthorInfo] = useState<null | Author>(null);
-    const [posts, setPosts] = useState(Array());
+    const [posts, setPosts] = useState([]);
     const BACKEND_HOST = process.env.FLASK_HOST;
 
 
@@ -37,7 +37,7 @@ const UserPage = ({ path, followId }: UserProps) => {
         const getPostsApiCall = async (userId: string) => {
             try {
                 const fetchedPosts = await getPosts(userId);
-                setPosts(fetchedPosts);
+                setPosts(fetchedPosts.items);
                 setIsPostLoading(false);
             } catch (err) {
                 setErrMsg((err as Error).message);

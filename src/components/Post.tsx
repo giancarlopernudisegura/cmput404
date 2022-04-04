@@ -2,12 +2,13 @@ import { h } from "preact";
 import FavoriteBorderOutlinedIcon from "@mui/icons-material/FavoriteBorderOutlined";
 import ChatBubbleOutlineOutlinedIcon from "@mui/icons-material/ChatBubbleOutlineOutlined";
 import ShareOutlinedIcon from "@mui/icons-material/ShareOutlined";
-import { Alert, IconButton } from "@mui/material";
+import { Alert, Icon, IconButton } from "@mui/material";
 import Button from "@mui/material/Button";
 import { useState, useEffect } from "preact/hooks";
 import Favorite from "@mui/icons-material/Favorite";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import LoopIcon from '@mui/icons-material/Loop';
 import CommentList from "../components/comment-components/CommentList";
 import CommentForm from "../components/forms/CommentForm";
 import {
@@ -17,6 +18,7 @@ import {
   getCommentLikes,
   getPostLikes,
   getSinglePost,
+  get_author_id,
 } from "../utils/apiCalls";
 import ReactMarkdown from "react-markdown";
 import { MARKDOWN, PLAIN } from "../utils/constants";
@@ -31,6 +33,8 @@ type PostProps = {
   postId: string;
   title: string;
   body: string;
+  categories: string[],
+  origin: string;
   authorName: string;
   authorId: string;
   currentAuthor?: string;
@@ -46,6 +50,8 @@ function Post({
   postId,
   title,
   body,
+  categories,
+  origin,
   authorName,
   authorId,
   currentAuthor,
@@ -63,6 +69,7 @@ function Post({
   const [isLiked, setIsLiked] = useState(0);
   const [postLikes, setPostLikes] = useState(Array());
   const [commentLikes, setCommentLikes] = useState(Array());
+  const [loggedUserId, setLoggedUserId] = useState("");
 
   const [comments, setComments] = useState(Array());
   const [errMsg, setErrMsg] = useState("");
@@ -109,9 +116,9 @@ function Post({
   };
 
   const shareButton = () => {
-    function getPost(authorId: string, postId: string){
+    function getPost(authorId: string, postId: string) {
       getSinglePost(authorId.toString(), postId)
-      .then((data) => console.log(data))
+        .then((data) => console.log(data))
     }
 
     getPost(authorId, postId);
@@ -134,14 +141,16 @@ function Post({
         .catch((err) => setErrMsg(err.message));
     }
 
-    function getCommentLike(authorId: string, postId: string, commentId: string){ // Need help getting the comment id from here
+    function getCommentLike(authorId: string, postId: string, commentId: string) { // Need help getting the comment id from here
       getCommentLikes(authorId.toString(), postId, commentId)
-      .then((data) => setCommentLikes(data))
-      .catch((err) => setErrMsg(err.message));
+        .then((data) => setCommentLikes(data))
+        .catch((err) => setErrMsg(err.message));
     }
 
     fetchComments(authorId, postId);
     getAllLikes(authorId, postId);
+    get_author_id()
+      .then(setLoggedUserId);
   }, []);
 
   const toggleFunction = () => {
@@ -174,26 +183,54 @@ function Post({
           {/* Display these buttons if the author of the  post is the current author */}
           {authorName === currentUser && (
             <span className="flex space-x-4">
-              {handleEdit && (
+              {/* TODO: show edit button if current user is the author, otherwise, show a re-share button */}
+              {loggedUserId == authorId ? (handleEdit && (
                 <IconButton>
                   <EditIcon
                     cursor="pointer"
-                    style={{ fill: "black" }} 
+                    style={{ fill: "black" }}
                     onClick={() => {
                       const editPost = {
-                          postId,
-                          title,
-                          description: body,
-                          contentType,
-                          visibility,
-                          unlisted
+                        postId,
+                        title,
+                        description: body,
+                        contentType,
+                        visibility,
+                        unlisted
                       };
 
                       handleEdit(editPost);
-                  }}
+                    }}
                   />
                 </IconButton>)
-              }
+              ) : <IconButton>
+                <LoopIcon
+                  cursor="pointer"
+                  style={{ fill: "black" }}
+                  onClick={async () => {
+                    // TODO: create new post (dup)
+                    await fetch(`/authors/${loggedUserId}/posts/`, {
+                      mode: "cors",
+                      method: "POST",
+                      credentials: "include",
+                      headers: {
+                        "Content-Type": "application/json; charset=utf-8",
+                      },
+                      body: JSON.stringify({
+                        type: "post",
+                        title,
+                        source: /^https?/.test(postId) ? postId : `${process.env.FLASK_HOST}/authors/${authorId}/posts/${postId}`,
+                        origin,
+                        content: body,
+                        contentType,
+                        category: categories.join(),
+                        visibility,
+                        unlisted
+                      }),
+                    });
+                  }}
+                />
+              </IconButton>}
 
               {onRemove && (
                 <IconButton>
@@ -259,13 +296,13 @@ function Post({
             />
           </div>
 
-          <div style={{fill: "black"}}>
-            <IconButton style={{fill: "black"}} onClick={() => {
+          <div style={{ fill: "black" }}>
+            <IconButton style={{ fill: "black" }} onClick={() => {
               if (onShare) {
                 onShare(authorId, postId)
               }
             }}>
-            <ShareOutlinedIcon fontSize="large" />
+              <ShareOutlinedIcon fontSize="large" />
             </IconButton>
           </div>
           <div>

@@ -23,6 +23,8 @@ function ShareList({ sharedPosts, onShare }: ShareListProps) {
                 postId={post.id}
                 title={post.title}
                 body={post.description}
+                origin={post.source}
+                categories={post.categories}
                 authorName={post.author.displayName}
                 authorId={post.author.id}
                 onShare={onShare}
