@@ -19,7 +19,6 @@ function PostList({
     currentAuthor = "Anonymous";
   }
 
-  console.log(initialPosts)
   return (
     <div id="post-list" class="container" className="grid grid-cols-1 gap-y-2 place-content-center">
 

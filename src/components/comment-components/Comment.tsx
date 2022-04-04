@@ -53,14 +53,12 @@ function Comment({
             setIsLiked(true);
           }
         });
-        console.log("COMMENT LIKES", response);
       } catch (err) {
         setErrMsg((err as Error).message);
       }
     }
 
     commentLikes(authorId, postId, id);
-    console.log(isLiked);
   }, []);
 
   const toggleLike = async () => {
@@ -68,12 +66,10 @@ function Comment({
       await deleteCommentLike(authorId, postId, id);
       setNumLikes(numLikes - 1);
       setIsLiked(false);
-      console.log("delete");
     } else {
       await addCommentLikes(authorId, postId, id);
       setNumLikes(numLikes + 1);
       setIsLiked(true);
-      console.log("add");
     }
     // setIsLiked(!isLiked);
   };

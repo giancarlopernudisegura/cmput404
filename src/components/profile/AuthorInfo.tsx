@@ -28,7 +28,7 @@ function AuthorInfo({ author, is_owner = false }: AuthorProps) {
                 return followers;
             }
             catch (err) {
-                console.log('Error fetching followers:', err);
+                console.error('Error fetching followers:', err);
             }
         }
 
@@ -54,7 +54,7 @@ function AuthorInfo({ author, is_owner = false }: AuthorProps) {
                 setMyFriends(friends);
 
             } catch (err) {
-                console.log('Error fetching friends:', err);
+                console.error('Error fetching friends:', err);
             }
 
         }

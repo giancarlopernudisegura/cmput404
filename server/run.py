@@ -17,6 +17,7 @@ load_dotenv()
 
 dir = os.path.abspath(os.path.dirname(__file__))
 FRONT_END_HOST = os.getenv("PREACT_HOST")
+BACK_END_HOST = os.getenv("FLASK_HOST")
 
 migrate = Migrate()
 
@@ -65,7 +66,8 @@ def create_app(config_filename=None):
     # add CORS
     @app.after_request
     def after_request(response):
-        response.headers.add("Access-Control-Allow-Origin", f"{request.origin}")
+        origin = request.origin or BACK_END_HOST
+        response.headers.add("Access-Control-Allow-Origin", f"{origin}")
         response.headers.add(
             "Access-Control-Allow-Headers", "Content-Type,Authorization,Set-Cookie"
         )

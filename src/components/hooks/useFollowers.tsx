@@ -20,10 +20,10 @@ export default function useFollowers(authorId: string) {
                 return followers;
             }
             catch (err) {
-                console.log('Error fetching followers:', err);
+                console.error('Error fetching followers:', err);
             }
         }
-        fetchFollowers();  
+        fetchFollowers();
     }, []);
 
     return followers;
