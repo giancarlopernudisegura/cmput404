@@ -208,7 +208,7 @@ def test_followers(test_client: FlaskClient):
     assert r.status_code == 200
     data = json.loads(r.data.decode("utf-8"))
     assert len(data["items"]) == 1
-    r = test_client.delete(f"/authors/{T_USER2_UUID}/followers/{T_USER1_UUID}", follow_redirects=True)
+    r = test_client.delete(f"/authors/{T_USER1_UUID}/followers/{T_USER2_UUID}", follow_redirects=True)
     assert r.status_code == 204
     r = test_client.get(f"/authors/{T_USER1_UUID}/followers/{T_USER2_UUID}", follow_redirects=True)
     assert r.status_code == 200
