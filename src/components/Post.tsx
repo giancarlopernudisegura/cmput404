@@ -252,31 +252,27 @@ function Post({
           <h3
             className="font-semibold text-lg mb-2 clickable"
             onClick={() => {
-              console.log("AUTHOR ID", authorId);
-              const authIdreg = /http:\/\/.*\/authors\/([a-z0-9-]+)/g;
-              const authId = authIdreg.exec(authorId);
-              console.log("AUTH ID", authId);
+              // get the author id from the url
+              const authIdRegex = /http:\/\/.*\/authors\/([a-z0-9-]+)/g;
+              const authIdExt = authIdRegex.exec(authorId);
               let newAuthId : any;
-              if (authId === null || authId.length === 0) {
+
+              // check if it's a remote node
+              if (authIdExt === null || authIdExt.length === 0) {
                 newAuthId = authorId;
               } else {
-                newAuthId = authId[1];
+                newAuthId = authIdExt[1];
               }
-              console.log("NEW AUTH ID", newAuthId);
 
               // get posts Id from the url
-              const postIdReg = /http:\/\/.*\/authors\/[a-z0-9-]+\/posts\/([a-z0-9-]+)/g;
-              const postIdRes = postIdReg.exec(postId);
-              console.log("POST ID", postId);
-              console.log("POST ID RES", postIdRes);
+              const postIdRegex = /http:\/\/.*\/authors\/[a-z0-9-]+\/posts\/([a-z0-9-]+)/g;
+              const postIdExt = postIdRegex.exec(postId);
               let newPostId : any;
-              if (postIdRes === null || postIdRes.length === 0) {
+              if (postIdExt === null || postIdExt.length === 0) {
                 newPostId = postId;
               } else {
-                newPostId = postIdRes[1];
+                newPostId = postIdExt[1];
               }
-              console.log("NEW POST ID", newPostId);
-
               route(`/app/authors/${newAuthId}/posts/${newPostId}`);
             }}
           >
