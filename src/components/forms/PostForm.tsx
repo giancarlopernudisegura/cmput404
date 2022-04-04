@@ -28,8 +28,8 @@ type Image = {
 
 const placeholderContent = {
     tempBody: "What's on your mind?",
-    tempTitle: "Enter your title here",
-    tempCategory: "Enter the category here"
+    tempTitle: "Enter your title",
+    tempCategory: "Enter the category of this post"
 };
 
 function PostForm({ body, setBody, category, setCategory, title, setTitle, isMarkdown, setIsMarkdown, buttonName, submitAction } : PostFormProps) {
@@ -196,70 +196,83 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, isMar
                     {authorDisplayName}
                 </div>
 
-                    <div className='grid grid-cols-1 gap-y-2'>
-                        <label className=''>Title</label>
+                    <div className='grid grid-cols-1 gap-y-3'>
+                        <label>Title</label>
                         <input 
                             type="text"
                             placeholder={placeholderContent.tempTitle}
                             onChange={handleTitle}
                             value={title}
-                        ></input>
-                    </div>
+                            className="w-full rounded-lg p-3"
+                        >
+                        </input>
                     
-                    <Tabs value={tabValue} onChange={handleTabChange}>
-                        <Tab label="Text"></Tab>
-                        {(isMarkdown === true) && <Tab label="Preview"></Tab>}
-                    </Tabs>
+                        <div className='grid grid-cols-1 gap-y-2'>
+                            <div class='tabs' className='mb-4'>
+                                <Tabs value={tabValue} onChange={handleTabChange}>
+                                    <Tab label="Text"></Tab>
+                                    {(isMarkdown === true) && <Tab label="Preview"></Tab>}
+                                </Tabs>
+                            </div>
 
-                    {(tabValue === 0) && <textarea type="text"
-                        placeholder={placeholderContent.tempBody}
-                        value={body}
-                        onChange={handleBody}
-                        className="w-full" 
-                    >    
-                    </textarea>}
-
-                    {(tabValue === 1) && <ReactMarkdown>{body}</ReactMarkdown>}
-
-                    <div className='grid grid-cols-1 gap-y-2'>
+                            {(tabValue === 0) && 
+                                <textarea type="text"
+                                    placeholder={placeholderContent.tempBody}
+                                    value={body}
+                                    onChange={handleBody}
+                                    className="w-full rounded-lg p-3" 
+                                >    
+                                </textarea>
+                            }
+                            {(tabValue === 1) && 
+                                <div className='bg-white rounded-lg p-3 h-24'>
+                                    <ReactMarkdown>
+                                        {body}
+                                    </ReactMarkdown>
+                                </div>
+                            }
+                        </div>
+                       
                         <label>Category</label>
                         <input 
                             placeholder={placeholderContent.tempCategory}
                             type="text"
                             onChange={handleCategory}
                             value={category}
+                            className="w-full rounded-lg p-3"
                         ></input>
+
                     </div>
 
-                    {isMarkdown && (
-                        <div>
-                            {imageMkd && <ReactMarkdown>{imageMkd}</ReactMarkdown>}
-                            <input 
-                                accept="image/*" 
-                                multiple 
-                                type="file" 
-                                id="upload-file2" 
-                                onChange={handleUploadPhoto}
-                            />
+
+                    <div className="flex flex-row justify-between mt-12 items-center">
+                        <div className='flex flex-col gap-y-2'>
+                            <FormControlLabel
+                                checked={isMarkdown}
+                                control={<Switch />} 
+                                label="Markdown" 
+                                onChange={() => setIsMarkdown(!isMarkdown)}
+                            /> 
+
+                            {isMarkdown && (
+                                <div>
+                                    {imageMkd && <ReactMarkdown>{imageMkd}</ReactMarkdown>}
+                                    <input
+                                        accept="image/*"
+                                        multiple
+                                        type="file"
+                                        id="upload-file2"
+                                        onChange={handleUploadPhoto}
+                                    />
+                                </div>
+                            )}
                         </div>
-                    )}
-                    
-
-                    <div className="flex flex-row justify-between mt-3">
-                        <FormControlLabel
-                            checked={isMarkdown}
-                            control={<Switch />} 
-                            label="Markdown" 
-                            onChange={() => setIsMarkdown(!isMarkdown)}
-                        />
-                    </div>
-                    <div>
                         <Button variant="contained"
                             onClick={handleSubmit}
                             className="w-1/3"
-                        >{buttonName}
+                        >
+                            {buttonName}
                         </Button>
-                    {/* TODO: toggle public or private */}
                     </div>
 
         </div>

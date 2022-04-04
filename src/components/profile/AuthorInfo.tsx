@@ -13,8 +13,6 @@ type AuthorProps = {
 };
 
 function AuthorInfo({ author, is_owner = false }: AuthorProps) {
-    // const [myFollowers, setMyFollowers] = useState(Array());
-    // const [myFriends, setMyFriends] = useState(Array())
 
     if (author === undefined) {
         return <h1>Error loading information about this author.</h1>;
