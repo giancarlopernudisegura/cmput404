@@ -171,11 +171,8 @@ const UserPage = ({ path, followId }: UserProps) => {
                         </Button>
                     </div>
                 )}
-                {console.log("INITIAL POSTS", isPostLoading)}
-                {console.log("POSTS", posts)}
                 {isPostLoading === true ? <CircularProgress /> : (
                     <div className="flex flex-col m-auto items-center">
-                        {console.log("CAME HERE")}
                         <PostList
                             initialPosts={posts}
                         />
