@@ -77,7 +77,7 @@ def multiple_authors() -> Response:
     authors = Author.query.paginate(page=page, per_page=size, error_out=False).items
     is_local = current_user.is_authenticated
     remote_authors = []
-    if len(authors) < size:
+    if is_local and len(authors) < size:
         remote_size = size - len(authors) 
         remote_page = calculate_remote_page(Author, page, size)
         remote_authors = get_all_remote_authors(remote_size, page=remote_page)
@@ -114,7 +114,7 @@ def single_author(author_id: str) -> Response:
     if request.method == "GET":
         if author != None:#local author
             return make_response(jsonify(author.json(is_local))), httpStatus.OK
-        else:#try remote author
+        elif is_local:#try remote author
             regex = r"https?:\/\/.*\/authors\/(.+)"
             if (match := re.match(regex, author_id)):
                 author_id = match.group(1)
@@ -123,6 +123,8 @@ def single_author(author_id: str) -> Response:
                 return make_response(jsonify(remote_author_dict)), httpStatus.OK
             else:
                 return Response(status=httpStatus.NOT_FOUND)
+        else:
+            return Response(status=httpStatus.NOT_FOUND)
     elif request.method == "POST":
         if not is_local or not current_user.id == author_id:
             return Response(status=httpStatus.FORBIDDEN)
@@ -139,7 +141,7 @@ def single_author(author_id: str) -> Response:
 def get_post(author_id: str, post_id: str) -> Response:
     post = Post.query.filter_by(id=post_id, private=False).first()
     is_local = current_user.is_authenticated
-    if post == None:
+    if post == None and is_local:
         regex = r"https?:\/\/.*\/authors\/(.+)"
         if (match := re.match(regex, author_id)):
             author_id = match.group(1)
@@ -154,11 +156,13 @@ def get_post(author_id: str, post_id: str) -> Response:
 @bp.route("/authors/<path:author_id>/posts/", methods=["GET", "POST"])
 @require_authentication
 def post(author_id: str) -> Response:
+    is_local = current_user.is_authenticated
     regex = r"https?:\/\/.*\/authors\/(.+)"
     if (match := re.match(regex, author_id)):
         author_id = match.group(1)
-    print(author_id)
-    is_remote = find_remote_author(author_id)
+    is_remote = None
+    if is_local:
+        is_remote = find_remote_author(author_id)
     if not Author.query.filter_by(id=author_id).first() and not is_remote:
         return utils.json_response(
                     httpStatus.NOT_FOUND,
@@ -173,7 +177,7 @@ def post(author_id: str) -> Response:
             .items
         )
         remote_posts = []
-        if is_remote and not Author.query.filter_by(id=author_id).first():
+        if is_local and is_remote and not Author.query.filter_by(id=author_id).first():
             remote_posts = get_remote_author_posts(author_id, size, page)
         posts_items = [post.json(is_local) for post in posts]
         posts_items.extend(remote_posts)
@@ -314,28 +318,29 @@ def specific_post(author_id: str, post_id: str) -> Response:
 )
 @require_authentication
 def get_comments(author_id: str, post_id: str) -> Response:
+    is_local = current_user.is_authenticated
     host_name = HOST
     regex = r"https?:\/\/.*\/authors\/(.+)"
     if (match := re.match(regex, author_id)):
         author_id = match.group(1)
-    remote_comment_host = find_remote_post(author_id, post_id)
-    if not Post.query.filter_by(id=post_id).first() and not remote_comment_host:
-        return utils.json_response(
-                    httpStatus.NOT_FOUND,
-                    {"message": f"Parent post {post_id} not found"},
-                )
-    if remote_comment_host:
-        host_name = remote_comment_host
+    if is_local:
+        remote_comment_host = find_remote_post(author_id, post_id)
+        if not Post.query.filter_by(id=post_id).first() and not remote_comment_host:
+            return utils.json_response(
+                        httpStatus.NOT_FOUND,
+                        {"message": f"Parent post {post_id} not found"},
+                    )
+        if remote_comment_host:
+            host_name = remote_comment_host
     page, size = pagination(request.args)
     comments = (
         Comment.query.filter_by(post=post_id).paginate(page=page, per_page=size, error_out=False).items
     )
     remote_comments = []
-    if len(comments) < size:
+    if is_local and len(comments) < size:
         remote_size = size - len(comments) 
         remote_page = calculate_remote_page(Comment, page, size)
         remote_comments = get_remote_comments(author_id, post_id, size=remote_size, page=remote_page)
-    is_local = current_user.is_authenticated
     comments_items = [comment.json(is_local) for comment in comments]
     comments_items.extend(remote_comments)
     return (
@@ -358,16 +363,19 @@ def get_comments(author_id: str, post_id: str) -> Response:
     methods=["GET"],
 )
 def get_comment(author_id: str, post_id: str, comment_id: str) -> Response:
+    is_local = current_user.is_authenticated
     comment = Comment.query.filter_by(id=comment_id).first()
     if comment != None:#is local comment
         is_local = current_user.is_authenticated
         return make_response(jsonify(comment.json(is_local))), httpStatus.OK
-    else:#look in remotes
+    elif is_local:#look in remotes
         remote_comment_dict = get_remote_comment(author_id, post_id, comment_id)
         if remote_comment_dict != None or len(remote_comment_dict) != 0:
             return make_response(jsonify(remote_comment_dict)), httpStatus.OK
         else:#not found in remotes
             return Response(status=httpStatus.NOT_FOUND)
+    else:
+        return Response(status=httpStatus.NOT_FOUND)
 
 
 
@@ -416,8 +424,9 @@ def serve_image(author_id: str, post_id: str):
 @bp.route("/authors/<path:author_id>/followers", methods=["GET"])
 @require_authentication
 def get_followers(author_id: str) -> Response:
+    is_local = current_user.is_authenticated
     ##remote
-    if not Author.query.filter_by(id=author_id).first():
+    if is_local and not Author.query.filter_by(id=author_id).first():
         regex = r"https?:\/\/.*\/authors\/(.+)"
         if (match := re.match(regex, author_id)):
             author_id = match.group(1)
@@ -437,7 +446,8 @@ def get_followers(author_id: str) -> Response:
 @bp.route("/authors/<path:author_id>/followers/<path:follower_id>", methods=["GET"])
 @require_authentication
 def is_follower(author_id: str, follower_id: str) -> Response:
-    if not Author.query.filter_by(id=author_id).first():#remote
+    is_local = current_user.is_authenticated
+    if is_local and not Author.query.filter_by(id=author_id).first():#remote
         regex = r"https?:\/\/.*\/authors\/(.+)"
         if (match := re.match(regex, author_id)):
             author_id = match.group(1)
@@ -574,7 +584,8 @@ def get_inbox(author_id: str) -> Response:
 @bp.route("/authors/<string:author_id>/inbox", methods=["POST"])
 @require_authentication
 def post_inbox(author_id: str) -> Response:
-    if find_remote_author(author_id):
+    is_local = current_user.is_authenticated
+    if is_local and find_remote_author(author_id):
         post_remote_inbox(author_id, request.json)
     try:
         if request.json["type"].lower() not in ["follow", "post", "like", "comment"]:
@@ -616,22 +627,24 @@ def clear_inbox(author_id: str) -> Response:
 @require_authentication
 def post_like_methods(author_id: str, post_id: str) -> Response:
     post = Post.query.filter_by(id=post_id).first()
+    is_local = current_user.is_authenticated
     ##remote
-    regex = r"https?:\/\/.*\/authors\/(.+)"
-    if (match := re.match(regex, author_id)):
-        author_id = match.group(1)
-    remote_likes = get_remote_post_likes(author_id, post_id)
-    if len(remote_likes) != 0 and request.method == "GET":
-        if len(remote_likes) == 0:#not found in remote
-            return utils.json_response(
-                httpStatus.NOT_FOUND, {"message": f"post {post_id} does not exist."}
-            )
-        return (
-            make_response(jsonify(likes=[like for like in remote_likes])),
-            httpStatus.OK,
-            )
+    if is_local:
+        regex = r"https?:\/\/.*\/authors\/(.+)"
+        if (match := re.match(regex, author_id)):
+            author_id = match.group(1)
+        remote_likes = get_remote_post_likes(author_id, post_id)
+        if len(remote_likes) != 0 and request.method == "GET":
+            if len(remote_likes) == 0:#not found in remote
+                return utils.json_response(
+                    httpStatus.NOT_FOUND, {"message": f"post {post_id} does not exist."}
+                )
+            return (
+                make_response(jsonify(likes=[like for like in remote_likes])),
+                httpStatus.OK,
+                )
     ##local
-    if post is None:  # post does not exist
+    elif post is None:  # post does not exist
         return utils.json_response(
             httpStatus.NOT_FOUND, {"message": f"post {post_id} does not exist."}
         )
@@ -681,24 +694,26 @@ def post_like_methods(author_id: str, post_id: str) -> Response:
 )
 @require_authentication
 def comment_like_methods(author_id: str, post_id: str, comment_id: str):
+    is_local = current_user.is_authenticated
     comment = Comment.query.filter_by(id=comment_id).first()
     post = Post.query.filter_by(id=post_id).first()
     regex = r"https?:\/\/.*\/authors\/(.+)"
     if (match := re.match(regex, author_id)):
         author_id = match.group(1)
     ##remote
-    remote_likes = get_remote_comment_likes(author_id, post_id, comment_id)
-    if len(remote_likes) != 0 and request.method == "GET":
-        if len(remote_likes) == 0:#not found in remote
-            return utils.json_response(
-                httpStatus.NOT_FOUND, {"message": f"comment {post_id} does not exist."}
-            )
-        return (
-            make_response(jsonify(likes=[like for like in remote_likes])),
-            httpStatus.OK,
-            )    
+    if is_local:
+        remote_likes = get_remote_comment_likes(author_id, post_id, comment_id)
+        if len(remote_likes) != 0 and request.method == "GET":
+            if len(remote_likes) == 0:#not found in remote
+                return utils.json_response(
+                    httpStatus.NOT_FOUND, {"message": f"comment {post_id} does not exist."}
+                )
+            return (
+                make_response(jsonify(likes=[like for like in remote_likes])),
+                httpStatus.OK,
+                )
     ##local
-    if post is None:  # post does not exist
+    elif post is None:  # post does not exist
         return utils.json_response(
             httpStatus.NOT_FOUND, {"message": f"post {post_id} does not exist."}
         )
@@ -757,11 +772,12 @@ def comment_like_methods(author_id: str, post_id: str, comment_id: str):
 @bp.route("/authors/<path:author_id>/liked", methods=["GET"])
 @require_authentication
 def get_author_liked(author_id: str):
+    is_local = current_user.is_authenticated
     ##remote
     regex = r"https?:\/\/.*\/authors\/(.+)"
     if (match := re.match(regex, author_id)):
         author_id = match.group(1)
-    if find_remote_author(author_id):
+    if is_local and find_remote_author(author_id):
         remote_liked = get_remote_author_liked(author_id)
         return (
             make_response(
@@ -786,7 +802,6 @@ def get_author_liked(author_id: str):
         .all()
     )
     author_likes = author_comment_likes + author_post_likes
-    is_local = current_user.is_authenticated
     return (
         make_response(
             jsonify(type="liked", items=[like.json(is_local) for like in author_likes])
