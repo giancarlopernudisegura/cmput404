@@ -7,9 +7,17 @@ import Comment from "../comment-components/Comment";
 
 type CommentListProps = {
   allComments: Array<any>;
+  authorId: string;
+  postId: string;
+  currentAuthor: string;
 };
 
-function CommentList({ allComments }: CommentListProps) {
+function CommentList({
+  allComments,
+  authorId,
+  postId,
+  currentAuthor,
+}: CommentListProps) {
   return (
     <div id="list-of-comments">
       {allComments.length < 1 ? (
@@ -25,6 +33,9 @@ function CommentList({ allComments }: CommentListProps) {
                 body={comment.content}
                 timeStamp={comment.published}
                 id={comment.id}
+                authorId={authorId}
+                postId={postId}
+                currentAuthor={currentAuthor}
               />
             </li>
           ))}

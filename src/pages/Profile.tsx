@@ -15,7 +15,7 @@ import PostList from "../components/PostList";
 import AuthorInfo from "../components/profile/AuthorInfo";
 import DialogTemplate from '../components/DialogTemplate';
 import { LOAD_MORE_TEXT, MARKDOWN, NO_MORE_POSTS_TEXT } from '../utils/constants';
-import ShareList from "../components/ShareList";
+import { MARKDOWN } from '../utils/constants';
 
 type profileProps = { path: string };
 
@@ -137,34 +137,6 @@ function Profile({ path }: profileProps) {
     setMyPosts(newList);
   }
 
-  async function sharePost(authorId: string, postId: string) {
-
-    window.location.href = `${BACKEND_HOST}/app/profile#${postId}`
-
-    navigator.clipboard.writeText(window.location.href)
-
-    console.log(`${BACKEND_HOST}/app/profile#${postId}`)
-
-    // function getPost(authorId: string, postId: string){
-    //   getSinglePost(authorId.toString(), postId)
-    //   .then((data) => addSharedPost(authorId.toString(), postId, {
-    //     postId: data.id,
-    //     authorName: data.author.displayName,
-    //     authorId: data.author.id,
-    //     title: data.title,
-    //     description: data.description,
-    //     contentType: data.contentType,
-    //     visibility: data.visibility,
-    //     unlisted: data.unlisted,
-    //   }))
-    //   .catch(err => setErrMsg(err.message))
-    // }
-
-    // getPost(authorId, postId);
-    // console.log(myPosts)
-
-  }
-
   return (
     <div id="profile">
       <DrawerMenu pageName="My Profile">
@@ -183,7 +155,6 @@ function Profile({ path }: profileProps) {
                 initialPosts={myPosts}
                 currentAuthor={author.displayName}
                 onRemove={handleRemove}
-                onShare={sharePost}
                 handleEdit={handleEdit}
               />
 
