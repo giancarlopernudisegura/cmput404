@@ -1,3 +1,4 @@
+from cmath import exp
 from threading import local
 from server.models import Author, Inbox, Post, Comment, Requests, Like, Remote_Node
 import requests
@@ -142,7 +143,8 @@ def get_remote_post(author_id: str, post_id: str):#tested for https://backend-40
     for node in nodes:
         r = requests.get(f"{node.id}authors/{author_id}/posts/{post_id}", auth=(node.user, node.password))
         if r.status_code == 200 and r.json()["type"] == "post":
-            return format_remote_post(author_id, post_id, node.id, r.json())
+            # return format_remote_post(author_id, post_id, node.id, r.json())
+            return r.json()
     return None#post not found
 
 
@@ -166,24 +168,30 @@ def get_remote_post_likes(author_id: str, post_id: str):
     nodes = Remote_Node.query.all()
     for node in nodes:
         r = requests.get(f"{node.id}authors/{author_id}/posts/{post_id}/likes?size=30&page=1", auth=(node.user, node.password))
-        if "type" in r.json():#nodes 1 and 2
-            if r.status_code == 200 and (r.json()["type"] == "likes" or r.json()["type"] == "liked"):
-                return {"likes":r.json()["items"]}
-        else:
-            if r.status_code == 200:
-                return {"likes":r.json()}
+        try:
+            if "type" in r.json():#nodes 1 and 2
+                if r.status_code == 200 and (r.json()["type"] == "likes" or r.json()["type"] == "liked"):
+                    return {"likes":r.json()["items"]}
+            else:
+                if r.status_code == 200:
+                    return {"likes":r.json()}
+        except:
+            pass
     return []
 
 def get_remote_comment_likes(author_id: str, post_id: str, comment_id: str):
     nodes = Remote_Node.query.all()
     for node in nodes:
         r = requests.get(f"{node.id}authors/{author_id}/posts/{post_id}/comments/{comment_id}/likes?size=30&page=1", auth=(node.user, node.password))
-        if "type" in r.json():#nodes 1 and 2
-            if r.status_code == 200 and (r.json()["type"] == "likes" or r.json()["type"] == "liked"):
-                return {"likes":r.json()["items"]}
-        else:
-            if r.status_code == 200:
-                return {"likes":r.json()}
+        try:
+            if "type" in r.json():#nodes 1 and 2
+                if r.status_code == 200 and (r.json()["type"] == "likes" or r.json()["type"] == "liked"):
+                    return {"likes":r.json()["items"]}
+            else:
+                if r.status_code == 200:
+                    return {"likes":r.json()}
+        except:
+            pass
     return []
 
 
