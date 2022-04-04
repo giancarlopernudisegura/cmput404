@@ -30,10 +30,10 @@ const UserPage = ({ path, followId }: UserProps) => {
     const [currentUserId, setCurrentUserId] = useState("");
     const [currentUserInfo, setCurrentUserInfo] = useState<null | Author>(null);
     const [authorInfo, setAuthorInfo] = useState<null | Author>(null);
-    const [posts, setPosts] = useState(Array());
+    const [posts, setPosts] = useState<any[]>([]);
     const BACKEND_HOST = process.env.FLASK_HOST;
-    const [ postPage, setPostPage ] = useState(1);
-    const [ buttonText, setButtonText ] = useState(LOAD_MORE_TEXT);
+    const [postPage, setPostPage] = useState(1);
+    const [buttonText, setButtonText] = useState(LOAD_MORE_TEXT);
 
     const getNextPostPage = async () => {
         try {
@@ -44,6 +44,7 @@ const UserPage = ({ path, followId }: UserProps) => {
             if (userPublicPosts.length === 0) {
                 alert("There are no more posts to show");
                 setButtonText(NO_MORE_POSTS_TEXT);
+                setIsPostLoading(false);
                 return;
             }
             setPosts([...posts, ...userPublicPosts]);

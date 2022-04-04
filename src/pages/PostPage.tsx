@@ -16,27 +16,26 @@ type PostPageProps = {
 };
 
 const PostPage = ({ path, postId, authorId }: PostPageProps) => {
-    const [ errorMsg, setErrorMsg ] = useState("");
-    const [ isLoading, setIsLoading ] = useState(true);
+    const [errorMsg, setErrorMsg] = useState("");
+    const [isLoading, setIsLoading] = useState(true);
 
     // information for Posts
-    const [ postInfo, setPostInfo ] = useState(Object());
-    const [ postAuthor, setPostAuthor ] = useState("");
-    const [ openDialog, setOnOpenDialog ] = useState<boolean>(false);
+    const [postInfo, setPostInfo] = useState(Object());
+    const [postAuthor, setPostAuthor] = useState("");
+    const [openDialog, setOnOpenDialog] = useState<boolean>(false);
 
-      // editPost
-    const [ IdEditPost, setIdEditPost] = useState<string>("");
-    const [ editPostBody, setEditPostBody ] = useState<string>("");
-    const [ editPostCat, setEditPostCat ] = useState<string>("");
-    const [ editPostTitle, setEditPostTitle ] = useState<string>("");
-    const [ editIsPostMkd, setEditIsPostMkd ] = useState<boolean>(false);
+    // editPost
+    const [IdEditPost, setIdEditPost] = useState<string>("");
+    const [editPostBody, setEditPostBody] = useState<string>("");
+    const [editPostCat, setEditPostCat] = useState<string>("");
+    const [editPostTitle, setEditPostTitle] = useState<string>("");
+    const [editIsPostMkd, setEditIsPostMkd] = useState<boolean>(false);
 
     useEffect(() => {
         // get main information form the url
         const getSpecPostFromApi = async () => {
             try {
                 const response = await getSpecPost(authorId as string, postId as string);
-                console.log("RESPONSE", response);
                 setPostInfo(response);
                 setPostAuthor(response.author.displayName);
             } catch (err) {
@@ -48,14 +47,14 @@ const PostPage = ({ path, postId, authorId }: PostPageProps) => {
         getSpecPostFromApi();
     }, []);
 
-    async function handleEdit(newPostBody: any) {    
+    async function handleEdit(newPostBody: any) {
         // initialize values
         setIdEditPost(newPostBody.postId);
         setEditPostBody(newPostBody.description);
         setEditPostCat("");
         setEditPostTitle(newPostBody.title);
         setEditIsPostMkd(newPostBody.contentType === MARKDOWN);
-    
+
         setOnOpenDialog(true);
     }
 
@@ -63,7 +62,6 @@ const PostPage = ({ path, postId, authorId }: PostPageProps) => {
         let newEditPost;
         try {
             newEditPost = await editPost(authorId, IdEditPost, newPostBody);
-            console.log("NEW EDIT", newEditPost);
         } catch (err) {
             setErrorMsg((err as Error).message);
         }
@@ -86,14 +84,17 @@ const PostPage = ({ path, postId, authorId }: PostPageProps) => {
             >
                 {isLoading ? <CircularProgress /> : (
                     <div>
-                        { errorMsg ? (
+                        {errorMsg ? (
                             <Alert severity="error">{errorMsg}</Alert>
                         ) :
                             <div>
-                                <Post 
+                                <Post
                                     postId={postInfo.id}
                                     title={postInfo.title}
                                     body={postInfo.description}
+                                    origin={postInfo.origin}
+                                    source={postInfo.source}
+                                    categories={postInfo.categories}
                                     authorName={postAuthor}
                                     authorId={authorId as string}
                                     currentAuthor={postInfo.author.displayName}
@@ -103,8 +104,8 @@ const PostPage = ({ path, postId, authorId }: PostPageProps) => {
                                     unlisted={postInfo.unlisted}
                                 />
 
-                                {openDialog && 
-                                    <DialogTemplate 
+                                {openDialog &&
+                                    <DialogTemplate
                                         open={openDialog}
                                         handleClose={() => setOnOpenDialog(false)}
                                         updatePost={editPostCall}

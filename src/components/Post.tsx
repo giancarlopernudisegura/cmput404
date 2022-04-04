@@ -2,12 +2,13 @@ import { h } from "preact";
 import FavoriteBorderOutlinedIcon from "@mui/icons-material/FavoriteBorderOutlined";
 import ChatBubbleOutlineOutlinedIcon from "@mui/icons-material/ChatBubbleOutlineOutlined";
 import ShareOutlinedIcon from "@mui/icons-material/ShareOutlined";
-import { Alert, IconButton, Typography } from "@mui/material";
+import { Alert, Icon, IconButton, Link, Typography } from "@mui/material";
 import Button from "@mui/material/Button";
 import { useState, useEffect } from "preact/hooks";
 import Favorite from "@mui/icons-material/Favorite";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import LoopIcon from '@mui/icons-material/Loop';
 import CommentList from "../components/comment-components/CommentList";
 import CommentForm from "../components/forms/CommentForm";
 import {
@@ -29,6 +30,9 @@ type PostProps = {
   postId: string;
   title: string;
   body: string;
+  categories: string[],
+  origin: string;
+  source: string;
   authorName: string;
   authorId: string;
   currentAuthor?: string;
@@ -43,6 +47,9 @@ function Post({
   postId,
   title,
   body,
+  categories,
+  origin,
+  source,
   authorName,
   authorId,
   currentAuthor,
@@ -60,6 +67,8 @@ function Post({
   const [isLiked, setIsLiked] = useState(false);
   const [numLikes, setNumLikes] = useState(0);
   const [postLikes, setPostLikes] = useState(Array());
+  const [commentLikes, setCommentLikes] = useState(Array());
+  const [loggedUserId, setLoggedUserId] = useState("");
 
   const [comments, setComments] = useState(Array());
   const [errMsg, setErrMsg] = useState("");
@@ -120,6 +129,8 @@ function Post({
 
     fetchComments(authorId, postId);
     getAllLikes(authorId, postId);
+    get_author_id()
+      .then(setLoggedUserId);
   }, []);
 
   const toggleLike = async () => {
@@ -168,7 +179,8 @@ function Post({
           {/* Display these buttons if the author of the  post is the current author */}
           {authorName === currentUser && (
             <span className="flex space-x-4">
-              {handleEdit && (
+              {/* TODO: show edit button if current user is the author, otherwise, show a re-share button */}
+              {loggedUserId == authorId ? (handleEdit && (
                 <IconButton>
                   <EditIcon
                     cursor="pointer"
@@ -186,23 +198,53 @@ function Post({
                       handleEdit(editPost);
                     }}
                   />
-                </IconButton>
-              )}
+                </IconButton >)
+              ) : <IconButton>
+                <LoopIcon
+                  cursor="pointer"
+                  style={{ fill: "black" }}
+                  onClick={async () => {
+                    // TODO: create new post (dup)
+                    await fetch(`/authors/${loggedUserId}/posts/`, {
+                      mode: "cors",
+                      method: "POST",
+                      credentials: "include",
+                      headers: {
+                        "Content-Type": "application/json; charset=utf-8",
+                      },
+                      body: JSON.stringify({
+                        type: "post",
+                        title,
+                        source,
+                        origin,
+                        content: body,
+                        contentType,
+                        category: categories.join(),
+                        visibility,
+                        unlisted
+                      }),
+                    });
+                  }}
+                />
+              </IconButton>
+              }
 
-              {onRemove && (
-                <IconButton>
-                  <DeleteIcon
-                    cursor="pointer"
-                    style={{ fill: "black" }}
-                    onClick={() => {
-                      onRemove(postId);
-                    }}
-                  />
-                </IconButton>
-              )}
-            </span>
+              {
+                onRemove && (
+                  <IconButton>
+                    <DeleteIcon
+                      cursor="pointer"
+                      style={{ fill: "black" }}
+                      onClick={() => {
+                        onRemove(postId);
+                      }}
+                    />
+                  </IconButton>
+                )
+              }
+            </span >
           )}
-        </div>
+        </div >
 
         <div className="px-3 my-2">
           <h3
@@ -213,7 +255,7 @@ function Post({
           </h3>
           {renderBody()}
         </div>
-      </div>
+      </div >
 
       <div id="buttons" className="grid grid-cols-1 divide-y py-4">
         <div className="flex flex-row gap-x-4 justify-evenly">
@@ -265,8 +307,10 @@ function Post({
               {commentButtonText}
             </Button>
           </div>
-        </div>
-      </div>
+        </div >
+        <Link href={source}>source</Link>
+        <Link href={origin}>origin</Link>
+      </div >
       <div
         id="comment-section"
         className={`${showComments === false ? "hidden" : "visible"}`}
@@ -284,7 +328,7 @@ function Post({
           currentAuthor={currentUser}
         />
       </div>
-    </li>
+    </li >
   );
 }
 

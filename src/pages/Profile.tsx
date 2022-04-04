@@ -33,10 +33,10 @@ function Profile({ path }: profileProps) {
   const [editIsPostMkd, setEditIsPostMkd] = useState<boolean>(false);
 
   // get author data 
-  const [ author, setAuthor ] = useState(Object());
-  const [ myPosts, setMyPosts ] = useState(Array());
-  const [ postPage, setPostPage ] = useState(1);
-  const [ buttonText, setButtonText ] = useState(LOAD_MORE_TEXT);
+  const [author, setAuthor] = useState(Object());
+  const [myPosts, setMyPosts] = useState(Array());
+  const [postPage, setPostPage] = useState(1);
+  const [buttonText, setButtonText] = useState(LOAD_MORE_TEXT);
   const BACKEND_HOST = process.env.FLASK_HOST;
 
   //Posts that have been shared by author
@@ -44,18 +44,18 @@ function Profile({ path }: profileProps) {
 
   const getNextPostPage = async () => {
     try {
-        const postsRes = await getPosts(author.id, postPage);
-        const fetchedPosts = postsRes.items;
-        if (fetchedPosts.length === 0) {
-            alert("There are no more posts to show");
-            setButtonText(NO_MORE_POSTS_TEXT);
-            return;
-        }
-        setMyPosts([...myPosts, ...fetchedPosts]);
-        // update post page
-        setPostPage(postPage + 1);
+      const postsRes = await getPosts(author.id, postPage);
+      const fetchedPosts = postsRes.items;
+      if (fetchedPosts.length === 0) {
+        alert("There are no more posts to show");
+        setButtonText(NO_MORE_POSTS_TEXT);
+        return;
+      }
+      setMyPosts([...myPosts, ...fetchedPosts]);
+      // update post page
+      setPostPage(postPage + 1);
     } catch (err) {
-        setErrMsg((err as Error).message);
+      setErrMsg((err as Error).message);
     }
   }
 
@@ -68,12 +68,12 @@ function Profile({ path }: profileProps) {
     });
 
     // Set the author's posts
-    var postsPromise = authorPromise.then(authorId => { 
-      let posts = getPosts(authorId, postPage); 
+    var postsPromise = authorPromise.then(authorId => {
+      let posts = getPosts(authorId, postPage);
       setPostPage(postPage + 1);
       return posts;
     });
-    postsPromise.then(posts => {  setMyPosts(posts.items); });
+    postsPromise.then(posts => { setMyPosts(posts.items); });
 
     Promise.all([authorPromise, postsPromise])
       .then(() => {
@@ -164,8 +164,8 @@ function Profile({ path }: profileProps) {
                 {buttonText}
               </Button>
 
-              {openDialog && 
-                <DialogTemplate 
+              {openDialog &&
+                <DialogTemplate
                   open={openDialog}
                   handleClose={() => setOnOpenDialog(false)}
                   updatePost={editPostCall}

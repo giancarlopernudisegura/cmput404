@@ -9,6 +9,8 @@ import {
   deleteCommentLike,
   get_author_id,
 } from "../../utils/apiCalls";
+import { MARKDOWN, PLAIN } from "../../utils/constants";
+import ReactMarkdown from "react-markdown";
 
 type CommentProps = {
   author: string;
@@ -18,6 +20,7 @@ type CommentProps = {
   authorId: string;
   postId: string;
   currentAuthor?: string;
+  contentType: string;
 };
 
 function Comment({
@@ -28,6 +31,7 @@ function Comment({
   authorId,
   postId,
   currentAuthor,
+  contentType,
 }: CommentProps) {
   const [commentLikes, setCommentLikes] = useState(Array());
   const [errMsg, setErrMsg] = useState("");
@@ -49,14 +53,12 @@ function Comment({
             setIsLiked(true);
           }
         });
-        console.log("COMMENT LIKES", response);
       } catch (err) {
         setErrMsg((err as Error).message);
       }
     }
 
     commentLikes(authorId, postId, id);
-    console.log(isLiked);
   }, []);
 
   const toggleLike = async () => {
@@ -64,12 +66,10 @@ function Comment({
       await deleteCommentLike(authorId, postId, id);
       setNumLikes(numLikes - 1);
       setIsLiked(false);
-      console.log("delete");
     } else {
       await addCommentLikes(authorId, postId, id);
       setNumLikes(numLikes + 1);
       setIsLiked(true);
-      console.log("add");
     }
     // setIsLiked(!isLiked);
   };
@@ -95,7 +95,11 @@ function Comment({
           </div>
         </div>
         <div className="my-2 pb-4">
-          <p className="text-lg">{body}</p>
+          {contentType === PLAIN ? (
+            <p className="text-lg">{body}</p>
+          ) : (
+            <ReactMarkdown>{body}</ReactMarkdown>
+          )}
         </div>
         <div
           id="likes-and-buttons"

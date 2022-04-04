@@ -9,7 +9,7 @@ import { useEffect, useState } from 'preact/hooks';
 import PrivacyDialog from './PrivacyDialog';
 import Divider from '@mui/material/Divider';
 
-type PostFormProps = { 
+type PostFormProps = {
     body: string,
     setBody: Function,
     category: string,
@@ -34,12 +34,12 @@ const placeholderContent = {
     tempCategory: "Enter the category of this post"
 };
 
-function PostForm({ body, setBody, category, setCategory, title, setTitle, isMarkdown, setIsMarkdown, buttonName, submitAction } : PostFormProps) {
-    const [ authorId, setAuthorId] = useState(null);
-    const [ authorDisplayName, setAuthorDisplayName] = useState("");
-    const [ tabValue, setTabValue ] = useState<number>(0);
-    const [ imageMkd, setImageMkd ] = useState<string>("");
-    const [ images, setImages ] = useState<Array<Image>>([]);
+function PostForm({ body, setBody, category, setCategory, title, setTitle, isMarkdown, setIsMarkdown, buttonName, submitAction }: PostFormProps) {
+    const [authorId, setAuthorId] = useState(null);
+    const [authorDisplayName, setAuthorDisplayName] = useState("");
+    const [tabValue, setTabValue] = useState<number>(0);
+    const [imageMkd, setImageMkd] = useState<string>("");
+    const [images, setImages] = useState<Array<Image>>([]);
 
     const privacyOptions = ['Public', 'Friends'];
     const [privacyDialogOpen, setPrivacyDialogOpen] = useState(false);
@@ -49,26 +49,26 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, isMar
         setAuthorDetails();
     }, []);
 
-    const handleBody = (event: Event) => { 
+    const handleBody = (event: Event) => {
         if (event) {
             setBody((event.target as HTMLTextAreaElement).value);
         }
     }
 
-    const handleTitle = (event: Event) => { 
+    const handleTitle = (event: Event) => {
         if (event) {
             setTitle((event.target as HTMLInputElement).value);
         }
     }
 
-    const handleCategory = (event: Event) => { 
+    const handleCategory = (event: Event) => {
         if (event) {
             setCategory((event.target as HTMLInputElement).value);
         }
     }
 
     const setAuthorDetails = () => {
-        get_author_id().then((author_id : any) => {
+        get_author_id().then((author_id: any) => {
             setAuthorId(author_id);
             getSpecAuthor(author_id).then(author => {
                 setAuthorDisplayName(author.displayName);
@@ -76,7 +76,7 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, isMar
         });
     }
 
-    const convertImgBase64 = (file : File) => new Promise<string>((resolve, reject) => {
+    const convertImgBase64 = (file: File) => new Promise<string>((resolve, reject) => {
         let reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = () => {
@@ -91,7 +91,7 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, isMar
         }
     });
 
-    const getImageUrl = (postId : string) => {
+    const getImageUrl = (postId: string) => {
         const imageUrl = `${process.env.FLASK_HOST}/authors/${authorId}/posts/${postId}/image`;
         return imageUrl;
     }
@@ -125,7 +125,7 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, isMar
                         const imageUrl = getImageUrl(res.id);
                         imgMkd += `![](${imageUrl})\n`;
                     } catch (err) {
-                        console.log("ERROR", (err as Error).message);
+                        console.error("ERROR", (err as Error).message);
                     }
 
                 }
@@ -156,9 +156,9 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, isMar
         setTabValue(newValue);
     }
 
-    const createImgMkd = (allImg : Array<Image>) => {
+    const createImgMkd = (allImg: Array<Image>) => {
         let mkd = "";
-        
+
         for (let img in Object.keys(allImg)) {
             mkd += `![](${allImg[img].imgUrl})\n`;
         }
@@ -166,23 +166,23 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, isMar
         return mkd;
     }
 
-    const handleUploadPhoto = async (event:any) => {
+    const handleUploadPhoto = async (event: any) => {
         const files = event.target.files;
-        let imagesUrls : Array<String> = [];
-        let imagesFiles : Array<File> = [];
-        let allImgs : Array<Image> = [];
+        let imagesUrls: Array<String> = [];
+        let imagesFiles: Array<File> = [];
+        let allImgs: Array<Image> = [];
         let base64: string;
 
         let values = Object.values(files);
         for (let val of values) {
             if (val instanceof File) {
-                let tempUrl : string = URL.createObjectURL(val);
+                let tempUrl: string = URL.createObjectURL(val);
                 try {
                     base64 = await convertImgBase64(val);
                 } catch (err) {
                     base64 = '';
                 }
-                allImgs.push({file: val, imgUrl: tempUrl, base64: base64});
+                allImgs.push({ file: val, imgUrl: tempUrl, base64: base64 });
                 imagesUrls.push(tempUrl);
                 imagesFiles.push(val);
             }
@@ -251,7 +251,7 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, isMar
                                 </div>
                             }
                         </div>
-                       
+                        
                         <label>Category</label>
                         <input 
                             placeholder={placeholderContent.tempCategory}

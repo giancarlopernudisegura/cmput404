@@ -10,7 +10,6 @@ type RenderBodyProps = {
 }
 
 const RenderBody = ({ content, contentType }: RenderBodyProps) => {
-  console.log(content);
   switch (contentType) {
     case MARKDOWN:
       return <ReactMarkdown>{content}</ReactMarkdown>;
@@ -24,7 +23,6 @@ export default function Comment({
   author,
   contentType
 }: Comment) {
-  console.log(content)
   return (
     <li className="bg-zinc-100 border-solid border-1 border-slate-600 w-2/3 m-auto rounded-lg py-4 px-5  my-5">
       <div className="grid grid-cols-1 gap-y-2">

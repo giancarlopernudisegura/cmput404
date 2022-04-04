@@ -1,4 +1,5 @@
 import { h } from "preact";
+import { MARKDOWN, PLAIN } from "../../utils/constants";
 import Comment from "../comment-components/Comment";
 
 /**
@@ -36,6 +37,7 @@ function CommentList({
                 authorId={authorId}
                 postId={postId}
                 currentAuthor={currentAuthor}
+                contentType={comment.contentType}
               />
             </li>
           ))}
