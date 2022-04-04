@@ -6,6 +6,8 @@ import Tab from '@mui/material/Tab';
 import ReactMarkdown from 'react-markdown';
 import { MARKDOWN, PLAIN } from '../../utils/constants';
 import { useEffect, useState } from 'preact/hooks';
+import PrivacyDialog from './PrivacyDialog';
+import Typography from '@mui/material/Typography';
 
 type PostFormProps = { 
     body: string,
@@ -187,6 +189,19 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, isMar
         setImageMkd(imgMkd);
     }
 
+    // Toggle public, friends only, single friend or unlisted
+    const privacyOptions = ['Public', 'Friends', 'Unlisted', 'Specific Friends...'];
+    const [privacyDialogOpen, setPrivacyDialogOpen] = useState(false);
+    const [selectedPrivacy, setSelectedPrivacy] = useState(privacyOptions[0]);
+    const handlePrivacyClickOpen = () => {
+        setPrivacyDialogOpen(true);
+    }
+
+    const handlePrivacyClose = (value: string) => {
+        setPrivacyDialogOpen(false);
+        setSelectedPrivacy(value)
+    }
+
 
     return (
         <div class="create-post"
@@ -267,12 +282,25 @@ function PostForm({ body, setBody, category, setCategory, title, setTitle, isMar
                                 </div>
                             )}
                         </div>
+    
+
+                        <Button variant="outlined" onClick={handlePrivacyClickOpen}>
+                            {selectedPrivacy}
+                        </Button>
+                        <PrivacyDialog 
+                            selectedValue={selectedPrivacy}
+                            open={privacyDialogOpen}
+                            onClose={handlePrivacyClose}
+                            options={privacyOptions}
+                        />
+                        
                         <Button variant="contained"
                             onClick={handleSubmit}
                             className="w-1/3"
                         >
                             {buttonName}
                         </Button>
+
                     </div>
 
         </div>
