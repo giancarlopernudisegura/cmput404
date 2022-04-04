@@ -197,6 +197,8 @@ def post(author_id: str) -> Response:
             content = json_val["content"]
             unlisted = json_val.get("unlisted", False)
             contentType = ContentType(json_val["contentType"])
+            origin = json_val.get("origin")
+            source = json_val.get("source")
             if (
                 not (visibility := json_val["visibility"].upper())
                 in post_visibility_map
@@ -219,7 +221,7 @@ def post(author_id: str) -> Response:
             return utils.json_response(httpStatus.BAD_REQUEST, {"message": str(e)})
         private = post_visibility_map[visibility.upper()]
 
-        post = Post(author, title, category, content, contentType, private, unlisted)
+        post = Post(author, title, category, content, contentType, private, source, origin, unlisted)
         db.session.add(post)
         db.session.commit()
         post.push()
@@ -254,6 +256,8 @@ def specific_post(author_id: str, post_id: str) -> Response:
             content = request.json["content"]
             unlisted = request.json.get("unlisted") or False
             contentType = ContentType(request.json["contentType"])
+            origin = request.json.get("origin")
+            source = request.json.get("source")
         except KeyError:
             return Response(status=httpStatus.BAD_REQUEST)
         except ValueError:
@@ -274,6 +278,8 @@ def specific_post(author_id: str, post_id: str) -> Response:
         post.content = content
         post.contentType = contentType
         post.unlisted = unlisted
+        post.origin = origin or post.origin
+        post.source = source or post.source
         db.session.commit()
         return make_response(jsonify(post.json(is_local))), httpStatus.OK
     elif request.method == "PUT":
@@ -283,7 +289,7 @@ def specific_post(author_id: str, post_id: str) -> Response:
                 httpStatus.BAD_REQUEST,
             )
         post = Post(
-            author, title, category, content, contentType, private, unlisted, post_id
+            author, title, category, content, contentType, private, source, origin, unlisted, post_id
         )
         db.session.add(post)
         db.session.commit()
