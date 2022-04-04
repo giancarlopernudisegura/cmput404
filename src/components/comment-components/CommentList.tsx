@@ -27,7 +27,7 @@ function CommentList({
         </div>
       ) : (
         <ul>
-          {allComments.filter((comment) => comment.contentType === MARKDOWN || comment.contentType === PLAIN).map((comment) => (
+          {allComments.map((comment) => (
             <li key={comment.author}>
               <Comment
                 author={comment.author}
@@ -37,6 +37,7 @@ function CommentList({
                 authorId={authorId}
                 postId={postId}
                 currentAuthor={currentAuthor}
+                contentType={comment.contentType}
               />
             </li>
           ))}

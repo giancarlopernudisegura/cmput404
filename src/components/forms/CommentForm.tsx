@@ -119,8 +119,6 @@ class CommentForm extends Component<Props, State> {
                 onChange={this.setMarkdown}
               />
 
-              {this.state.markdown === false ? this.state.body : <ReactMarkdown>{this.state.body}</ReactMarkdown>}
-
               <Button
                 variant="contained"
                 type="submit"
