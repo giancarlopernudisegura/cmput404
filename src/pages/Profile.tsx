@@ -51,7 +51,10 @@ function Profile({ path }: profileProps) {
         setButtonText(NO_MORE_POSTS_TEXT);
         return;
       }
-      setMyPosts([...myPosts, ...fetchedPosts]);
+
+      const validPosts = fetchedPosts.filter((post: any) => post.unlisted === false);
+
+      setMyPosts([...myPosts, ...validPosts]);
       // update post page
       setPostPage(postPage + 1);
     } catch (err) {

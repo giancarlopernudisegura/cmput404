@@ -74,7 +74,7 @@ function Homepage(props : FeedProps) {
                         author.pageNumber = null;
                     } else {
                         for (let post of data.items) {
-                            if (post.visibility === PRIVATE || post.visibility === FRIENDS ) {
+                            if ((post.visibility === PRIVATE || post.visibility === FRIENDS) && post.unlisted === false) {
                               let followerData = await followerCall(newAuthId as string, author.id, "GET");
                               if (followerData.items.length !== 0) {
                                 authorPosts.push(post);

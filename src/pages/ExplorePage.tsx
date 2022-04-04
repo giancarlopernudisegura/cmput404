@@ -81,7 +81,7 @@ function ExplorePage({ path }: ExplorePageProps) {
                             author.pageNumber = null;
                         } else {
                             for (let post of data.items) {
-                                if (post.visibility === PUBLIC) {
+                                if (post.visibility === PUBLIC && post.unlisted === false) {
                                     authorPosts.push(post);
                                 }
                             }

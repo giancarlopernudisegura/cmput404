@@ -39,7 +39,7 @@ const UserPage = ({ path, followId }: UserProps) => {
         try {
             const postsRes = await getPosts(followId as string, postPage);
             const fetchedPosts = postsRes.items;
-            const userPublicPosts = fetchedPosts.filter( (post : any) => post.visibility === 'PUBLIC');
+            const userPublicPosts = fetchedPosts.filter( (post : any) => post.visibility === 'PUBLIC' && post.unlisted === false);
 
             if (userPublicPosts.length === 0) {
                 alert("There are no more posts to show");
