@@ -15,7 +15,6 @@ import PostList from "../components/PostList";
 import AuthorInfo from "../components/profile/AuthorInfo";
 import DialogTemplate from '../components/DialogTemplate';
 import { LOAD_MORE_TEXT, MARKDOWN, NO_MORE_POSTS_TEXT } from '../utils/constants';
-import { MARKDOWN } from '../utils/constants';
 
 type profileProps = { path: string };
 
